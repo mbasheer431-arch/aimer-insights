@@ -1,0 +1,972 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>AIMER Insights · Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --ink: #10201a; --ink-2: #3d4b45; --muted: #6b7772; --line: #e2e9e6; --paper: #f4f7f6; --white: #fff;
+    --mint: #dcf2ef; --green: #12c784; --green-d: #0a7a4c; --lime: #dfe35a; --red: #c8402f; --amber: #a86f00;
+    --r: 14px; font-family: Figtree, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-size: 15px; line-height: 1.5; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--green-d); outline-offset: 2px; }
+  [hidden] { display: none !important; }
+
+  /* sign-in */
+  .gate { min-height: 100vh; display: grid; place-items: center; padding: 24px; background: linear-gradient(160deg, #cfeeea, #eef7f5); }
+  .gate form { background: var(--white); border-radius: 24px; padding: 32px; width: min(400px, 100%); box-shadow: 0 24px 48px -28px rgba(16,32,26,.4); }
+  .mark { width: 42px; height: 42px; border-radius: 50%; background: var(--ink); display: grid; place-items: center; }
+  .mark i { width: 24px; height: 24px; border-radius: 50%; border: 3px solid #fff; border-right-color: var(--green); border-bottom-color: var(--lime); }
+  .gate h1 { font-size: 22px; margin: 16px 0 4px; }
+  .gate p { color: var(--muted); margin: 0 0 20px; }
+
+  /* shell */
+  .app { display: grid; grid-template-columns: 232px minmax(0, 1fr); min-height: 100vh; }
+  .rail { background: var(--ink); color: #dfe8e4; padding: 22px 14px; display: flex; flex-direction: column; gap: 4px; position: sticky; top: 0; height: 100vh; }
+  .rail .brand { display: flex; gap: 10px; align-items: center; padding: 0 8px 18px; }
+  .rail .brand .mark { background: #fff; } .rail .brand .mark i { border-color: var(--ink); border-right-color: var(--green); border-bottom-color: var(--lime); }
+  .rail .brand b { display: block; color: #fff; font-size: 15px; } .rail .brand small { color: #8fa59c; }
+  .rail button { text-align: left; border: 0; background: transparent; color: #b9c9c2; padding: 10px 12px; border-radius: 10px; cursor: pointer; }
+  .rail button:hover { color: #fff; background: rgba(255,255,255,.06); }
+  .rail button[aria-current="page"] { background: var(--mint); color: var(--ink); font-weight: 600; }
+  .rail .who { margin-top: auto; font-size: 13px; color: #8fa59c; padding: 8px 12px; border-top: 1px solid rgba(255,255,255,.08); }
+  .rail .who b { color: #fff; font-weight: 500; display: block; word-break: break-all; }
+  main { padding: 32px clamp(16px, 4vw, 48px) 64px; max-width: 1180px; }
+  h2 { font-size: 28px; letter-spacing: -.02em; margin: 0 0 4px; font-weight: 600; }
+  .lead { color: var(--muted); margin: 0 0 24px; max-width: 64ch; }
+  h3 { font-size: 17px; margin: 0 0 4px; font-weight: 600; }
+
+  /* blocks */
+  .panel { background: var(--white); border-radius: var(--r); padding: 20px; border: 1px solid var(--line); }
+  .stack { display: grid; gap: 14px; }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .spacer { flex: 1; }
+  .btn { border: 1px solid var(--line); background: var(--white); border-radius: 999px; padding: 8px 16px; cursor: pointer; font-weight: 500; white-space: nowrap; }
+  .btn:hover { border-color: var(--ink); }
+  .btn.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .btn.danger { color: var(--red); }
+  .btn[disabled] { opacity: .5; cursor: progress; }
+  label.f { display: grid; gap: 6px; font-size: 13px; color: var(--ink-2); font-weight: 500; }
+  label.f small { color: var(--muted); font-weight: 400; }
+  input[type=text], input[type=email], input[type=password], input[type=number], input[type=month], select, textarea {
+    border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; background: var(--white); width: 100%; }
+  textarea { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; min-height: 120px; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  .msg { font-size: 14px; padding: 10px 14px; border-radius: 10px; }
+  .msg.ok { background: #e3f7ee; color: var(--green-d); } .msg.bad { background: #fbe9e6; color: var(--red); } .msg.info { background: var(--mint); color: var(--ink); }
+
+  /* connections */
+  .conn { display: grid; grid-template-columns: 6px minmax(0, 1fr) auto; gap: 16px; align-items: start; }
+  .conn .bar { align-self: stretch; border-radius: 3px; background: #c9d4cf; }
+  .conn.ok .bar { background: var(--green); } .conn.bad .bar { background: var(--red); } .conn.off .bar { background: #e2e9e6; }
+  .conn .meta { display: flex; flex-wrap: wrap; gap: 4px 16px; color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .tag { display: inline-block; font-size: 12px; padding: 2px 9px; border-radius: 999px; background: var(--paper); color: var(--ink-2); font-weight: 500; }
+  .tag.sm { background: var(--mint); } .tag.md { background: #fff6c4; } .tag.lsq { background: #e8e4fb; }
+  .err { color: var(--red); font-size: 13px; margin-top: 6px; word-break: break-word; }
+  .conn .actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .empty { text-align: center; padding: 40px 20px; color: var(--muted); }
+  .empty b { display: block; color: var(--ink); font-size: 17px; margin-bottom: 4px; }
+
+  /* tables */
+  .tw { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--white); }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th { text-align: left; font-weight: 600; color: var(--muted); font-size: 12.5px; padding: 10px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; background: var(--paper); }
+  td { padding: 9px 12px; border-bottom: 1px solid #eef3f1; vertical-align: top; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr:last-child td { border-bottom: 0; }
+  td input, td select { padding: 6px 8px; }
+  .s-success { color: var(--green-d); font-weight: 600; } .s-failed { color: var(--red); font-weight: 600; } .s-running { color: var(--amber); font-weight: 600; }
+
+  /* dialog */
+  dialog { border: 0; border-radius: 20px; padding: 0; width: min(620px, 94vw); box-shadow: 0 30px 80px -20px rgba(16,32,26,.45); }
+  dialog::backdrop { background: rgba(16,32,26,.45); }
+  dialog form { padding: 24px; display: grid; gap: 14px; }
+  details summary { cursor: pointer; color: var(--green-d); font-weight: 500; }
+  .key-note { font-size: 12.5px; color: var(--muted); }
+
+  /* dashboard */
+  .seg { display: inline-flex; background: var(--white); border: 1px solid var(--line); border-radius: 999px; padding: 3px; flex-wrap: wrap; }
+  .seg button { border: 0; background: transparent; padding: 6px 12px; border-radius: 999px; cursor: pointer; color: var(--muted); font-size: 14px; }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+  .filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 4px 0 18px; }
+  .filters select, .filters input[type=date] { width: auto; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+  .kpi { background: var(--white); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; }
+  .kpi:nth-child(1) { background: var(--mint); border-color: var(--mint); }
+  .kpi .l { font-size: 13px; color: var(--muted); }
+  .kpi .v { font-size: 26px; font-weight: 600; letter-spacing: -.02em; margin: 2px 0; font-variant-numeric: tabular-nums; }
+  .kpi .d { font-size: 12.5px; color: var(--muted); }
+  .kpi .d.up { color: var(--green-d); } .kpi .d.down { color: var(--red); }
+  .chartbox { position: relative; height: 300px; }
+  th.sort { cursor: pointer; user-select: none; } th.sort:hover { color: var(--ink); }
+  .ai { background: var(--ink); color: #e8efec; border-radius: 20px; padding: 22px; }
+  .ai h3 { color: #fff; } .ai .key-note { color: #9db0a8; }
+  .ai .doc h4 { color: #fff; font-size: 16px; margin: 18px 0 6px; }
+  .ai .doc p, .ai .doc li { line-height: 1.6; } .ai .doc ul, .ai .doc ol { padding-left: 20px; margin: 6px 0; }
+  .ai .doc b { color: #fff; }
+  .ai .btn { background: transparent; color: #e8efec; border-color: rgba(255,255,255,.25); }
+  .ai .btn.primary { background: var(--lime); color: var(--ink); border-color: var(--lime); }
+  .ai .hist { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ai .hist button[aria-pressed="true"] { background: rgba(255,255,255,.14); }
+  .note-bar { font-size: 13px; color: var(--muted); margin: 0 0 14px; }
+
+  @media (max-width: 820px) {
+    .app { grid-template-columns: 1fr; }
+    .rail { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; }
+    .rail .brand { padding: 0 8px 0 0; } .rail .who { margin: 0; border: 0; width: 100%; }
+    .conn { grid-template-columns: 6px 1fr; } .conn .actions { grid-column: 2; justify-content: flex-start; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<!-- Sign in -->
+<section class="gate" id="gate" hidden>
+  <form id="login">
+    <div class="mark" aria-hidden="true"><i></i></div>
+    <h1>AIMER Insights admin</h1>
+    <p>Sign in with your AIMER account.</p>
+    <div class="stack">
+      <label class="f">Email<input type="email" id="email" autocomplete="username" required></label>
+      <label class="f">Password<input type="password" id="password" autocomplete="current-password" required></label>
+      <button class="btn primary" type="submit" id="loginBtn">Sign in</button>
+      <div id="loginMsg" role="status"></div>
+      <div class="row" style="gap:6px"><button class="btn" type="button" id="forgotBtn">Forgot password?</button><button class="btn" type="button" id="reqOpen">Request access</button></div>
+      <p class="key-note" style="margin:0" id="forgotNote">If the reset email doesn’t arrive, ask an AIMER Insights admin for a password link (Users → Password reset link).</p>
+    </div>
+  </form>
+  <form id="reqForm" hidden style="margin-top:16px">
+    <h1 style="font-size:20px">Request access</h1>
+    <p>An admin reviews every request. You’ll get a link to set your password once approved.</p>
+    <div class="stack">
+      <label class="f">Your name<input type="text" id="reqName" maxlength="120" required autocomplete="name"></label>
+      <label class="f">Work email<input type="email" id="reqEmail" maxlength="200" required autocomplete="email"></label>
+      <label class="f">Why do you need access? <small>Optional</small><input type="text" id="reqNote" maxlength="500" placeholder="e.g. Counsellor, Future HR team"></label>
+      <div class="row"><button class="btn" type="button" id="reqCancel">Back to sign in</button><span class="spacer"></span><button class="btn primary" type="submit" id="reqBtn">Send request</button></div>
+      <div id="reqMsg" role="status"></div>
+    </div>
+  </form>
+</section>
+
+<!-- Set password (opened from an invite or reset link) -->
+<section class="gate" id="setpw" hidden>
+  <form id="pwForm">
+    <div class="mark" aria-hidden="true"><i></i></div>
+    <h1>Set your password</h1>
+    <p id="pwFor">Choose a password for AIMER Insights.</p>
+    <div class="stack">
+      <label class="f">New password <small>At least 10 characters</small><input type="password" id="pw1" autocomplete="new-password" minlength="10" required></label>
+      <label class="f">Repeat password<input type="password" id="pw2" autocomplete="new-password" minlength="10" required></label>
+      <button class="btn primary" type="submit" id="pwBtn">Save password</button>
+      <div id="pwMsg" role="status"></div>
+    </div>
+  </form>
+</section>
+
+<!-- App -->
+<div class="app" id="app" hidden>
+  <nav class="rail" aria-label="Admin sections">
+    <div class="brand"><div class="mark" aria-hidden="true"><i></i></div><div><b>AIMER Insights</b><small>Admin panel</small></div></div>
+    <button data-view="dashboard">Dashboard</button>
+    <button data-view="connections" data-need="staff">Connections</button>
+    <button data-view="log" data-need="staff">Sync log</button>
+    <button data-view="targets" data-need="staff">Programmes &amp; targets</button>
+    <button data-view="users" data-need="admin">Users</button>
+    <div class="who"><b id="whoEmail"></b><span id="whoRole"></span><br><button class="btn" id="logout" style="margin-top:8px;padding:5px 12px;color:#dfe8e4;border-color:rgba(255,255,255,.2);background:transparent">Sign out</button></div>
+  </nav>
+
+  <main>
+    <!-- Dashboard -->
+    <section data-section="dashboard" hidden>
+      <h2>Dashboard</h2>
+      <p class="lead" id="dbLead">Live Meta Ads performance from your connected accounts.</p>
+      <div class="filters">
+        <div class="seg" role="group" aria-label="Period" id="dbPeriod">
+          <button data-p="today">Today</button><button data-p="7d">7 days</button><button data-p="30d">30 days</button><button data-p="mtd">This month</button><button data-p="lm">Last month</button><button data-p="custom">Custom</button>
+        </div>
+        <input type="date" id="dbFrom" aria-label="From"><input type="date" id="dbTo" aria-label="To">
+        <select id="dbProg" aria-label="Programme"><option value="">All programmes</option></select>
+        <select id="dbLoc" aria-label="Location"><option value="">All locations</option></select>
+      </div>
+      <p class="note-bar" id="dbNote"></p>
+      <div class="kpis" id="dbKpis"></div>
+      <div class="panel" style="margin-top:14px"><h3>Daily spend and link clicks</h3><p class="key-note" style="margin:2px 0 10px">Bars: spend (₹). Line: link clicks (right axis).</p><div class="chartbox"><canvas id="dbChart" aria-label="Daily spend and link clicks" role="img"></canvas></div></div>
+      <div class="panel" style="margin-top:14px"><div class="row"><h3>Campaigns</h3><span class="spacer"></span><span class="key-note">Click a column to sort</span></div>
+        <div class="tw" style="margin-top:10px"><table id="dbTable"><thead></thead><tbody></tbody></table></div></div>
+      <div class="ai" style="margin-top:14px" id="aiBox">
+        <div class="row"><h3>AI campaign analysis</h3><span class="spacer"></span><button class="btn primary" id="aiRun">Analyse this period</button></div>
+        <p class="key-note" style="margin:4px 0 0" id="aiNote">Reads the numbers for the selected period and filters, and writes a summary, what works, what needs attention and next actions. Saved for the whole team.</p>
+        <div id="aiMsg" role="status" style="margin-top:10px"></div>
+        <div class="doc" id="aiDoc"></div>
+        <div class="hist" id="aiHist" style="margin-top:14px"></div>
+      </div>
+      <div class="panel" style="margin-top:14px"><h3>Lead quality and admissions</h3><p class="key-note" style="margin:4px 0 0">Qualified leads, counselling, applications, admissions and revenue appear here once the LeadSquared sync is switched on.</p></div>
+    </section>
+
+    <!-- Connections -->
+    <section data-section="connections" hidden>
+      <div class="row"><div><h2>Connections</h2></div><span class="spacer"></span>
+        <button class="btn" id="syncAll">Sync all now</button>
+        <button class="btn primary" id="addConn">Add connection</button></div>
+      <p class="lead">Each connection is one API key. Meta data syncs every hour and re-checks the last 7 days every night. A new connection loads the last 6 months on its first sync. Keys are stored encrypted and can't be viewed again after saving.</p>
+      <div id="connMsg" role="status"></div>
+      <div class="stack" id="connList"></div>
+      <div class="panel" id="testOut" hidden style="margin-top:14px"></div>
+    </section>
+
+    <!-- Sync log -->
+    <section data-section="log" hidden>
+      <div class="row"><h2>Sync log</h2><span class="spacer"></span><button class="btn" id="reloadLog">Refresh</button></div>
+      <p class="lead">The last 50 sync runs, newest first. A failed run shows the error from Meta, Supermetrics or LeadSquared.</p>
+      <div class="tw"><table><thead><tr><th>Started (IST)</th><th>Source</th><th>Job</th><th>Status</th><th class="num">Rows</th><th>Window</th><th>Error</th></tr></thead><tbody id="logBody"></tbody></table></div>
+    </section>
+
+    <!-- Programmes & targets -->
+    <section data-section="targets" hidden>
+      <h2>Programmes &amp; targets</h2>
+      <p class="lead">Programmes are matched to campaigns by name rules. Targets are planning values for each month; leave a box empty if it doesn't apply.</p>
+      <div class="panel stack">
+        <div class="row"><h3>Programmes</h3><span class="spacer"></span><button class="btn" id="addProg">Add programme</button></div>
+        <div class="tw"><table><thead><tr><th>Name</th><th>Active</th><th></th></tr></thead><tbody id="progBody"></tbody></table></div>
+      </div>
+      <div class="panel stack" style="margin-top:14px">
+        <div class="row"><h3>Campaign name rules</h3><span class="spacer"></span><button class="btn" id="addRule">Add rule</button></div>
+        <p class="key-note" style="margin:0">Use % as a wildcard. "YC |%" matches every campaign whose name starts with "YC |". Lower priority numbers are checked first.</p>
+        <div class="tw"><table><thead><tr><th>Campaign name pattern</th><th>Programme</th><th class="num">Priority</th><th></th></tr></thead><tbody id="ruleBody"></tbody></table></div>
+      </div>
+      <div class="panel stack" style="margin-top:14px">
+        <div class="row"><h3>Monthly targets</h3><span class="spacer"></span><label class="f" style="flex-direction:row;align-items:center;gap:8px">Month <input type="month" id="tMonth" style="width:auto"></label><button class="btn primary" id="saveTargets">Save targets</button></div>
+        <div class="tw"><table><thead><tr><th>Scope</th><th class="num">Budget ₹</th><th class="num">Target CPL ₹</th><th class="num">Cost / qualified ₹</th><th class="num">Cost / admission ₹</th><th class="num">Qualified rate %</th><th class="num">Admissions</th><th class="num">Revenue ₹</th></tr></thead><tbody id="tBody"></tbody></table></div>
+        <div id="tMsg" role="status"></div>
+      </div>
+    </section>
+
+    <!-- Users -->
+    <section data-section="users" hidden>
+      <h2>Users</h2>
+      <p class="lead">Add people three ways: send an invite link, create the account yourself with a temporary password, or invite a whole list at once. People can also request access from the sign-in page.</p>
+      <div class="panel stack" id="reqPanel" hidden>
+        <div class="row"><h3>Access requests</h3><span class="tag md" id="reqCount"></span></div>
+        <p class="key-note" style="margin:0">Approve with a role to create their invite link, then send it to them. Rejected requests are kept for your records.</p>
+        <div id="reqAdminMsg" role="status"></div>
+        <div class="tw"><table><thead><tr><th>Name</th><th>Email</th><th>Note</th><th>Requested</th><th>Role</th><th></th></tr></thead><tbody id="reqBody"></tbody></table></div>
+      </div>
+      <div class="panel stack" style="margin-top:14px">
+        <div class="row"><h3>Add people</h3><span class="spacer"></span>
+          <div class="seg" role="group" aria-label="How to add" id="addMode"><button type="button" data-m="link" aria-pressed="true">Invite link</button><button type="button" data-m="create" aria-pressed="false">Create with password</button><button type="button" data-m="bulk" aria-pressed="false">Invite several</button></div></div>
+        <p class="key-note" style="margin:0" id="addHelp">They get a one-time link, open it, and choose their own password.</p>
+        <div class="row" id="pwRow" hidden>
+          <input type="text" id="invPw" placeholder="Temporary password (10+ characters)" autocomplete="off" style="flex:2;min-width:220px">
+          <button class="btn" type="button" id="genPw">Generate</button>
+        </div>
+        <textarea id="bulkEmails" hidden placeholder="One email per line, or separated by commas"></textarea>
+        <form class="row" id="inviteForm">
+          <input type="text" id="invName" placeholder="Name (optional)" maxlength="120" style="flex:1;min-width:150px">
+          <input type="email" id="invEmail" placeholder="name@aimerbschool.com" required style="flex:2;min-width:220px">
+          <select id="invRole" style="flex:1;min-width:160px"><option value="viewer">Viewer (CEO, read-only)</option><option value="counselling_lead">Counselling lead</option><option value="marketing">Marketing</option><option value="admin">Admin</option></select>
+          <button class="btn primary" type="submit" id="addBtn">Create invite link</button>
+        </form>
+        <div id="invMsg" role="status"></div>
+        <div class="tw"><table><thead><tr><th>Email</th><th>Role</th><th>Invited</th><th>Status</th><th></th></tr></thead><tbody id="invBody"></tbody></table></div>
+      </div>
+      <div class="panel stack" style="margin-top:14px">
+        <h3>People with access</h3>
+        <p class="key-note" style="margin:0">Every account in the project. Change a role or remove access; the change applies at their next page load. Accounts without a role can't see any data.</p>
+        <div id="usrMsg" role="status"></div>
+        <div class="tw"><table><thead><tr><th>Email</th><th>Role</th><th>Email confirmed</th><th>Last sign-in</th><th></th></tr></thead><tbody id="usrBody"></tbody></table></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Connection dialog -->
+<dialog id="connDlg" aria-labelledby="connDlgTitle">
+  <form id="connForm" method="dialog">
+    <h3 id="connDlgTitle">Add connection</h3>
+    <label class="f">Type
+      <select id="cProvider">
+        <option value="supermetrics">Supermetrics API key (Meta Ads)</option>
+        <option value="meta_direct">Meta system user token (Meta Ads)</option>
+        <option value="leadsquared">LeadSquared API keys</option>
+        <option value="groq">AI analysis key (Groq)</option>
+        <option value="openai">AI analysis key (OpenAI)</option>
+      </select></label>
+    <label class="f">Name <small>So you can tell connections apart, e.g. "Supermetrics – account 2"</small><input type="text" id="cLabel" required maxlength="80"></label>
+    <label class="f" id="fAccounts">Meta ad account IDs <small>One or more, separated by commas. Find them in Ads Manager (act=…).</small><input type="text" id="cAccounts" placeholder="act_1234567890"></label>
+
+    <div id="fKeySingle"><label class="f"><span id="keyLabel">API key</span> <small id="keyHint"></small><input type="password" id="cKey" autocomplete="off" spellcheck="false"></label></div>
+    <div id="fKeyLsq" class="grid2" hidden>
+      <label class="f">Access key<input type="password" id="cLsqAccess" autocomplete="off" spellcheck="false"></label>
+      <label class="f">Secret key<input type="password" id="cLsqSecret" autocomplete="off" spellcheck="false"></label>
+      <label class="f" style="grid-column:1/-1">Host URL <small>From LeadSquared → API and Webhooks, e.g. https://api-in21.leadsquared.com/v2/</small><input type="text" id="cLsqHost" placeholder="https://api-in21.leadsquared.com/v2/"></label>
+    </div>
+
+    <details id="fAdvanced"><summary>Advanced settings</summary>
+      <div class="stack" style="margin-top:12px">
+        <label class="f" id="fGraph">Graph API version<input type="text" id="cGraph" placeholder="v23.0"></label>
+        <label class="f" id="fModel">AI model <small>Groq: openai/gpt-oss-120b · OpenAI: gpt-4o-mini</small><input type="text" id="cModel" placeholder="openai/gpt-oss-120b"></label>
+        <label class="f" id="fMap">Supermetrics field mapping <small>Only change if a test shows the wrong columns. Keys stay the same; values are Supermetrics field IDs.</small><textarea id="cMap"></textarea></label>
+      </div>
+    </details>
+    <label class="row" style="gap:8px"><input type="checkbox" id="cActive" checked> Include in scheduled syncs</label>
+    <div id="dlgMsg" role="status"></div>
+    <div class="row"><button class="btn" value="cancel" formnovalidate>Cancel</button><span class="spacer"></span><button class="btn primary" id="cSave" value="default">Save connection</button></div>
+  </form>
+</dialog>
+
+<script>
+(() => {
+  // Public project URL and publishable key: safe to ship in a page; access is controlled by sign-in and database rules.
+  const SUPABASE_URL = 'https://haytolhmfaghtebjbiuj.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_ghBEPB17qbQDR06Mim4y4Q_C56Yykmc';
+  // An invite or reset link lands here as #access_token=…&type=invite|recovery. Read it before the client consumes it.
+  const AUTH_TYPE = new URLSearchParams(location.hash.slice(1)).get('type');
+  const AUTH_ERR = new URLSearchParams(location.hash.slice(1)).get('error_description');
+  // New-style links open this page as ?setup=<token_hash>&t=invite|magiclink|recovery. Nothing is used up until the
+  // person presses "Save password", so link previews in WhatsApp or email can't spend the link.
+  const QS = new URLSearchParams(location.search);
+  const SETUP = QS.get('setup'), SETUP_TYPE = ['invite', 'magiclink', 'recovery'].includes(QS.get('t')) ? QS.get('t') : null;
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const $ = (id) => document.getElementById(id);
+  const h = (tag, attrs, ...kids) => {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (v == null || v === false) continue;
+      if (k === 'class') el.className = v; else if (k === 'text') el.textContent = v;
+      else if (k.startsWith('on')) el.addEventListener(k.slice(2), v); else el.setAttribute(k, v === true ? '' : v);
+    }
+    for (const c of kids.flat()) if (c != null && c !== false) el.append(c instanceof Node ? c : String(c));
+    return el;
+  };
+  const say = (el, text, kind) => { el.replaceChildren(text ? h('div', { class: 'msg ' + (kind || 'info'), text }) : ''); };
+  const ist = (ts) => ts ? new Date(ts).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
+  const PROVIDER = { supermetrics: ['Supermetrics', 'sm'], meta_direct: ['Meta token', 'md'], leadsquared: ['LeadSquared', 'lsq'], groq: ['AI · Groq', 'md'], openai: ['AI · OpenAI', 'md'] };
+  const isAI = (p) => p === 'groq' || p === 'openai';
+  const STAFF = ['admin', 'marketing'];
+  const SM_MAP = { date: 'Date', campaign_id: 'adcampaign_id', campaign_name: 'adcampaign_name', spend: 'cost', impressions: 'impressions', reach: 'reach', link_clicks: 'link_clicks', leads: 'onsite_conversion.lead_grouped' };
+  let me = null, role = null, conns = [], editing = null, programmes = [];
+
+  // ---------- Auth ----------
+  let needPassword = AUTH_TYPE === 'invite' || AUTH_TYPE === 'recovery';
+  let setupDone = false, forcePw = false, forceDone = false;
+  async function boot() {
+    const { data } = await sb.auth.getSession();
+    if (AUTH_ERR) { history.replaceState(null, '', location.pathname); $('gate').hidden = false; say($('loginMsg'), 'That link has expired or was already used. Ask your admin for a new one.', 'bad'); return; }
+    if (SETUP && SETUP_TYPE && !setupDone) {
+      $('gate').hidden = true; $('app').hidden = true; $('setpw').hidden = false;
+      $('pwFor').textContent = SETUP_TYPE === 'recovery' ? 'Choose a new password for your AIMER Insights account.' : 'Welcome! Choose a password to finish setting up your AIMER Insights account.';
+      return;
+    }
+    if (data.session && needPassword) {
+      $('gate').hidden = true; $('app').hidden = true; $('setpw').hidden = false;
+      $('pwFor').textContent = 'Choose a password for ' + data.session.user.email + '.';
+      history.replaceState(null, '', location.pathname);
+      return;
+    }
+    if (!data.session) { $('gate').hidden = false; $('app').hidden = true; return; }
+    me = data.session.user;
+    if (me.user_metadata?.must_change_password && !forceDone) {
+      forcePw = true;
+      $('gate').hidden = true; $('app').hidden = true; $('setpw').hidden = false;
+      $('pwFor').textContent = 'You signed in with a temporary password. Choose your own password to continue.';
+      return;
+    }
+    const { data: r } = await sb.from('user_roles').select('role').eq('user_id', me.id).maybeSingle();
+    role = r?.role || null;
+    if (!role) {
+      $('gate').hidden = false; $('app').hidden = true;
+      say($('loginMsg'), 'This account has no access yet. Ask an admin to give ' + me.email + ' a role.', 'bad');
+      await sb.auth.signOut(); return;
+    }
+    $('gate').hidden = true; $('app').hidden = false;
+    $('whoEmail').textContent = me.email;
+    $('whoRole').textContent = { admin: 'Admin', marketing: 'Marketing', counselling_lead: 'Counselling lead', viewer: 'Viewer' }[role] || role;
+    document.querySelectorAll('.rail [data-need]').forEach((b) => { b.hidden = b.dataset.need === 'admin' ? role !== 'admin' : !STAFF.includes(role); });
+    if (role !== 'admin') $('addConn').hidden = true;
+    if (!STAFF.includes(role)) { $('aiRun').hidden = true; $('aiNote').textContent = 'AI analyses written by the marketing team for these periods.'; }
+    // Everyone lands on the full dashboard; the admin sections stay reachable at index.html#connections etc.
+    const view = location.hash.slice(1);
+    if (!view || view === 'dashboard' || new URLSearchParams(location.search).get('next') === 'dashboard' || !STAFF.includes(role)) { location.replace('dashboard.html'); return; }
+    show(view);
+  }
+  $('login').addEventListener('submit', async (e) => {
+    e.preventDefault(); $('loginBtn').disabled = true; say($('loginMsg'), '');
+    const { error } = await sb.auth.signInWithPassword({ email: $('email').value.trim(), password: $('password').value });
+    $('loginBtn').disabled = false;
+    if (error) return say($('loginMsg'), error.message === 'Invalid login credentials' ? 'Email or password is wrong.' : error.message, 'bad');
+    boot();
+  });
+  $('logout').addEventListener('click', async () => { await sb.auth.signOut(); location.replace('index.html'); });
+
+  // ---------- Navigation ----------
+  const loaders = { dashboard: () => loadDashboard(), connections: loadConns, log: loadLog, targets: loadTargets, users: loadUsers };
+  function show(view) {
+    if (view === 'dashboard') { location.href = 'dashboard.html'; return; }
+    if (!loaders[view] || (view === 'users' && role !== 'admin') || (['connections', 'log', 'targets'].includes(view) && !STAFF.includes(role))) view = 'dashboard';
+    document.querySelectorAll('[data-section]').forEach((s) => (s.hidden = s.dataset.section !== view));
+    document.querySelectorAll('.rail [data-view]').forEach((b) => b.setAttribute('aria-current', b.dataset.view === view ? 'page' : 'false'));
+    history.replaceState(null, '', '#' + view);
+    loaders[view]();
+  }
+  document.querySelectorAll('.rail [data-view]').forEach((b) => b.addEventListener('click', () => show(b.dataset.view)));
+
+  // ---------- Connections ----------
+  async function loadConns() {
+    const { data, error } = await sb.from('integration_connections').select('*').order('created_at');
+    if (error) return say($('connMsg'), 'Could not load connections: ' + error.message, 'bad');
+    conns = data || [];
+    const list = $('connList');
+    if (!conns.length) {
+      list.replaceChildren(h('div', { class: 'panel empty' }, h('b', { text: 'No connections yet' }), 'Add a Supermetrics API key or a Meta token to start pulling ad data.'));
+      return;
+    }
+    list.replaceChildren(...conns.map((c) => {
+      const [pname, pcls] = PROVIDER[c.provider] || [c.provider, ''];
+      const state = !c.is_active ? 'off' : c.last_status === 'failed' ? 'bad' : c.last_status ? 'ok' : '';
+      const isLsq = c.provider === 'leadsquared', ai = isAI(c.provider);
+      const busy = (btn, fn) => async () => { btn.disabled = true; try { await fn(); } finally { btn.disabled = false; } };
+      const testBtn = h('button', { class: 'btn', text: 'Test' });
+      const range = h('select', { 'aria-label': 'History to load', style: 'width:auto;border-radius:999px;padding:7px 10px' },
+        [['7', 'Last 7 days'], ['30', 'Last 30 days'], ['90', 'Last 90 days'], ['180', 'Last 6 months']].map(([v, t]) => h('option', { value: v, text: t })));
+      const syncBtn = h('button', { class: 'btn', text: 'Load' });
+      testBtn.addEventListener('click', busy(testBtn, () => runSync({ connection_id: c.id, test: true, days_back: 2 }, c.label)));
+      syncBtn.addEventListener('click', busy(syncBtn, () => runSync({ connection_id: c.id, days_back: Number(range.value) }, c.label + (Number(range.value) > 30 ? ' (this can take a minute)' : ''))));
+      return h('div', { class: 'panel conn ' + state },
+        h('div', { class: 'bar', 'aria-hidden': 'true' }),
+        h('div', null,
+          h('div', { class: 'row', style: 'gap:8px' }, h('h3', { text: c.label }), h('span', { class: 'tag ' + pcls, text: pname }), c.is_active ? null : h('span', { class: 'tag', text: 'Paused' })),
+          h('div', { class: 'meta' },
+            isLsq ? h('span', { text: c.settings?.host || 'No host set' }) : ai ? h('span', { text: 'Model ' + (c.settings?.model || 'default') }) : h('span', { text: (c.account_ids || []).join(', ') || 'No ad accounts set' }),
+            h('span', { text: c.has_secret ? 'Key ••••' + (c.secret_hint || '') : 'No key saved' }),
+            h('span', { text: c.last_sync_at ? 'Last run ' + ist(c.last_sync_at) + ' · ' + (c.last_status || '') : (isLsq ? 'Syncs every 15 minutes' : ai ? 'Used by AI analysis on the Dashboard' : 'Not run yet') })),
+          c.last_error ? h('div', { class: 'err', text: c.last_error }) : null),
+        h('div', { class: 'actions' }, isLsq || ai ? null : testBtn, isLsq || ai ? null : range, isLsq || ai ? null : syncBtn,
+          role === 'admin' ? h('button', { class: 'btn', text: 'Edit', onclick: () => openDlg(c) }) : null,
+          role === 'admin' ? h('button', { class: 'btn danger', text: 'Delete', onclick: () => delConn(c) }) : null));
+    }));
+  }
+
+  async function runSync(body, label) {
+    say($('connMsg'), (body.test ? 'Testing ' : 'Syncing ') + (label || 'all connections') + '…', 'info');
+    $('testOut').hidden = true;
+    const { data, error } = await sb.functions.invoke('sync-ads', { body });
+    if (error) { let m = error.message; try { m = (await error.context.json()).error || m; } catch (_) {} say($('connMsg'), 'Sync failed: ' + m, 'bad'); return loadConns(); }
+    const res = data?.results || [];
+    if (!res.length) say($('connMsg'), data?.message || 'Nothing to sync.', 'info');
+    else if (res.every((r) => r.ok)) say($('connMsg'), body.test ? 'Test passed — the key works and data came back. Nothing was saved.' : 'Synced ' + data.since + ' to ' + data.until + ': ' + res.map((r) => r.connection + ' (' + r.rows + ' rows)').join(', ') + '.', 'ok');
+    else say($('connMsg'), res.filter((r) => !r.ok).map((r) => r.connection + ': ' + r.error).join(' | '), 'bad');
+    if (body.test && res[0]?.accounts) showTest(res[0]);
+    loadConns();
+  }
+
+  function showTest(r) {
+    const out = $('testOut'); out.hidden = false;
+    const blocks = r.accounts.map((a) => {
+      const cols = ['date_start', 'campaign_name', 'spend', 'impressions', 'inline_link_clicks'];
+      return h('div', { class: 'stack' },
+        h('h3', { text: a.account + ' — ' + a.rows + ' rows' + (a.campaigns ? ', ' + a.campaigns + ' campaigns' : '') }),
+        a.header ? h('div', { class: 'key-note', text: 'Columns returned: ' + a.header.join(', ') }) : null,
+        a.sample.length ? h('div', { class: 'tw' }, h('table', null,
+          h('thead', null, h('tr', null, cols.map((c) => h('th', { text: c })), h('th', { text: 'leads' }))),
+          h('tbody', null, a.sample.map((s) => h('tr', null, cols.map((c) => h('td', { text: String(s[c] ?? '') })), h('td', { text: String((s.actions || []).find((x) => x.action_type === 'onsite_conversion.lead_grouped' || x.action_type === 'lead')?.value ?? 0) })))))) :
+          h('div', { class: 'key-note', text: 'No rows for the last 2 days. If campaigns were running, check the account ID.' }));
+    });
+    out.replaceChildren(h('div', { class: 'row' }, h('h3', { text: 'Test result: ' + r.connection }), h('span', { class: 'spacer' }), h('button', { class: 'btn', text: 'Close', onclick: () => (out.hidden = true) })), ...blocks);
+  }
+
+  $('syncAll').addEventListener('click', async (e) => { e.target.disabled = true; try { await runSync({ days_back: 7 }); } finally { e.target.disabled = false; } });
+
+  async function delConn(c) {
+    if (!confirm('Delete "' + c.label + '"? Its saved key is removed. Data already synced stays.')) return;
+    const { error } = await sb.rpc('admin_delete_connection', { p_id: c.id });
+    say($('connMsg'), error ? 'Could not delete: ' + error.message : 'Deleted ' + c.label + '.', error ? 'bad' : 'ok');
+    loadConns();
+  }
+
+  // dialog
+  const dlg = $('connDlg');
+  function syncDlgFields() {
+    const p = $('cProvider').value;
+    const lsq = p === 'leadsquared', ai = isAI(p);
+    $('fAccounts').hidden = lsq || ai; $('fKeySingle').hidden = lsq; $('fKeyLsq').hidden = !lsq;
+    $('fAdvanced').hidden = lsq; $('fGraph').hidden = p !== 'meta_direct'; $('fMap').hidden = p !== 'supermetrics'; $('fModel').hidden = !ai;
+    if (ai) $('fAdvanced').open = true;
+    $('keyLabel').textContent = p === 'meta_direct' ? 'System user token' : ai ? 'AI API key' : 'Supermetrics API key';
+  }
+  $('cProvider').addEventListener('change', syncDlgFields);
+  function openDlg(c) {
+    editing = c || null;
+    $('connDlgTitle').textContent = c ? 'Edit ' + c.label : 'Add connection';
+    $('cProvider').value = c?.provider || 'supermetrics'; $('cProvider').disabled = !!c;
+    $('cLabel').value = c?.label || ''; $('cAccounts').value = (c?.account_ids || []).join(', ');
+    $('cKey').value = ''; $('cLsqAccess').value = ''; $('cLsqSecret').value = '';
+    $('cLsqHost').value = c?.settings?.host || '';
+    $('cGraph').value = c?.settings?.graph_version || '';
+    $('cModel').value = c?.settings?.model || '';
+    $('cMap').value = JSON.stringify({ ...SM_MAP, ...(c?.settings?.field_map || {}) }, null, 2);
+    $('cActive').checked = c ? c.is_active : true;
+    $('keyHint').textContent = c?.has_secret ? 'A key ending ••••' + (c.secret_hint || '') + ' is saved. Leave empty to keep it.' : 'Stored encrypted; you won’t be able to view it again.';
+    say($('dlgMsg'), '');
+    syncDlgFields(); dlg.showModal(); $('cLabel').focus();
+  }
+  $('addConn').addEventListener('click', () => openDlg(null));
+  $('connForm').addEventListener('submit', async (e) => {
+    if (e.submitter?.value === 'cancel') return;
+    e.preventDefault();
+    const p = $('cProvider').value, lsq = p === 'leadsquared', ai = isAI(p);
+    const accounts = lsq || ai ? [] : $('cAccounts').value.split(/[\s,]+/).map((s) => s.trim()).filter(Boolean);
+    const settings = {};
+    let secret = null;
+    if (!$('cLabel').value.trim()) return say($('dlgMsg'), 'Give the connection a name.', 'bad');
+    if (lsq) {
+      settings.host = $('cLsqHost').value.trim();
+      if (!/^https:\/\/[a-z0-9.-]+leadsquared\.com\/v2\/?$/i.test(settings.host)) return say($('dlgMsg'), 'Enter the host URL exactly as LeadSquared shows it, e.g. https://api-in21.leadsquared.com/v2/', 'bad');
+      const a = $('cLsqAccess').value.trim(), s = $('cLsqSecret').value.trim();
+      if (a || s) { if (!a || !s) return say($('dlgMsg'), 'Enter both the access key and the secret key.', 'bad'); secret = JSON.stringify({ access_key: a, secret_key: s }); }
+    } else if (ai) {
+      secret = $('cKey').value.trim() || null;
+      settings.model = $('cModel').value.trim() || (p === 'openai' ? 'gpt-4o-mini' : 'openai/gpt-oss-120b');
+    } else {
+      if (!accounts.length) return say($('dlgMsg'), 'Add at least one Meta ad account ID.', 'bad');
+      secret = $('cKey').value.trim() || null;
+      if (p === 'meta_direct' && $('cGraph').value.trim()) settings.graph_version = $('cGraph').value.trim();
+      if (p === 'supermetrics') {
+        try { const m = JSON.parse($('cMap').value || '{}'); const diff = {}; for (const k of Object.keys(SM_MAP)) if (m[k] && m[k] !== SM_MAP[k]) diff[k] = m[k]; if (Object.keys(diff).length) settings.field_map = diff; settings.ds_id = 'FA'; }
+        catch (_) { return say($('dlgMsg'), 'The field mapping isn’t valid JSON.', 'bad'); }
+      }
+    }
+    if (!editing && !secret) return say($('dlgMsg'), 'Paste the API key to save a new connection.', 'bad');
+    const isNewMeta = !editing && !lsq && !ai;
+    $('cSave').disabled = true;
+    const { error } = await sb.rpc('admin_save_connection', {
+      p_id: editing?.id || null, p_source: lsq ? 'leadsquared' : ai ? 'ai' : 'meta', p_provider: p, p_label: $('cLabel').value.trim(),
+      p_account_ids: accounts, p_settings: settings, p_is_active: $('cActive').checked, p_secret: secret });
+    $('cSave').disabled = false;
+    if (error) return say($('dlgMsg'), 'Could not save: ' + error.message, 'bad');
+    $('cKey').value = ''; $('cLsqAccess').value = ''; $('cLsqSecret').value = '';
+    dlg.close(); say($('connMsg'), 'Saved. ' + (lsq ? 'LeadSquared leads sync every 15 minutes.' : ai ? 'Run an analysis from the Dashboard to check the key.' : 'Click Test to check the key, then Load → Last 6 months (or wait: the next hourly sync loads 6 months automatically).'), 'ok');
+    loadConns();
+  });
+  dlg.addEventListener('close', () => { $('cKey').value = ''; $('cLsqAccess').value = ''; $('cLsqSecret').value = ''; });
+
+
+  // ---------- Dashboard (live data from Supabase) ----------
+  const inr = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
+  const intf = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 });
+  const F = { inr: (v) => (v == null || !isFinite(v) ? '—' : inr.format(v)), int: (v) => (v == null || !isFinite(v) ? '—' : intf.format(v)), pct: (v) => (v == null || !isFinite(v) ? '—' : v.toFixed(2) + '%') };
+  const istToday = () => new Date(Date.now() + 5.5 * 3600e3).toISOString().slice(0, 10);
+  const addD = (d, n) => { const x = new Date(d + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
+  const nDays = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 864e5) + 1;
+  const niceDate = (d) => new Date(d + 'T00:00:00Z').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+  const div = (a, b) => (b > 0 ? a / b : null);
+  const DB = { p: '7d', from: null, to: null, prog: '', loc: '', sort: { key: 'spend', dir: -1 }, chart: null, rows: [], aiShown: null };
+  function range() {
+    const t = istToday();
+    if (DB.p === 'today') return [t, t];
+    if (DB.p === '30d') return [addD(t, -30), addD(t, -1)];
+    if (DB.p === 'mtd') return [t.slice(0, 8) + '01', t];
+    if (DB.p === 'lm') { const s = addD(t.slice(0, 8) + '01', -1).slice(0, 8) + '01'; const e = addD(t.slice(0, 8) + '01', -1); return [s, e]; }
+    if (DB.p === 'custom' && DB.from && DB.to && DB.from <= DB.to) return [DB.from, DB.to];
+    return [addD(t, -7), addD(t, -1)];
+  }
+  function agg(rows) {
+    const a = { spend: 0, imp: 0, reach: 0, clicks: 0, leads: 0 };
+    for (const r of rows) { a.spend += +r.spend; a.imp += +r.impressions; a.reach += +r.reach; a.clicks += +r.link_clicks; a.leads += +r.leads; }
+    a.ctr = div(a.clicks * 100, a.imp); a.cpc = div(a.spend, a.clicks); a.cpm = div(a.spend * 1000, a.imp); a.cpl = div(a.spend, a.leads); a.freq = div(a.imp, a.reach);
+    return a;
+  }
+  document.querySelectorAll('#dbPeriod button').forEach((b) => b.addEventListener('click', () => { DB.p = b.dataset.p; if (DB.p === 'custom') { const [f, t] = range(); DB.from = DB.from || f; DB.to = DB.to || t; } loadDashboard(); }));
+  $('dbFrom').addEventListener('change', () => { DB.p = 'custom'; DB.from = $('dbFrom').value; DB.to = DB.to || $('dbTo').value; loadDashboard(); });
+  $('dbTo').addEventListener('change', () => { DB.p = 'custom'; DB.to = $('dbTo').value; DB.from = DB.from || $('dbFrom').value; loadDashboard(); });
+  $('dbProg').addEventListener('change', () => { DB.prog = $('dbProg').value; loadDashboard(); });
+  $('dbLoc').addEventListener('change', () => { DB.loc = $('dbLoc').value; loadDashboard(); });
+
+  async function loadDashboard() {
+    const [from, to] = range();
+    const n = nDays(from, to), pFrom = addD(from, -n), pTo = addD(from, -1);
+    document.querySelectorAll('#dbPeriod button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.p === DB.p ? 'true' : 'false'));
+    $('dbFrom').value = from; $('dbTo').value = to;
+    const { data, error } = await sb.from('v_insights_daily').select('date,campaign_id,campaign_name,campaign_status,programme,location,spend,impressions,reach,link_clicks,leads,is_partial_day').gte('date', pFrom).lte('date', to).limit(20000);
+    if (error) { $('dbNote').textContent = 'Could not load data: ' + error.message; return; }
+    // filter options from what exists
+    const opts = (el, vals, all) => { const cur = el.value; el.replaceChildren(h('option', { value: '', text: all }), ...[...new Set(vals.filter(Boolean))].sort().map((v) => h('option', { value: v, text: v }))); el.value = cur; };
+    opts($('dbProg'), data.map((r) => r.programme), 'All programmes'); opts($('dbLoc'), data.map((r) => r.location), 'All locations');
+    const rows = data.filter((r) => (!DB.prog || r.programme === DB.prog) && (!DB.loc || r.location === DB.loc));
+    const cur = rows.filter((r) => r.date >= from), prev = rows.filter((r) => r.date < from);
+    DB.rows = cur;
+    const k = agg(cur), pk = agg(prev);
+    const { data: integ } = await sb.from('integrations').select('mode,last_success_at').eq('source', 'meta').maybeSingle();
+    const partial = cur.some((r) => r.is_partial_day);
+    $('dbLead').textContent = niceDate(from) + (from !== to ? ' – ' + niceDate(to) : '') + ' (IST)' + ', compared with ' + niceDate(pFrom) + ' – ' + niceDate(pTo) + '.';
+    $('dbNote').textContent = (integ?.mode === 'live' ? 'Live Meta data, last sync ' + ist(integ.last_success_at) + '. ' : 'Meta data not connected. ') + (partial ? 'Today is still in progress. ' : '') + (cur.length && k.leads === 0 ? 'Leads show 0 until the lead-form field is mapped in the Supermetrics connection, so CPL is not shown. ' : '') + 'Reach is summed from daily figures.';
+    const card = (label, v, pv, fmt, goodUp) => {
+      let d = 'No earlier data', cls = '';
+      if (pv != null && isFinite(pv) && pv !== 0 && v != null && isFinite(v)) { const c = (v - pv) / Math.abs(pv) * 100; d = (c >= 0 ? '▲ +' : '▼ ') + c.toFixed(1) + '% vs previous'; cls = goodUp == null ? '' : (c >= 0) === goodUp ? 'up' : 'down'; }
+      return h('div', { class: 'kpi' }, h('div', { class: 'l', text: label }), h('div', { class: 'v', text: fmt(v) }), h('div', { class: 'd ' + cls, text: d }));
+    };
+    $('dbKpis').replaceChildren(
+      card('Ad spend', k.spend, pk.spend, F.inr, null), card('Impressions', k.imp, pk.imp, F.int, true), card('Reach (daily sum)', k.reach, pk.reach, F.int, true),
+      card('Link clicks', k.clicks, pk.clicks, F.int, true), card('CTR', k.ctr, pk.ctr, F.pct, true), card('CPC', k.cpc, pk.cpc, F.inr, false),
+      card('CPM', k.cpm, pk.cpm, F.inr, false), card('Leads', k.leads, pk.leads, F.int, true), card('Cost per lead', k.leads ? k.cpl : null, pk.leads ? pk.cpl : null, F.inr, false));
+    // chart
+    const days = []; for (let d = from; d <= to; d = addD(d, 1)) days.push(d);
+    const byDay = new Map(days.map((d) => [d, []])); cur.forEach((r) => byDay.get(r.date)?.push(r));
+    const ds = days.map((d) => agg(byDay.get(d)));
+    if (DB.chart) DB.chart.destroy();
+    if (window.Chart) DB.chart = new Chart($('dbChart'), {
+      data: { labels: days.map(niceDate), datasets: [
+        { type: 'bar', label: 'Spend (₹)', data: days.map((d, i) => (byDay.get(d).length ? Math.round(ds[i].spend) : null)), backgroundColor: '#12c784', borderRadius: 6, yAxisID: 'y' },
+        { type: 'line', label: 'Link clicks', data: days.map((d, i) => (byDay.get(d).length ? ds[i].clicks : null)), borderColor: '#10201a', backgroundColor: '#10201a', tension: 0.3, pointRadius: 2, yAxisID: 'y1' }] },
+      options: { maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+        plugins: { legend: { labels: { boxWidth: 12, font: { family: 'Figtree' } } }, tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + (c.datasetIndex === 0 ? F.inr(c.raw) : F.int(c.raw)) } } },
+        scales: { y: { beginAtZero: true, ticks: { callback: (v) => '₹' + intf.format(v) }, grid: { color: '#eef3f1' } }, y1: { beginAtZero: true, position: 'right', grid: { display: false } }, x: { grid: { display: false } } } } });
+    renderCampTable();
+    loadInsights();
+  }
+  const COLS = [['campaign_name', 'Campaign', 's'], ['programme', 'Programme', 's'], ['location', 'Location', 's'], ['spend', 'Spend', 'inr'], ['imp', 'Impressions', 'int'], ['reach', 'Reach', 'int'], ['clicks', 'Link clicks', 'int'], ['ctr', 'CTR', 'pct'], ['cpc', 'CPC', 'inr'], ['cpm', 'CPM', 'inr'], ['leads', 'Leads', 'int'], ['cpl', 'CPL', 'inr'], ['share', 'Share of spend', 'pct']];
+  function renderCampTable() {
+    const by = new Map(); DB.rows.forEach((r) => { if (!by.has(r.campaign_id)) by.set(r.campaign_id, []); by.get(r.campaign_id).push(r); });
+    const total = agg(DB.rows).spend;
+    let list = [...by.values()].map((rs) => { const a = agg(rs); return { campaign_name: rs[0].campaign_name, programme: rs[0].programme || 'Unmapped', location: rs[0].location || '—', ...a, cpl: a.leads ? a.cpl : null, share: div(a.spend * 100, total) }; });
+    const { key, dir } = DB.sort;
+    list.sort((a, b) => { const x = a[key], y = b[key]; if (x == null) return 1; if (y == null) return -1; return (x < y ? -1 : x > y ? 1 : 0) * dir; });
+    const t = $('dbTable');
+    t.tHead.replaceChildren(h('tr', null, COLS.map(([k2, l, f]) => h('th', { class: 'sort' + (f !== 's' ? ' num' : ''), 'aria-sort': key === k2 ? (dir > 0 ? 'ascending' : 'descending') : 'none', onclick: () => { DB.sort = { key: k2, dir: key === k2 ? -dir : -1 }; renderCampTable(); } }, l + (key === k2 ? (dir > 0 ? ' ▲' : ' ▼') : '')))));
+    t.tBodies[0].replaceChildren(...(list.length ? list.map((r) => h('tr', null, COLS.map(([k2, , f]) => h('td', { class: f !== 's' ? 'num' : '', text: f === 's' ? r[k2] : F[f](r[k2]) })))) : [h('tr', null, h('td', { colspan: COLS.length, class: 'key-note', text: 'No ad data in this period.' }))]));
+  }
+
+  // ---------- AI analysis ----------
+  function mdToDom(md) {
+    const box = h('div');
+    const inline = (txt) => txt.split(/(\*\*[^*]+\*\*)/g).filter(Boolean).map((part) => (part.startsWith('**') && part.endsWith('**') ? h('b', { text: part.slice(2, -2) }) : document.createTextNode(part)));
+    let list = null, listType = '';
+    for (const raw of md.split('\n')) {
+      const line = raw.trimEnd();
+      const hm = /^#{1,4}\s+(.*)$/.exec(line), ul = /^\s*[-*•]\s+(.*)$/.exec(line), ol = /^\s*\d+[.)]\s+(.*)$/.exec(line);
+      if (ul || ol) {
+        const type = ul ? 'ul' : 'ol';
+        if (!list || listType !== type) { list = h(type); listType = type; box.append(list); }
+        list.append(h('li', null, inline((ul || ol)[1])));
+        continue;
+      }
+      list = null;
+      if (hm) box.append(h('h4', { text: hm[1].replace(/\*\*/g, '') }));
+      else if (line.trim()) box.append(h('p', null, inline(line)));
+    }
+    return box;
+  }
+  function showInsight(row) {
+    DB.aiShown = row.id;
+    const f = row.filters || {};
+    $('aiDoc').replaceChildren(
+      h('p', { class: 'key-note', text: niceDate(row.period_start) + ' – ' + niceDate(row.period_end) + (f.programme ? ' · ' + f.programme : '') + (f.location ? ' · ' + f.location : '') + ' · by ' + (row.created_by_email || 'team') + ', ' + ist(row.created_at) + ' · ' + (row.model || '') }),
+      mdToDom(row.content));
+    document.querySelectorAll('#aiHist button').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.id) === row.id)));
+  }
+  let aiRows = [];
+  async function loadInsights() {
+    const { data } = await sb.from('ai_insights').select('id,created_at,created_by_email,period_start,period_end,filters,model,content').order('created_at', { ascending: false }).limit(12);
+    aiRows = data || [];
+    const [from, to] = range();
+    const match = aiRows.find((r) => r.period_start === from && r.period_end === to && (r.filters?.programme || '') === DB.prog && (r.filters?.location || '') === DB.loc);
+    $('aiHist').replaceChildren(...(aiRows.length ? [h('span', { class: 'key-note', text: 'Saved analyses:' }), ...aiRows.map((r) => h('button', { class: 'btn', 'data-id': r.id, text: niceDate(r.period_start) + '–' + niceDate(r.period_end), onclick: () => showInsight(r) }))] : []));
+    if (match) showInsight(match);
+    else $('aiDoc').replaceChildren(h('p', { class: 'key-note', text: aiRows.length ? 'No analysis saved for this exact period and filter yet.' + (STAFF.includes(role) ? ' Click "Analyse this period".' : '') : 'No analyses yet.' }));
+  }
+  $('aiRun').addEventListener('click', async () => {
+    const [from, to] = range();
+    $('aiRun').disabled = true; say($('aiMsg'), 'Analysing ' + niceDate(from) + ' – ' + niceDate(to) + '… this takes about 10–20 seconds.', 'info');
+    const { data, error } = await sb.functions.invoke('ai-insights', { body: { since: from, until: to, programme: DB.prog || null, location: DB.loc || null } });
+    $('aiRun').disabled = false;
+    if (error) { let m = error.message; try { m = (await error.context.json()).error || m; } catch (_) {} return say($('aiMsg'), m, 'bad'); }
+    say($('aiMsg'), '');
+    await loadInsights();
+    const row = aiRows.find((r) => r.id === data.id); if (row) showInsight(row);
+  });
+
+  // ---------- Sync log ----------
+  async function loadLog() {
+    const { data, error } = await sb.from('sync_runs').select('*').order('started_at', { ascending: false }).limit(50);
+    const body = $('logBody');
+    if (error) return body.replaceChildren(h('tr', null, h('td', { colspan: 7, text: 'Could not load: ' + error.message })));
+    if (!data.length) return body.replaceChildren(h('tr', null, h('td', { colspan: 7, class: 'key-note', text: 'No syncs have run yet. Add a connection and click Test or Sync.' })));
+    body.replaceChildren(...data.map((r) => h('tr', null,
+      h('td', { text: ist(r.started_at) }), h('td', { text: r.source }), h('td', { text: r.job }),
+      h('td', { class: 's-' + r.status, text: r.status }), h('td', { class: 'num', text: r.rows_upserted ?? '' }),
+      h('td', { text: r.window_start ? r.window_start + ' → ' + r.window_end : '' }), h('td', { class: 'err', style: 'margin:0', text: r.error || '' }))));
+  }
+  $('reloadLog').addEventListener('click', loadLog);
+
+  // ---------- Programmes, rules, targets ----------
+  const thisMonth = new Date(Date.now() + 5.5 * 3600e3).toISOString().slice(0, 7);
+  $('tMonth').value = thisMonth;
+  $('tMonth').addEventListener('change', loadTargetsTable);
+  async function loadTargets() { await loadProgs(); await loadRules(); await loadTargetsTable(); }
+  async function loadProgs() {
+    const { data } = await sb.from('programmes').select('*').order('name');
+    programmes = data || [];
+    $('progBody').replaceChildren(...programmes.map((p) => {
+      const name = h('input', { type: 'text', value: p.name, 'aria-label': 'Programme name' });
+      const act = h('input', { type: 'checkbox', 'aria-label': 'Active' }); act.checked = p.is_active;
+      const save = async () => { const { error } = await sb.from('programmes').update({ name: name.value.trim(), is_active: act.checked }).eq('id', p.id); if (error) alert(error.message); else loadTargets(); };
+      name.addEventListener('change', save); act.addEventListener('change', save);
+      return h('tr', null, h('td', null, name), h('td', null, act), h('td', { class: 'key-note', text: 'Saves automatically' }));
+    }));
+  }
+  $('addProg').addEventListener('click', async () => {
+    const name = prompt('New programme name'); if (!name?.trim()) return;
+    const { error } = await sb.from('programmes').insert({ name: name.trim() }); if (error) alert(error.message); loadTargets();
+  });
+  async function loadRules() {
+    const { data } = await sb.from('naming_rules').select('*').order('priority');
+    $('ruleBody').replaceChildren(...(data || []).map((r) => {
+      const pat = h('input', { type: 'text', value: r.pattern, 'aria-label': 'Pattern' });
+      const sel = h('select', { 'aria-label': 'Programme' }, programmes.map((p) => h('option', { value: p.id, text: p.name }))); sel.value = r.programme_id;
+      const pri = h('input', { type: 'number', value: r.priority, style: 'width:90px', 'aria-label': 'Priority' });
+      const save = async () => { const { error } = await sb.from('naming_rules').update({ pattern: pat.value.trim(), programme_id: sel.value, priority: Number(pri.value) || 100 }).eq('id', r.id); if (error) alert(error.message); };
+      [pat, sel, pri].forEach((x) => x.addEventListener('change', save));
+      return h('tr', null, h('td', null, pat), h('td', null, sel), h('td', { class: 'num' }, pri),
+        h('td', null, h('button', { class: 'btn danger', text: 'Remove', onclick: async () => { await sb.from('naming_rules').delete().eq('id', r.id); loadRules(); } })));
+    }));
+  }
+  $('addRule').addEventListener('click', async () => {
+    if (!programmes.length) return alert('Add a programme first.');
+    const pattern = prompt('Campaign name pattern, e.g. "FHR |%"'); if (!pattern?.trim()) return;
+    const { error } = await sb.from('naming_rules').insert({ pattern: pattern.trim(), programme_id: programmes[0].id, priority: 50 });
+    if (error) alert(error.message); loadRules();
+  });
+  const TF = ['budget', 'target_cpl', 'target_cpql', 'target_cpa', 'target_ql_rate', 'target_admissions', 'revenue_target'];
+  let tRows = [];
+  async function loadTargetsTable() {
+    const month = $('tMonth').value + '-01';
+    const { data } = await sb.from('monthly_targets').select('*').eq('month', month);
+    const scopes = [{ id: null, name: 'Whole school' }, ...programmes.filter((p) => p.is_active)];
+    tRows = scopes.map((s) => ({ scope: s, row: (data || []).find((d) => d.programme_id === s.id) || {} }));
+    $('tBody').replaceChildren(...tRows.map((t) => h('tr', null, h('td', { text: t.scope.name, style: t.scope.id ? '' : 'font-weight:600' }),
+      TF.map((f) => { const i = h('input', { type: 'number', min: 0, step: 'any', value: t.row[f] ?? '', style: 'width:110px;text-align:right', 'aria-label': f, 'data-f': f }); return h('td', { class: 'num' }, i); }))));
+    say($('tMsg'), '');
+  }
+  $('saveTargets').addEventListener('click', async () => {
+    const month = $('tMonth').value + '-01';
+    const trs = [...$('tBody').children];
+    const rows = tRows.map((t, i) => { const o = { month, programme_id: t.scope.id }; trs[i].querySelectorAll('input').forEach((inp) => (o[inp.dataset.f] = inp.value === '' ? null : Number(inp.value))); return o; });
+    const { error } = await sb.from('monthly_targets').upsert(rows, { onConflict: 'month,programme_id' });
+    say($('tMsg'), error ? 'Could not save: ' + error.message : 'Targets saved for ' + $('tMonth').value + '.', error ? 'bad' : 'ok');
+  });
+
+  // ---------- Users ----------
+  async function loadUsers() {
+    const { data, error } = await sb.from('role_invites').select('*').order('invited_at', { ascending: false });
+    if (error) return say($('invMsg'), error.message, 'bad');
+    $('invBody').replaceChildren(...(data || []).map((r) => h('tr', null, h('td', { text: r.email }), h('td', { text: r.role.replace('_', ' ') }), h('td', { text: ist(r.invited_at) }),
+      h('td', { text: r.claimed_at ? 'Active since ' + ist(r.claimed_at) : 'Waiting for sign-up' }),
+      h('td', null, r.claimed_at ? null : h('span', { class: 'row', style: 'gap:6px' }, h('button', { class: 'btn', text: 'Get invite link', onclick: () => getLink('invite', r.email, r.role, $('invMsg')) }), h('button', { class: 'btn danger', text: 'Cancel', onclick: async () => { await sb.from('role_invites').delete().eq('email', r.email); loadUsers(); } }))))));
+  }
+  async function loadPeople() {
+    const { data, error } = await sb.rpc('admin_list_users');
+    if (error) return say($('usrMsg'), 'Could not load people: ' + error.message, 'bad');
+    const ROLES = [['', 'No access'], ['viewer', 'Viewer'], ['counselling_lead', 'Counselling lead'], ['marketing', 'Marketing'], ['admin', 'Admin']];
+    $('usrBody').replaceChildren(...(data || []).map((u) => {
+      const sel = h('select', { 'aria-label': 'Role for ' + u.email }, ROLES.map(([v, t]) => h('option', { value: v, text: t })));
+      sel.value = u.role || '';
+      sel.addEventListener('change', async () => {
+        const { error: e2 } = await sb.rpc('admin_set_role', { p_email: u.email, p_role: sel.value || null });
+        say($('usrMsg'), e2 ? 'Not changed: ' + e2.message : u.email + ' is now ' + (sel.selectedOptions[0].text.toLowerCase()) + '.', e2 ? 'bad' : 'ok');
+        loadPeople();
+      });
+      const isMe = u.email === me.email;
+      return h('tr', null, h('td', { text: u.email + (isMe ? ' (you)' : '') }), h('td', null, sel),
+        h('td', { text: u.confirmed ? 'Yes' : 'Not yet — waiting for them to open their link' }), h('td', { text: ist(u.last_sign_in_at) }), h('td', null, isMe ? null : h('span', { class: 'row', style: 'gap:6px;flex-wrap:nowrap' },
+          h('button', { class: 'btn', text: u.confirmed ? 'Password reset link' : 'New invite link', onclick: () => getLink('link', u.email, u.role, $('usrMsg')) }),
+          h('button', { class: 'btn danger', text: 'Remove', onclick: () => removeUser(u.email) }))));
+    }));
+  }
+  const _loadUsers = loadUsers;
+  loaders.users = async () => { await _loadUsers(); await loadPeople(); };
+
+  // Invite links: created by the admin-users function and shared by WhatsApp or email (nothing is emailed automatically)
+  const panelUrl = location.origin + location.pathname;
+  function showLink(target, email, link, existing) {
+    const msgTxt = 'AIMER Insights: open this link and choose your password. Please do it today, the link expires.\n' + link;
+    const wa = 'https://wa.me/?text=' + encodeURIComponent(msgTxt);
+    const mail = 'mailto:' + encodeURIComponent(email) + '?subject=' + encodeURIComponent('Your AIMER Insights access') + '&body=' + encodeURIComponent(msgTxt);
+    const copyBtn = h('button', { class: 'btn', text: 'Copy link' });
+    copyBtn.addEventListener('click', async () => { try { await navigator.clipboard.writeText(link); copyBtn.textContent = 'Copied'; } catch (_) { copyBtn.textContent = 'Select and copy below'; } });
+    target.replaceChildren(h('div', { class: 'msg ok' },
+      h('div', { text: (existing ? 'Password link ready for ' : 'Account created for ') + email + '. Send this link. It only takes effect when they press Save password, so previews can’t use it up. It expires after a while; create a new one any time.' }),
+      h('input', { type: 'text', value: link, readonly: true, style: 'margin:8px 0;font-size:12px', onclick: (ev) => ev.target.select() }),
+      h('div', { class: 'row' }, copyBtn, h('a', { class: 'btn', href: wa, target: '_blank', rel: 'noopener', text: 'Send on WhatsApp' }), h('a', { class: 'btn', href: mail, text: 'Send by email' }))));
+  }
+  async function removeUser(email) {
+    if (!confirm('Remove ' + email + ' completely? They lose access straight away. You can invite them again later.')) return;
+    say($('usrMsg'), 'Removing…', 'info');
+    const { error } = await sb.functions.invoke('admin-users', { body: { action: 'delete', email } });
+    if (error) { let m = error.message; try { m = (await error.context.json()).error || m; } catch (_) {} return say($('usrMsg'), 'Not removed: ' + m, 'bad'); }
+    say($('usrMsg'), email + ' was removed.', 'ok');
+    loaders.users();
+  }
+  async function getLink(action, email, role, target, name) {
+    say(target, 'Creating link…', 'info');
+    const { data, error } = await sb.functions.invoke('admin-users', { body: { action, email, role, name: name || null, redirect_to: panelUrl } });
+    if (error) { let m = error.message; try { m = (await error.context.json()).error || m; } catch (_) {} return say(target, 'Could not create the link: ' + m, 'bad'); }
+    showLink(target, data.email, data.link, data.existing);
+    loaders.users();
+  }
+  // ---- Add people: invite link, create with password, invite several ----
+  let addMode = 'link';
+  const HELP = { link: 'They get a one-time link, open it, and choose their own password.',
+    create: 'You set a temporary password and share it with them. They must choose their own password the first time they sign in. No link needed.',
+    bulk: 'Paste several emails. Each gets its own invite link with the same role; copy them all at once.' };
+  document.querySelectorAll('#addMode button').forEach((b) => b.addEventListener('click', () => {
+    addMode = b.dataset.m;
+    document.querySelectorAll('#addMode button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    $('addHelp').textContent = HELP[addMode];
+    $('pwRow').hidden = addMode !== 'create';
+    $('bulkEmails').hidden = addMode !== 'bulk';
+    $('invEmail').hidden = $('invName').hidden = addMode === 'bulk';
+    $('invEmail').required = addMode !== 'bulk';
+    $('addBtn').textContent = { link: 'Create invite link', create: 'Create account', bulk: 'Create invite links' }[addMode];
+    if (addMode === 'create' && !$('invPw').value) $('genPw').click();
+    say($('invMsg'), '');
+  }));
+  $('genPw').addEventListener('click', () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+    const a = new Uint32Array(12); crypto.getRandomValues(a);
+    $('invPw').value = 'Aimer-' + [...a].map((x) => chars[x % chars.length]).join('');
+  });
+  const fnErr = async (error) => { let m = error.message; try { m = (await error.context.json()).error || m; } catch (_) {} return m; };
+  $('inviteForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const role = $('invRole').value, name = $('invName').value.trim();
+    $('addBtn').disabled = true;
+    try {
+      if (addMode === 'link') {
+        await getLink('invite', $('invEmail').value.trim().toLowerCase(), role, $('invMsg'), name);
+        $('invEmail').value = ''; $('invName').value = '';
+      } else if (addMode === 'create') {
+        const email = $('invEmail').value.trim().toLowerCase(), pw = $('invPw').value;
+        if (pw.length < 10) return say($('invMsg'), 'The temporary password needs at least 10 characters.', 'bad');
+        say($('invMsg'), 'Creating account…', 'info');
+        const { error } = await sb.functions.invoke('admin-users', { body: { action: 'create', email, role, name, password: pw } });
+        if (error) return say($('invMsg'), 'Not created: ' + await fnErr(error), 'bad');
+        const site = location.origin + location.pathname;
+        const msg = 'Your AIMER Insights account is ready.\nSign in: ' + site + '\nEmail: ' + email + '\nTemporary password: ' + pw + '\nYou’ll choose your own password after signing in.';
+        const copy = h('button', { class: 'btn', text: 'Copy sign-in details' });
+        copy.addEventListener('click', async () => { try { await navigator.clipboard.writeText(msg); copy.textContent = 'Copied'; } catch (_) { copy.textContent = 'Select the text below'; } });
+        $('invMsg').replaceChildren(h('div', { class: 'msg ok' },
+          h('div', { text: 'Account created for ' + email + ' as ' + role.replace('_', ' ') + '. Share these details privately; the password is shown only now.' }),
+          h('textarea', { readonly: true, style: 'margin:8px 0;min-height:96px;font-size:12px' }, msg),
+          h('div', { class: 'row' }, copy, h('a', { class: 'btn', href: 'https://wa.me/?text=' + encodeURIComponent(msg), target: '_blank', rel: 'noopener', text: 'Send on WhatsApp' }))));
+        $('invEmail').value = ''; $('invName').value = ''; $('invPw').value = '';
+        loaders.users();
+      } else {
+        const emails = [...new Set($('bulkEmails').value.split(/[\s,;]+/).map((x) => x.trim().toLowerCase()).filter((x) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x)))];
+        if (!emails.length) return say($('invMsg'), 'Paste at least one valid email.', 'bad');
+        if (emails.length > 50) return say($('invMsg'), 'Up to 50 at a time, please.', 'bad');
+        const out = [];
+        for (const [i, em] of emails.entries()) {
+          say($('invMsg'), 'Creating links… ' + (i + 1) + ' of ' + emails.length, 'info');
+          const { data, error } = await sb.functions.invoke('admin-users', { body: { action: 'invite', email: em, role, redirect_to: location.origin + location.pathname } });
+          out.push(error ? { email: em, error: await fnErr(error) } : { email: em, link: data.link });
+        }
+        const okRows = out.filter((x) => x.link);
+        const all = okRows.map((x) => x.email + ': ' + x.link).join('\n');
+        const copyAll = h('button', { class: 'btn', text: 'Copy all links' });
+        copyAll.addEventListener('click', async () => { try { await navigator.clipboard.writeText(all); copyAll.textContent = 'Copied'; } catch (_) { copyAll.textContent = 'Select the text below'; } });
+        $('invMsg').replaceChildren(h('div', { class: 'msg ' + (okRows.length === out.length ? 'ok' : 'info') },
+          h('div', { text: okRows.length + ' of ' + out.length + ' links created. Send each person their own link.' }),
+          h('textarea', { readonly: true, style: 'margin:8px 0;min-height:120px;font-size:12px' }, all),
+          out.filter((x) => x.error).map((x) => h('div', { class: 'err', text: x.email + ': ' + x.error })), copyAll));
+        $('bulkEmails').value = '';
+        loaders.users();
+      }
+    } finally { $('addBtn').disabled = false; }
+  });
+
+  // ---- Access requests (admin) ----
+  async function loadRequests() {
+    const { data, error } = await sb.from('access_requests').select('*').eq('status', 'pending').order('requested_at');
+    if (error) return;
+    $('reqPanel').hidden = !data.length;
+    $('reqCount').textContent = data.length ? data.length + ' waiting' : '';
+    $('reqBody').replaceChildren(...data.map((r) => {
+      const sel = h('select', { 'aria-label': 'Role for ' + r.email }, [['viewer', 'Viewer'], ['counselling_lead', 'Counselling lead'], ['marketing', 'Marketing'], ['admin', 'Admin']].map(([v, t]) => h('option', { value: v, text: t })));
+      const approve = h('button', { class: 'btn primary', text: 'Approve' }), reject = h('button', { class: 'btn danger', text: 'Reject' });
+      approve.addEventListener('click', async () => {
+        approve.disabled = true;
+        await getLink('invite', r.email, sel.value, $('reqAdminMsg'), r.full_name);
+        await sb.from('access_requests').update({ status: 'approved', role: sel.value, decided_at: new Date().toISOString(), decided_by: me.id }).eq('id', r.id);
+        loadRequests();
+      });
+      reject.addEventListener('click', async () => {
+        if (!confirm('Reject the request from ' + r.email + '?')) return;
+        await sb.from('access_requests').update({ status: 'rejected', decided_at: new Date().toISOString(), decided_by: me.id }).eq('id', r.id);
+        say($('reqAdminMsg'), 'Request from ' + r.email + ' rejected.', 'info'); loadRequests();
+      });
+      return h('tr', null, h('td', { text: r.full_name || '' }), h('td', { text: r.email }), h('td', { text: r.note || '' }), h('td', { text: ist(r.requested_at) }), h('td', null, sel), h('td', null, h('span', { class: 'row', style: 'gap:6px;flex-wrap:nowrap' }, approve, reject)));
+    }));
+  }
+  const _usersLoader = loaders.users;
+  loaders.users = async () => { await _usersLoader(); await loadRequests(); };
+
+  // ---- Sign-in page: request access + forgot password ----
+  $('reqOpen').addEventListener('click', () => { $('login').hidden = true; $('reqForm').hidden = false; $('reqName').focus(); });
+  $('reqCancel').addEventListener('click', () => { $('reqForm').hidden = true; $('login').hidden = false; });
+  $('reqForm').addEventListener('submit', async (e) => {
+    e.preventDefault(); $('reqBtn').disabled = true;
+    const { data, error } = await sb.rpc('request_access', { p_email: $('reqEmail').value, p_name: $('reqName').value, p_note: $('reqNote').value });
+    $('reqBtn').disabled = false;
+    if (error) return say($('reqMsg'), error.message.replace(/^.*?: /, ''), 'bad');
+    say($('reqMsg'), data === 'already_pending' ? 'You already have a request waiting. An admin will get back to you.' : 'Request sent. An admin will review it and send you a link to set your password.', 'ok');
+    $('reqForm').reset();
+  });
+  $('forgotBtn').addEventListener('click', async () => {
+    const email = $('email').value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { $('email').focus(); return say($('loginMsg'), 'Type your email above first, then press Forgot password.', 'info'); }
+    $('forgotBtn').disabled = true;
+    await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+    $('forgotBtn').disabled = false;
+    say($('loginMsg'), 'If an account exists for ' + email + ', a reset link is on its way. No email after a few minutes? Ask an admin for a password link.', 'info');
+  });
+
+  $('pwForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if ($('pw1').value !== $('pw2').value) return say($('pwMsg'), 'The two passwords don’t match.', 'bad');
+    $('pwBtn').disabled = true; say($('pwMsg'), 'Saving…', 'info');
+    if (SETUP && SETUP_TYPE && !setupDone) {
+      const { error: ve } = await sb.auth.verifyOtp({ token_hash: SETUP, type: SETUP_TYPE });
+      if (ve) {
+        $('pwBtn').disabled = false; setupDone = true;
+        history.replaceState(null, '', location.pathname);
+        $('setpw').hidden = true; $('gate').hidden = false;
+        return say($('loginMsg'), /expired|invalid|not found/i.test(ve.message)
+          ? 'This link has already been used or has expired. If you already set a password, sign in below. Otherwise ask your admin for a new link.'
+          : 'Could not verify the link: ' + ve.message, 'bad');
+      }
+    }
+    const { error } = await sb.auth.updateUser(forcePw ? { password: $('pw1').value, data: { must_change_password: false } } : { password: $('pw1').value });
+    $('pwBtn').disabled = false;
+    if (error) return say($('pwMsg'), /same|different/i.test(error.message) ? 'That is your current password; choose a new one.' : error.message, 'bad');
+    needPassword = false; setupDone = true; if (forcePw) { forcePw = false; forceDone = true; } $('setpw').hidden = true;
+    history.replaceState(null, '', location.pathname);
+    say($('loginMsg'), 'Password saved. Opening AIMER Insights…', 'ok');
+    boot();
+  });
+
+  sb.auth.onAuthStateChange((ev) => { if (ev === 'SIGNED_OUT') { $('app').hidden = true; $('gate').hidden = false; } });
+  boot();
+})();
+</script>
+</body>
+</html>
