@@ -255,6 +255,13 @@
     <section data-section="users" hidden>
       <h2>Users</h2>
       <p class="lead">Add people three ways: send an invite link, create the account yourself with a temporary password, or invite a whole list at once. People can also request access from the sign-in page.</p>
+      <div class="panel" style="margin-bottom:14px"><div class="tw"><table><thead><tr><th>Role</th><th>Sees</th><th>Admin panel</th></tr></thead><tbody>
+        <tr><td>Admin</td><td>Everything</td><td>Everything, incl. keys and users</td></tr>
+        <tr><td>Marketing</td><td>Everything</td><td>Connections (test/sync), sync log, targets</td></tr>
+        <tr><td>Counselling lead / Viewer</td><td>Every dashboard page, read-only</td><td>No</td></tr>
+        <tr><td>Creative coordinator</td><td>Ads Manager, Creative &amp; audience, campaign delivery, daily trends, AI creative review. No leads or CRM.</td><td>No</td></tr>
+        <tr><td>Product manager</td><td>All analysis pages, only for the courses you assign. No counsellor scorecard.</td><td>No</td></tr>
+      </tbody></table></div></div>
       <div class="panel stack" id="reqPanel" hidden>
         <div class="row"><h3>Access requests</h3><span class="tag md" id="reqCount"></span></div>
         <p class="key-note" style="margin:0">Approve with a role to create their invite link, then send it to them. Rejected requests are kept for your records.</p>
@@ -269,11 +276,12 @@
           <input type="text" id="invPw" placeholder="Temporary password (10+ characters)" autocomplete="off" style="flex:2;min-width:220px">
           <button class="btn" type="button" id="genPw">Generate</button>
         </div>
+        <div id="invCourses" class="row" hidden style="gap:10px;flex-wrap:wrap"></div>
         <textarea id="bulkEmails" hidden placeholder="One email per line, or separated by commas"></textarea>
         <form class="row" id="inviteForm">
           <input type="text" id="invName" placeholder="Name (optional)" maxlength="120" style="flex:1;min-width:150px">
           <input type="email" id="invEmail" placeholder="name@aimerbschool.com" required style="flex:2;min-width:220px">
-          <select id="invRole" style="flex:1;min-width:160px"><option value="viewer">Viewer (CEO, read-only)</option><option value="counselling_lead">Counselling lead</option><option value="marketing">Marketing</option><option value="admin">Admin</option></select>
+          <select id="invRole" style="flex:1;min-width:160px"><option value="viewer">Viewer (CEO, read-only)</option><option value="counselling_lead">Counselling lead</option><option value="marketing">Marketing</option><option value="creative">Creative coordinator</option><option value="product_manager">Product manager (chosen courses)</option><option value="admin">Admin</option></select>
           <button class="btn primary" type="submit" id="addBtn">Create invite link</button>
         </form>
         <div id="invMsg" role="status"></div>
@@ -773,10 +781,28 @@
       h('td', { text: r.claimed_at ? 'Active since ' + ist(r.claimed_at) : 'Waiting for sign-up' }),
       h('td', null, r.claimed_at ? null : h('span', { class: 'row', style: 'gap:6px' }, h('button', { class: 'btn', text: 'Get invite link', onclick: () => getLink('invite', r.email, r.role, $('invMsg')) }), h('button', { class: 'btn danger', text: 'Cancel', onclick: async () => { await sb.from('role_invites').delete().eq('email', r.email); loadUsers(); } }))))));
   }
+  // ---- Courses for product managers ----
+  let allProgs = [];
+  async function loadAllProgs() { const { data } = await sb.from('programmes').select('id,name,is_active').order('name'); allProgs = (data || []).filter((p) => p.is_active !== false); }
+  const courseBoxes = (selected) => allProgs.map((p) => { const cb = h('input', { type: 'checkbox', value: p.id }); cb.checked = (selected || []).includes(p.id); return h('label', { class: 'row', style: 'gap:6px;font-size:13px' }, cb, p.name); });
+  async function saveCourses(email, ids, target) {
+    const { error } = await sb.rpc('admin_set_programme_access', { p_email: email, p_programme_ids: ids });
+    say(target, error ? 'Courses not saved: ' + error.message : email + ' can now see ' + (ids.length ? ids.length + ' course' + (ids.length > 1 ? 's' : '') : 'no courses') + '.', error ? 'bad' : 'ok');
+    return !error;
+  }
+  function renderInvCourses() {
+    const box = $('invCourses');
+    box.hidden = $('invRole').value !== 'product_manager';
+    if (!box.hidden) box.replaceChildren(h('span', { class: 'key-note', text: 'Courses this product manager can see:' }), ...courseBoxes([]));
+  }
+  $('invRole').addEventListener('change', renderInvCourses);
+  const pickedCourses = () => [...$('invCourses').querySelectorAll('input:checked')].map((x) => x.value);
+
   async function loadPeople() {
+    await loadAllProgs();
     const { data, error } = await sb.rpc('admin_list_users');
     if (error) return say($('usrMsg'), 'Could not load people: ' + error.message, 'bad');
-    const ROLES = [['', 'No access'], ['viewer', 'Viewer'], ['counselling_lead', 'Counselling lead'], ['marketing', 'Marketing'], ['admin', 'Admin']];
+    const ROLES = [['', 'No access'], ['viewer', 'Viewer'], ['counselling_lead', 'Counselling lead'], ['marketing', 'Marketing'], ['creative', 'Creative coordinator'], ['product_manager', 'Product manager'], ['admin', 'Admin']];
     $('usrBody').replaceChildren(...(data || []).map((u) => {
       const sel = h('select', { 'aria-label': 'Role for ' + u.email }, ROLES.map(([v, t]) => h('option', { value: v, text: t })));
       sel.value = u.role || '';
@@ -786,14 +812,30 @@
         loadPeople();
       });
       const isMe = u.email === me.email;
-      return h('tr', null, h('td', { text: u.email + (isMe ? ' (you)' : '') }), h('td', null, sel),
+      let roleCell = sel;
+      if (u.role === 'product_manager') {
+        const names = allProgs.filter((p) => (u.programme_ids || []).includes(p.id)).map((p) => p.name);
+        const edit = h('button', { class: 'btn', text: names.length ? 'Courses: ' + names.join(', ') : 'Assign courses' });
+        const panel = h('div', { class: 'stack', hidden: true, style: 'margin-top:8px;gap:6px' });
+        edit.addEventListener('click', () => {
+          panel.hidden = !panel.hidden;
+          if (!panel.hidden) {
+            const boxes = courseBoxes(u.programme_ids || []);
+            const save = h('button', { class: 'btn primary', text: 'Save courses' });
+            save.addEventListener('click', async () => { const ids = boxes.map((l) => l.querySelector('input')).filter((x) => x.checked).map((x) => x.value); if (await saveCourses(u.email, ids, $('usrMsg'))) loadPeople(); });
+            panel.replaceChildren(...boxes, save);
+          }
+        });
+        roleCell = h('div', null, sel, h('div', { style: 'margin-top:6px' }, edit), panel);
+      }
+      return h('tr', null, h('td', { text: u.email + (isMe ? ' (you)' : '') }), h('td', null, roleCell),
         h('td', { text: u.confirmed ? 'Yes' : 'Not yet — waiting for them to open their link' }), h('td', { text: ist(u.last_sign_in_at) }), h('td', null, isMe ? null : h('span', { class: 'row', style: 'gap:6px;flex-wrap:nowrap' },
           h('button', { class: 'btn', text: u.confirmed ? 'Password reset link' : 'New invite link', onclick: () => getLink('link', u.email, u.role, $('usrMsg')) }),
           h('button', { class: 'btn danger', text: 'Remove', onclick: () => removeUser(u.email) }))));
     }));
   }
   const _loadUsers = loadUsers;
-  loaders.users = async () => { await _loadUsers(); await loadPeople(); };
+  loaders.users = async () => { await _loadUsers(); await loadPeople(); renderInvCourses(); };
 
   // Invite links: created by the admin-users function and shared by WhatsApp or email (nothing is emailed automatically)
   const panelUrl = location.origin + location.pathname;
@@ -852,7 +894,9 @@
     $('addBtn').disabled = true;
     try {
       if (addMode === 'link') {
-        await getLink('invite', $('invEmail').value.trim().toLowerCase(), role, $('invMsg'), name);
+        const em = $('invEmail').value.trim().toLowerCase();
+        await getLink('invite', em, role, $('invMsg'), name);
+        if (role === 'product_manager' && pickedCourses().length) await saveCourses(em, pickedCourses(), $('usrMsg'));
         $('invEmail').value = ''; $('invName').value = '';
       } else if (addMode === 'create') {
         const email = $('invEmail').value.trim().toLowerCase(), pw = $('invPw').value;
@@ -868,6 +912,7 @@
           h('div', { text: 'Account created for ' + email + ' as ' + role.replace('_', ' ') + '. Share these details privately; the password is shown only now.' }),
           h('textarea', { readonly: true, style: 'margin:8px 0;min-height:96px;font-size:12px' }, msg),
           h('div', { class: 'row' }, copy, h('a', { class: 'btn', href: 'https://wa.me/?text=' + encodeURIComponent(msg), target: '_blank', rel: 'noopener', text: 'Send on WhatsApp' }))));
+        if (role === 'product_manager' && pickedCourses().length) await saveCourses(email, pickedCourses(), $('usrMsg'));
         $('invEmail').value = ''; $('invName').value = ''; $('invPw').value = '';
         loaders.users();
       } else {
@@ -879,6 +924,7 @@
           say($('invMsg'), 'Creating links… ' + (i + 1) + ' of ' + emails.length, 'info');
           const { data, error } = await sb.functions.invoke('admin-users', { body: { action: 'invite', email: em, role, redirect_to: location.origin + location.pathname } });
           out.push(error ? { email: em, error: await fnErr(error) } : { email: em, link: data.link });
+          if (!error && role === 'product_manager' && pickedCourses().length) await sb.rpc('admin_set_programme_access', { p_email: em, p_programme_ids: pickedCourses() });
         }
         const okRows = out.filter((x) => x.link);
         const all = okRows.map((x) => x.email + ': ' + x.link).join('\n');
@@ -901,7 +947,7 @@
     $('reqPanel').hidden = !data.length;
     $('reqCount').textContent = data.length ? data.length + ' waiting' : '';
     $('reqBody').replaceChildren(...data.map((r) => {
-      const sel = h('select', { 'aria-label': 'Role for ' + r.email }, [['viewer', 'Viewer'], ['counselling_lead', 'Counselling lead'], ['marketing', 'Marketing'], ['admin', 'Admin']].map(([v, t]) => h('option', { value: v, text: t })));
+      const sel = h('select', { 'aria-label': 'Role for ' + r.email }, [['viewer', 'Viewer'], ['counselling_lead', 'Counselling lead'], ['marketing', 'Marketing'], ['creative', 'Creative coordinator'], ['product_manager', 'Product manager'], ['admin', 'Admin']].map(([v, t]) => h('option', { value: v, text: t })));
       const approve = h('button', { class: 'btn primary', text: 'Approve' }), reject = h('button', { class: 'btn danger', text: 'Reject' });
       approve.addEventListener('click', async () => {
         approve.disabled = true;

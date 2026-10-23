@@ -45,6 +45,18 @@ body { margin: 0; background: #e3f3f0; }
 #dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
 /* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
 #dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
 .ax {
   --g: #12c784; --g2: #0a7a4c; --g3: #b9f0d9; --lime: #dfe35a; --lime2: #f3f4c4;
   --mint: #dcf2ef; --cream: #fbfbe9; --ink: #0d0f0e; --ink2: #1b1f1d; --line: #e7ece9; --soft: #f5f7f6;
@@ -274,6 +286,7 @@ body { margin: 0; background: #e3f3f0; }
     <div class="ax-brand"><span class="ax-logo" aria-hidden="true"><i></i></span><div><div class="ax-bname1">AIMER Insights</div><div class="ax-bsub" id="ax-asof" data-source="meta_daily">&nbsp;</div></div></div>
     <nav class="ax-tabs" id="ax-nav" aria-label="Dashboard sections">
       <button data-tab="overview"><span aria-hidden="true">◎</span> Overview</button>
+      <button data-tab="plan"><span aria-hidden="true">✓</span> Action plan</button>
       <button data-tab="daily"><span aria-hidden="true">▤</span> Daily</button>
       <button data-tab="campaigns"><span aria-hidden="true">▥</span> Campaigns</button>
       <button data-tab="ads"><span aria-hidden="true">▦</span> Ads Manager</button>
@@ -351,6 +364,13 @@ body { margin: 0; background: #e3f3f0; }
         </div>
       </section>
 
+      <!-- Action plan -->
+      <section class="ax-page" id="plan" data-page="plan" hidden>
+        <p class="ax-take" id="pl-take" data-source="meta_daily crm_leads">&nbsp;</p>
+        <div class="ax-tools"><span class="ax-note" style="margin:0">Built from live data for the period and filters above: sales follow-up, budget, creatives, audience and tracking. High priority first.</span><span><button class="ax-btn" id="pl-export">⬇ Export plan (CSV)</button> <span class="ax-note" id="pl-status"></span></span></div>
+        <div id="pl-list" data-source="meta_daily crm_leads meta_ads"></div>
+      </section>
+
       <!-- 2. Daily -->
       <section class="ax-page" id="daily" data-page="daily" hidden>
         <p class="ax-take" id="dy-take" data-source="meta_daily crm_leads">&nbsp;</p>
@@ -397,6 +417,14 @@ body { margin: 0; background: #e3f3f0; }
         <p class="ax-note" id="cr-aud-note"></p>
         <div class="ax-grid" id="cr-aud" data-source="meta_daily"></div>
         <div class="ax-card" id="cr-waste-card" style="margin-top:var(--cds-gap-md)"><h3>Spend that produced no leads</h3><p class="ax-note" id="cr-waste-note"></p><div id="cr-waste" data-source="meta_daily"></div></div>
+        <div class="ax-sec" id="cr-h-ai"><span>AI creative review</span> What went well, what went wrong, what to test next</div>
+        <div class="ax-card dark" id="cr-ai-card">
+          <div class="ax-chead"><h3>AI creative analysis</h3><button class="ax-btn" id="cr-ai-run" style="background:#dfe35a;border-color:#dfe35a;color:#0d0f0e">Analyse creatives</button></div>
+          <p class="ax-note" id="cr-ai-note">Reads ad-level results, fatigue signals and audience breakdowns for the period and filters above. Saved for the team.</p>
+          <div id="cr-ai-msg" role="status"></div>
+          <div class="ax-aidoc" id="cr-ai-doc"></div>
+          <div class="ax-aihist" id="cr-ai-hist"></div>
+        </div>
         <div class="ax-sec" id="cr-h-fatigue"><span>Creative fatigue</span> Ads losing steam</div>
         <div class="ax-card" id="cr-fatigue-card"><p class="ax-note" id="cr-fatigue-note"></p><div id="cr-fatigue" data-source="meta_ads"></div></div>
         <div class="ax-sec" id="cr-h-board"><span>Creative leaderboard</span> Every ad in the period</div>
@@ -2395,10 +2423,149 @@ body { margin: 0; background: #e3f3f0; }
 
 </script>
 <script>
+// Action plan: turns the live data into a prioritised to-do list across sales follow-up, budget, creatives,
+// audience and tracking. Every item states the finding (with numbers), the action and why it matters.
+// Respects the global filters and the viewer's role (creative coordinators see creative and audience items only).
+(function () {
+  const AX = window.AX, h = AX.h, F = AX.fmt;
+  const PRI = { High: 0, Medium: 1, Low: 2 };
+  const AREA = { sales: 'Sales follow-up', budget: 'Budget & campaigns', creative: 'Creatives', audience: 'Audience & placement', data: 'Tracking & data' };
+  const n = (v) => { const x = Number(v); return isFinite(x) ? x : 0; };
+  const bcache = new Map(); let bpending = null;
+
+  AX.pages.plan = function (D) {
+    const P = AX.p(), per = AX.period(P, D.asOf), cfg = AX.config, T = cfg.thresholds, items = [];
+    const add = (pri, area, title, finding, action, impact) => items.push({ pri, area, title, finding, action, impact });
+    const creativeOnly = AX.role === 'creative';
+
+    // ---------- Sales follow-up (needs CRM) ----------
+    if (!creativeOnly && D.leads.length) {
+      const now = Date.now();
+      const L = AX.leadsIn(D, P, per.start, per.end).filter((l) => l.createdTs != null && now - l.createdTs > 2 * 3600e3);
+      const withCalls = L.filter((l) => l.calls > 0 || l.firstCallTs != null);
+      if (L.length >= 20 && withCalls.length) {
+        const in1h = L.filter((l) => l.firstCallTs != null && l.firstCallTs - l.createdTs <= 3600e3).length;
+        const p1 = (in1h / L.length) * 100;
+        const waits = L.filter((l) => l.firstCallTs != null).map((l) => (l.firstCallTs - l.createdTs) / 60000).sort((a, b) => a - b);
+        const med = waits.length ? waits[Math.floor(waits.length / 2)] : null;
+        if (p1 < 60) add(p1 < 30 ? 'High' : 'Medium', 'sales', 'Call new leads within the first hour',
+          F.pct(p1, 0) + ' of ' + F.int(L.length) + ' leads were called within an hour; median wait ' + (med == null ? '—' : med < 120 ? Math.round(med) + ' min' : (med / 60).toFixed(1) + ' h') + '.',
+          'Route new Meta leads to an on-duty counsellor with an instant WhatsApp/LeadSquared alert; set a 1-hour SLA and review the Sales team page daily.',
+          'Leads contacted fast qualify far more often; this is usually the cheapest admissions gain available.');
+        const stale = L.filter((l) => l.firstCallTs == null && !l.lost && !l.admitted && now - l.createdTs > 24 * 3600e3).length;
+        if (stale) add(stale >= 10 ? 'High' : 'Medium', 'sales', 'Clear leads waiting more than a day', F.int(stale) + ' open leads have had no call for over 24 hours.',
+          'Work the “Leads waiting for a first call” list on the Sales team page today, oldest first.', 'Every day without a call sharply lowers the chance to enrol.');
+      }
+      const C = AX.leadsIn(D, P, per.start, per.end);
+      const lost = C.filter((l) => l.lost).length;
+      if (C.length >= 30 && lost / C.length > 0.4) {
+        const reasons = [...AX.groupBy(C.filter((l) => l.lost && l.reason), (l) => l.reason)].sort((a, b) => b[1].length - a[1].length).slice(0, 2).map(([r, v]) => r + ' (' + v.length + ')').join(', ');
+        add('Medium', 'sales', 'Reduce early losses', F.pct((lost / C.length) * 100, 0) + ' of leads in the period are already lost' + (reasons ? '; top reasons: ' + reasons : '') + '.',
+          'Review lost leads with counsellors weekly; if reasons point to the wrong audience, tighten targeting or add a qualifying question to the form.', 'Lowers cost per admission without more spend.');
+      }
+    }
+
+    // ---------- Budget & campaigns ----------
+    if (!creativeOnly) {
+      const rows = AX.campaignRows(D, P, per.start, per.end).filter((r) => r.objective === 'Leads' && r.spend >= Math.max(3000, T.min_spend_verdict / 3));
+      const judged = rows.filter((r) => r.crm >= 10 && r.qualified > 0).map((r) => Object.assign(r, { cpq: r.spend / r.qualified })).sort((a, b) => a.cpq - b.cpq);
+      if (judged.length >= 2 && judged[judged.length - 1].cpq > judged[0].cpq * 2) {
+        const best = judged[0], worst = judged[judged.length - 1];
+        add('High', 'budget', 'Shift budget towards the cheapest qualified leads',
+          AX.shortName(best.name) + ' costs ' + F.inr(best.cpq) + ' per qualified lead vs ' + F.inr(worst.cpq) + ' for ' + AX.shortName(worst.name) + '.',
+          'Move 20–30% of ' + AX.shortName(worst.name) + '’s daily budget to ' + AX.shortName(best.name) + ' and re-check after 7 days.', 'Same spend, more qualified leads.');
+      }
+      for (const r of rows.filter((r) => r.crm >= 10 && r.qualified === 0 && r.spend >= 5000).slice(0, 4))
+        add('Medium', 'budget', 'Leads but no qualified prospects: ' + AX.shortName(r.name), F.inr(r.spend) + ' spent, ' + F.int(r.crm) + ' CRM leads, 0 qualified.',
+          'Check targeting and form questions; compare with the best campaign’s audience before adding budget.', 'Stops paying for leads that never convert.');
+      for (const r of rows.filter((r) => r.leads === 0 && r.spend >= 3000).slice(0, 4))
+        add('High', 'budget', 'Spend with no leads: ' + AX.shortName(r.name), F.inr(r.spend) + ' spent in the period with 0 lead-form leads.',
+          'If this is not an awareness or website campaign, pause it or fix the form; if it is, rename it with AWRS or WEB so it is judged correctly.', 'Removes waste or fixes how it is measured.');
+      const unmapped = D.camps.filter((c) => !c.programme && D.meta.some((m) => m.cid === c.id && m.date >= per.start)).length;
+      if (unmapped) add('Low', 'data', 'Map campaigns to programmes', F.int(unmapped) + ' campaigns with spend in the period have no programme.',
+        'Admin panel → Programmes & targets → add a campaign-name rule.', 'Programme reports and targets become complete.');
+    }
+
+    // ---------- Creatives (ad-level) ----------
+    const ads = (dash.data('meta_ads').data || []).filter((r) => AX.campOk(D.cById.get(r.campaign_id), P));
+    if (ads.length) {
+      const A = D.asOf, s7 = AX.d.add(A, -6), p7s = AX.d.add(A, -13), p7e = AX.d.add(A, -7);
+      const agg = (rs) => { const a = { spend: 0, imp: 0, reach: 0, lc: 0, leads: 0, days: new Set() }; for (const r of rs) { a.spend += n(r.spend); a.imp += n(r.impressions); a.reach += n(r.reach); a.lc += n(r.link_clicks); a.leads += n(r.leads); if (n(r.spend) > 0) a.days.add(r.date); } a.ctr = AX.div(a.lc * 100, a.imp); a.freq = AX.div(a.imp, a.reach); a.cpl = AX.div(a.spend, a.leads); return a; };
+      const byAd = AX.groupBy(ads, (r) => r.ad_id);
+      const tired = [], winners = [], dead = [];
+      for (const [, rs] of byAd) {
+        const name = rs[rs.length - 1].ad_name || rs[0].ad_id, camp = D.cById.get(rs[0].campaign_id);
+        if (camp && camp.objective && camp.objective !== 'Leads') continue;
+        const cur = agg(rs.filter((r) => r.date >= s7)), prev = agg(rs.filter((r) => r.date >= p7s && r.date <= p7e)), inP = agg(rs.filter((r) => r.date >= per.start && r.date <= per.end));
+        const ctrCh = AX.chg(cur.ctr, prev.ctr).pct, cplCh = AX.chg(cur.cpl, prev.cpl).pct;
+        if (cur.days.size >= 4 && prev.days.size >= 4 && cur.imp > 2000 && ((ctrCh != null && ctrCh <= -20) || (cplCh != null && cplCh >= 30))) tired.push({ name, ctrCh, cplCh, spend: cur.spend });
+        if (inP.leads >= 10 && inP.cpl != null && inP.cpl <= cfg.target_cpl * 0.8) winners.push({ name, cpl: inP.cpl, leads: inP.leads });
+        if (inP.spend >= 2000 && inP.leads === 0) dead.push({ name, spend: inP.spend });
+      }
+      if (tired.length) add('Medium', 'creative', 'Refresh tiring creatives', tired.length + ' ad' + (tired.length > 1 ? 's' : '') + ' losing steam vs the week before: ' + tired.slice(0, 3).map((t) => t.name + (t.ctrCh != null ? ' (CTR ' + (t.ctrCh > 0 ? '+' : '') + t.ctrCh.toFixed(0) + '%)' : '')).join('; ') + '.',
+        'Brief new variations (new hook, first 3 seconds, thumbnail) and rotate them in; keep the winning offer.', 'Restores CTR and holds CPL down.');
+      if (winners.length) { winners.sort((a, b) => a.cpl - b.cpl); add('Low', 'creative', 'Scale the winning creatives', winners.slice(0, 3).map((w) => w.name + ' (' + F.inr(w.cpl) + ' CPL, ' + w.leads + ' leads)').join('; ') + '.',
+        'Duplicate these into new ad sets or audiences and make 2–3 variations of each concept.', 'More volume at proven cost.'); }
+      if (dead.length) { dead.sort((a, b) => b.spend - a.spend); add('Medium', 'creative', 'Pause ads with spend and no leads', dead.slice(0, 4).map((d) => d.name + ' (' + F.inr(d.spend) + ')').join('; ') + '.',
+        'Pause or rework these ads; move their budget to the winners.', 'Removes direct waste.'); }
+    }
+
+    // ---------- Audience & placement (breakdowns, loaded on demand) ----------
+    const camps = D.camps.filter((c) => AX.campOk(c, P)).map((c) => c.id);
+    const key = per.start + '|' + per.end + '|' + camps.join(',');
+    const br = bcache.get(key);
+    if (br === undefined && AX.fetchBreakdowns && bpending !== key) {
+      bpending = key;
+      AX.fetchBreakdowns(per.start, per.end, camps).then((r) => { bcache.set(key, r || []); bpending = null; if (AX.tab === 'plan') AX.render(); }).catch(() => { bcache.set(key, []); bpending = null; });
+    }
+    if (br && br.length) {
+      const rows = br.map((r) => ({ dim: r[0], value: r[1], spend: n(r[2]), leads: n(r[5]) }));
+      const total = rows.filter((r) => r.dim === 'age').reduce((s, r) => s + r.spend, 0) || 1;
+      const waste = rows.filter((r) => r.dim !== 'hour' && r.leads === 0 && r.spend >= Math.max(1000, total * 0.02)).sort((a, b) => b.spend - a.spend);
+      if (waste.length) add('Medium', 'audience', 'Exclude segments that bring no leads', waste.slice(0, 4).map((w) => w.dim + ' “' + w.value.replace(/_/g, ' ') + '” ' + F.inr(w.spend)).join('; ') + ' with 0 leads.',
+        'Exclude these placements/segments in the ad sets (or test them separately) unless they serve awareness.', 'Cuts spend that produces nothing.');
+      for (const dim of ['placement', 'age']) {
+        const seg = rows.filter((r) => r.dim === dim && r.leads >= 5).map((r) => Object.assign(r, { cpl: r.spend / r.leads })).sort((a, b) => a.cpl - b.cpl);
+        if (seg.length >= 2 && seg[seg.length - 1].cpl > seg[0].cpl * 2.5)
+          add('Low', 'audience', 'Lean into the cheapest ' + dim, '“' + seg[0].value.replace(/_/g, ' ') + '” costs ' + F.inr(seg[0].cpl) + ' per lead vs ' + F.inr(seg[seg.length - 1].cpl) + ' for “' + seg[seg.length - 1].value.replace(/_/g, ' ') + '”.',
+            'Test a dedicated ad set or bid adjustment for the cheaper ' + dim + '; check the Creative & audience page per programme first (some audiences, like parents, are intentional).', 'Lower CPL at the same budget.');
+      }
+    }
+
+    // ---------- Tracking & data ----------
+    if (!creativeOnly && D.leads.length) {
+      const metaLeads = D.leads.filter((l) => l.source === 'Meta Ads' && l.date >= per.start && l.date <= per.end);
+      const linked = metaLeads.filter((l) => l.cid).length;
+      if (metaLeads.length >= 20 && linked / metaLeads.length < 0.9)
+        add('High', 'data', 'Link every Meta lead to its campaign', F.pct((linked / metaLeads.length) * 100, 0) + ' of ' + F.int(metaLeads.length) + ' Meta leads in the CRM are linked to a campaign.',
+          'Pass campaign ID and ad ID into LeadSquared hidden fields on every lead form and landing page (mx_Campaign_ID, mx_Ad_ID).', 'Unlocks true cost per qualified lead and per admission for every campaign and ad.');
+      if (!D.leads.some((l) => l.revenue != null)) add('Medium', 'data', 'Record fee revenue in the CRM', 'No lead carries a fee or revenue value, so ROAS cannot be calculated.',
+        'Map the LeadSquared fee/payment field (tell the dashboard team its name).', 'Turns cost per admission into return on ad spend.');
+    }
+
+    // ---------- Render ----------
+    items.sort((a, b) => PRI[a.pri] - PRI[b.pri]);
+    const cnt = (p) => items.filter((i) => i.pri === p).length;
+    AX.fill('pl-take', items.length ? per.label + ': ' + items.length + ' actions — ' + cnt('High') + ' high, ' + cnt('Medium') + ' medium, ' + cnt('Low') + ' low priority. Work top to bottom; re-check after a week.' + (br === undefined ? ' Loading audience checks…' : '')
+      : 'No actions for this period and these filters. Try a longer period (30 days works best).');
+    const tag = (p) => h('span', { class: 'ax-pill ' + (p === 'High' ? 'bad' : p === 'Medium' ? 'warn' : 'ok'), text: p });
+    AX.fill('pl-list', items.length ? items.map((i) => h('div', { class: 'ax-card', style: { marginBottom: '10px' } },
+      h('div', { class: 'ax-chead' }, h('h3', { text: i.title }), h('div', { class: 'row', style: { gap: '6px', display: 'flex' } }, h('span', { class: 'ax-pill', text: AREA[i.area] }), tag(i.pri))),
+      h('dl', { class: 'ax-dl' }, h('dt', { text: 'Finding' }), h('dd', { text: i.finding }), h('dt', { text: 'Action' }), h('dd', { text: i.action }), h('dt', { text: 'Why' }), h('dd', { text: i.impact })))) : h('div', { class: 'ax-empty', text: 'Nothing to act on right now.' }));
+    const el = AX.$('pl-export');
+    if (el && !el._bound) { el._bound = true; el.addEventListener('click', () => AX.download('aimer-action-plan-' + per.start + '-to-' + per.end + '.csv',
+      AX.csv([{ key: 'pri', label: 'Priority' }, { key: 'areaName', label: 'Area' }, { key: 'title', label: 'Action' }, { key: 'finding', label: 'Finding' }, { key: 'action', label: 'What to do' }, { key: 'impact', label: 'Why' }],
+        (AX._planItems || []).map((i) => Object.assign({ areaName: AREA[i.area] }, i)), AX.exportMeta(D, P, 'Action plan')), AX.$('pl-status'))); }
+    AX._planItems = items;
+  };
+})();
+
+</script>
+<script>
 // Main: navigation, data-state header, settings persistence, and the render loop.
 (function () {
   const AX = window.AX, h = AX.h;
-  const TABS = ['overview', 'daily', 'campaigns', 'ads', 'creative', 'sales', 'cohorts', 'crm', 'programmes', 'budget', 'reports', 'settings'];
+  const TABS = ['overview', 'plan', 'daily', 'campaigns', 'ads', 'creative', 'sales', 'cohorts', 'crm', 'programmes', 'budget', 'reports', 'settings'];
   const fromHash = location.hash.slice(1);
   AX.tab = TABS.includes(fromHash) ? fromHash : 'overview';
   AX.renderRev = 0;
@@ -2408,7 +2575,7 @@ body { margin: 0; background: #e3f3f0; }
   document.querySelectorAll('#ax [data-source]').forEach((el) => el.classList.add('dash-skeleton'));
 
   const nav = AX.$('ax-nav');
-  const TITLES = { overview: 'Overview', daily: 'Daily performance', campaigns: 'Campaign performance', ads: 'Ads Manager', creative: 'Creative & audience', sales: 'Sales team', cohorts: 'Cohorts & forecast', crm: 'Lead quality & CRM', programmes: 'Programme performance', budget: 'Budget & ROI', reports: 'Reports & export', settings: 'Integrations & settings' };
+  const TITLES = { overview: 'Overview', plan: 'Action plan', daily: 'Daily performance', campaigns: 'Campaign performance', ads: 'Ads Manager', creative: 'Creative & audience', sales: 'Sales team', cohorts: 'Cohorts & forecast', crm: 'Lead quality & CRM', programmes: 'Programme performance', budget: 'Budget & ROI', reports: 'Reports & export', settings: 'Integrations & settings' };
   nav.addEventListener('click', (e) => {
     const b = e.target.closest('button[data-tab]'); if (!b) return;
     AX.tab = b.dataset.tab; dash.setLink(AX.tab);
@@ -2460,6 +2627,7 @@ body { margin: 0; background: #e3f3f0; }
   // ---------- Render ----------
   const REQUIRED = ['campaigns', 'meta_daily', 'crm_leads', 'integration_status'];
   AX.render = function () {
+    if (AX.allowedTabs && !AX.allowedTabs.includes(AX.tab)) AX.tab = AX.allowedTabs[0];
     AX.renderRev++;
     nav.querySelectorAll('button[data-tab]').forEach((b) => b.setAttribute('aria-current', b.dataset.tab === AX.tab ? 'page' : 'false'));
     document.querySelectorAll('#ax .ax-page').forEach((p) => { p.hidden = p.dataset.page !== AX.tab; });
@@ -2509,6 +2677,17 @@ body { margin: 0; background: #e3f3f0; }
   const { data: r } = await sb.from('user_roles').select('role').eq('user_id', me.id).maybeSingle();
   const role = r?.role;
   if (!role) { await sb.auth.signOut(); location.replace('index.html'); return; }
+  // Pages each role may open (data itself is also restricted in the database)
+  const ROLE_TABS = {
+    creative: ['creative', 'plan', 'ads', 'campaigns', 'daily'],
+    product_manager: ['overview', 'plan', 'daily', 'campaigns', 'ads', 'creative', 'cohorts', 'crm', 'programmes', 'budget', 'reports'],
+  };
+  AX.role = role;
+  AX.allowedTabs = ROLE_TABS[role] || null;
+  if (AX.allowedTabs) {
+    document.querySelectorAll('#ax-nav [data-tab]').forEach((b) => { if (!AX.allowedTabs.includes(b.dataset.tab)) b.remove(); });
+    if (!AX.allowedTabs.includes(AX.tab)) AX.tab = AX.allowedTabs[0];
+  }
 
   AX.fill('ax-userbar', h('span', { text: me.email }),
     STAFF.includes(role) ? h('a', { href: 'index.html#connections', text: 'Admin panel' }) : null,
@@ -2527,7 +2706,7 @@ body { margin: 0; background: #e3f3f0; }
     return out;
   }
   const s = (v) => (v == null ? '' : String(v));
-  const objective = (o, name) => { const n = s(name).toUpperCase(); if (/AWRS|AWARENESS|\bREACH\b/.test(n)) return 'Awareness'; const x = s(o).toUpperCase(); if (!x || x.includes('LEAD')) return 'Leads'; if (x.includes('AWARE') || x.includes('REACH')) return 'Awareness'; return 'Traffic & engagement'; };
+  const objective = (o, name) => { const n = s(name).toUpperCase(); if (/AWRS|AWARENESS|\bREACH\b/.test(n)) return 'Awareness'; if (/(^|[^A-Z])WEB([^A-Z]|$)|TRAFFIC|\bLPV\b/.test(n)) return 'Traffic & engagement'; const x = s(o).toUpperCase(); if (!x || x.includes('LEAD')) return 'Leads'; if (x.includes('AWARE') || x.includes('REACH')) return 'Awareness'; return 'Traffic & engagement'; };
 
   // Audience breakdowns are fetched on demand for the selected period and campaigns
   AX.fetchBreakdowns = async (since, until, campaigns) => {
@@ -2618,9 +2797,7 @@ body { margin: 0; background: #e3f3f0; }
   window.__aimerRefresh = async () => { const b = document.getElementById('ax-refresh'); if (b) { b.disabled = true; b.textContent = 'Refreshing…'; } await load(); if (b) { b.disabled = false; b.textContent = 'Refresh'; } };
   document.addEventListener('visibilitychange', () => { if (!document.hidden && Date.now() - lastLoad > 2 * 60e3) load(); });
 
-  // ---------- AI analysis on the Overview ----------
-  const runBtn = AX.$('ov-ai-run');
-  if (!STAFF.includes(role)) { runBtn.hidden = true; AX.$('ov-ai-note').textContent = 'Analyses written by the marketing team for recent periods.'; }
+  // ---------- AI analysis: campaign view on the Overview, creative view on Creative & audience ----------
   const ist = (ts) => (ts ? new Date(ts).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '');
   const md = (text) => {
     const box = h('div'); let list = null, type = '';
@@ -2633,35 +2810,44 @@ body { margin: 0; background: #e3f3f0; }
     }
     return box;
   };
-  let saved = [];
   const current = () => { const P = AX.p(); const D = AX.parse({ campaigns: dash.data('campaigns').data, meta: dash.data('meta_daily').data, leads: dash.data('crm_leads').data }); const per = AX.period(P, D.asOf || new Date().toISOString().slice(0, 10)); return { since: per.start, until: per.end, programme: P.programme || null, location: P.location || null }; };
-  const show = (row) => {
-    const f = row.filters || {};
-    AX.fill('ov-ai-doc', h('p', { class: 'ax-note', style: { color: '#9aa49f' }, text: row.period_start + ' to ' + row.period_end + (f.programme ? ' · ' + f.programme : '') + (f.location ? ' · ' + f.location : '') + ' · ' + (row.created_by_email || 'team') + ', ' + ist(row.created_at) }), md(row.content));
-    document.querySelectorAll('#ov-ai-hist button').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.id) === row.id)));
-  };
-  async function loadAI() {
-    const { data } = await sb.from('ai_insights').select('id,created_at,created_by_email,period_start,period_end,filters,model,content').order('created_at', { ascending: false }).limit(12);
-    saved = data || [];
-    const c = current();
-    AX.fill('ov-ai-hist', saved.map((x) => h('button', { 'data-id': x.id, text: x.period_start.slice(5) + ' → ' + x.period_end.slice(5) + (x.filters?.programme ? ' · ' + AX.shortName(x.filters.programme) : ''), onclick: () => show(x) })));
-    const match = saved.find((x) => x.period_start === c.since && x.period_end === c.until && (x.filters?.programme || null) === c.programme && (x.filters?.location || null) === c.location);
-    if (match) show(match);
-    else AX.fill('ov-ai-doc', h('p', { class: 'ax-note', style: { color: '#9aa49f' }, text: saved.length ? 'No analysis saved for this exact period and filters yet. Pick a saved one below' + (STAFF.includes(role) ? ', or click Analyse this period.' : '.') : 'No analyses yet.' }));
+  const CAN_RUN = { campaign: ['admin', 'marketing', 'product_manager'], creative: ['admin', 'marketing', 'creative', 'product_manager'] };
+  function mountAI(pfx, mode, tab) {
+    const runBtn = AX.$(pfx + '-ai-run');
+    if (!runBtn) return;
+    if (!CAN_RUN[mode].includes(role)) { runBtn.hidden = true; AX.fill(pfx + '-ai-note', 'Analyses written by the marketing team for recent periods.'); }
+    else if (role === 'product_manager') AX.fill(pfx + '-ai-note', 'Pick your course in the Programme filter, then analyse. Saved for your team.');
+    let saved = [];
+    const show = (row) => {
+      const f = row.filters || {};
+      AX.fill(pfx + '-ai-doc', h('p', { class: 'ax-note', style: { color: '#9aa49f' }, text: row.period_start + ' to ' + row.period_end + (f.programme ? ' · ' + f.programme : '') + (f.location ? ' · ' + f.location : '') + ' · ' + (row.created_by_email || 'team') + ', ' + ist(row.created_at) }), md(row.content));
+      document.querySelectorAll('#' + pfx + '-ai-hist button').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.id) === row.id)));
+    };
+    async function loadAI() {
+      const { data } = await sb.from('ai_insights').select('id,created_at,created_by_email,period_start,period_end,filters,model,content').order('created_at', { ascending: false }).limit(40);
+      saved = (data || []).filter((x) => ((x.filters && x.filters.mode) || 'campaign') === mode).slice(0, 12);
+      const c = current();
+      AX.fill(pfx + '-ai-hist', saved.map((x) => h('button', { 'data-id': x.id, text: x.period_start.slice(5) + ' → ' + x.period_end.slice(5) + (x.filters?.programme ? ' · ' + AX.shortName(x.filters.programme) : ''), onclick: () => show(x) })));
+      const match = saved.find((x) => x.period_start === c.since && x.period_end === c.until && (x.filters?.programme || null) === c.programme && (x.filters?.location || null) === c.location);
+      if (match) show(match);
+      else AX.fill(pfx + '-ai-doc', h('p', { class: 'ax-note', style: { color: '#9aa49f' }, text: saved.length ? 'No analysis saved for this exact period and filters yet. Pick a saved one below' + (CAN_RUN[mode].includes(role) ? ', or click Analyse.' : '.') : 'No analyses yet.' }));
+    }
+    runBtn.addEventListener('click', async () => {
+      const c = Object.assign(current(), { mode });
+      runBtn.disabled = true; AX.fill(pfx + '-ai-msg', h('p', { class: 'ax-note', style: { color: '#dfe35a' }, text: 'Analysing ' + c.since + ' to ' + c.until + '… about 10–30 seconds.' }));
+      const { data, error } = await sb.functions.invoke('ai-insights', { body: c });
+      runBtn.disabled = false;
+      if (error) { let m = error.message; try { m = (await error.context.json()).error || m; } catch (_) {} AX.fill(pfx + '-ai-msg', h('p', { class: 'ax-note', style: { color: '#ff8a80' }, text: m })); return; }
+      AX.fill(pfx + '-ai-msg');
+      await loadAI();
+      const row = saved.find((x) => x.id === data.id); if (row) show(row);
+    });
+    let lastKey = '';
+    dash.onData(() => { if (AX.tab !== tab) return; const k = JSON.stringify(current()); if (k !== lastKey) { lastKey = k; loadAI(); } });
+    if (AX.tab === tab) loadAI();
   }
-  runBtn.addEventListener('click', async () => {
-    const c = current();
-    runBtn.disabled = true; AX.fill('ov-ai-msg', h('p', { class: 'ax-note', style: { color: '#dfe35a' }, text: 'Analysing ' + c.since + ' to ' + c.until + '… about 10–20 seconds.' }));
-    const { data, error } = await sb.functions.invoke('ai-insights', { body: c });
-    runBtn.disabled = false;
-    if (error) { let m = error.message; try { m = (await error.context.json()).error || m; } catch (_) {} AX.fill('ov-ai-msg', h('p', { class: 'ax-note', style: { color: '#ff8a80' }, text: m })); return; }
-    AX.fill('ov-ai-msg');
-    await loadAI();
-    const row = saved.find((x) => x.id === data.id); if (row) show(row);
-  });
-  let lastKey = '';
-  dash.onData(() => { if (AX.tab !== 'overview') return; const k = JSON.stringify(current()); if (k !== lastKey) { lastKey = k; loadAI(); } });
-  loadAI();
+  mountAI('ov', 'campaign', 'overview');
+  mountAI('cr', 'creative', 'creative');
 })();
 
 </script>
