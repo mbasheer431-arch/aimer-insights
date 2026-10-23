@@ -57,6 +57,22 @@ body { margin: 0; background: #e3f3f0; }
 #dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
 /* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
 #dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
 .ax {
   --g: #12c784; --g2: #0a7a4c; --g3: #b9f0d9; --lime: #dfe35a; --lime2: #f3f4c4;
   --mint: #dcf2ef; --cream: #fbfbe9; --ink: #0d0f0e; --ink2: #1b1f1d; --line: #e7ece9; --soft: #f5f7f6;
@@ -276,6 +292,63 @@ body { margin: 0; background: #e3f3f0; }
 .ax-userbar a, .ax-userbar button { color: var(--color-fg); border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 6px 12px; text-decoration: none; cursor: pointer; font: inherit; font-size: var(--cds-font-size-caption); }
 
 .ax-table td.ax-namecell { max-width: 22rem; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+
+@media (min-width: 900px) {
+  .ax-tabs { flex-wrap: wrap; justify-content: center; overflow: visible; border-radius: 22px; row-gap: 2px; }
+}
+
+/* creative gallery */
+.ax-ggrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+.ax-gcard { padding: 10px; display: flex; flex-direction: column; gap: 4px; }
+.ax-gthumb { position: relative; aspect-ratio: 1 / 1; border-radius: 12px; overflow: hidden; background: var(--soft); margin-bottom: 6px; }
+.ax-gthumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ax-gnoimg { display: grid; place-items: center; height: 100%; color: var(--color-fg-muted); font-size: 12px; text-align: center; padding: 10px; }
+.ax-gname { font-weight: 600; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ax-gcopy { font-size: 12px; color: var(--color-fg-muted); font-style: italic; }
+.ax-gstats { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 8px; font-size: 12px; margin: 4px 0; }
+.ax-gbtns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; }
+.ax-gbtns .ax-btn { padding: 4px 10px; font-size: 12px; text-decoration: none; }
+.ax-pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; background: rgba(255,255,255,.92); color: #0d0f0e; border: 1px solid rgba(13,15,14,.08); }
+.ax-pill.ok { background: #d9f7ea; color: #0a6b43; } .ax-pill.warn { background: #fdf0c8; color: #7a5a00; } .ax-pill.bad { background: #fde0de; color: #a32b25; }
+.ax-dl { display: grid; grid-template-columns: 5.5rem 1fr; gap: 4px 12px; margin: 6px 0 0; font-size: 13px; }
+.ax-dl dt { color: var(--color-fg-muted); font-weight: 600; } .ax-dl dd { margin: 0; }
+.ax-prog { width: 90px; height: 7px; border-radius: 99px; background: rgba(13,15,14,.08); overflow: hidden; } .ax-prog span { display: block; height: 100%; border-radius: 99px; }
+.ax-live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #12c784; margin-right: 6px; vertical-align: middle; animation: axpulse 1.6s infinite; }
+@keyframes axpulse { 0% { box-shadow: 0 0 0 0 rgba(18,199,132,.5); } 70% { box-shadow: 0 0 0 7px rgba(18,199,132,0); } 100% { box-shadow: 0 0 0 0 rgba(18,199,132,0); } }
+@media (prefers-reduced-motion: reduce) { .ax-live-dot { animation: none; } }
+
+.ax-wf { padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(13,15,14,.08); margin-bottom: 8px; cursor: pointer; }
+.ax-wf:hover { border-color: rgba(13,15,14,.25); }
+.ax-wf.win { background: #f2fbf6; } .ax-wf.flop { background: #fff6f5; }
+.ax-wf-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; } .ax-wf-top b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ax-wf-nums { font-size: 12px; margin: 3px 0 6px; } .ax-wf-why { display: flex; flex-wrap: wrap; gap: 4px; }
+
+/* Ask AIMER AI */
+.ax-chat-fab { position: fixed; right: 20px; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 60; border: 0; border-radius: 999px; padding: 12px 18px; background: #0d0f0e; color: #fff; font-weight: 600; box-shadow: 0 8px 24px rgba(13,15,14,.25); cursor: pointer; font-size: 14px; }
+.ax-chat-fab span { color: #dfe35a; }
+.ax-chat { position: fixed; right: 20px; bottom: calc(76px + env(safe-area-inset-bottom, 0px)); z-index: 61; width: min(440px, calc(100vw - 24px)); height: min(640px, calc(100vh - 120px)); background: #fff; color: #0d0f0e; border-radius: 18px; box-shadow: 0 18px 60px rgba(13,15,14,.28); display: flex; flex-direction: column; overflow: hidden; }
+.ax-chat[hidden] { display: none; }
+.ax-chat-head { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: #0d0f0e; color: #fff; }
+.ax-chat-head .ax-chat-sub { color: #b9c0bc; }
+.ax-chat-x { background: transparent; border: 0; color: #fff; font-size: 16px; cursor: pointer; padding: 4px 8px; }
+.ax-chat-list { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; background: #f6f8f7; }
+.ax-chat-msg { max-width: 92%; padding: 9px 12px; border-radius: 14px; font-size: 13.5px; line-height: 1.45; overflow-x: auto; }
+.ax-chat-msg p { margin: 0 0 6px; } .ax-chat-msg p:last-child { margin-bottom: 0; }
+.ax-chat-msg ul, .ax-chat-msg ol { margin: 4px 0 6px; padding-left: 18px; }
+.ax-chat-msg h4 { margin: 8px 0 4px; font-size: 13.5px; }
+.ax-chat-msg.me { align-self: flex-end; background: #0d0f0e; color: #fff; border-bottom-right-radius: 4px; }
+.ax-chat-msg.ai { align-self: flex-start; background: #fff; border: 1px solid rgba(13,15,14,.08); border-bottom-left-radius: 4px; }
+.ax-chat-msg .bad { color: #a32b25; }
+.ax-chat-sub { font-size: 11.5px; color: #6b736f; margin-top: 4px; }
+.ax-chat-sugg { display: flex; flex-direction: column; gap: 6px; }
+.ax-chat-sugg button { text-align: left; background: #fff; border: 1px solid rgba(13,15,14,.12); border-radius: 12px; padding: 8px 10px; cursor: pointer; font-size: 13px; color: #0d0f0e; }
+.ax-chat-sugg button:hover { border-color: #0d0f0e; }
+.ax-chat-in { display: flex; gap: 8px; padding: 10px; border-top: 1px solid rgba(13,15,14,.08); background: #fff; }
+.ax-chat-in textarea { flex: 1; resize: none; border: 1px solid rgba(13,15,14,.15); border-radius: 12px; padding: 8px 10px; font: inherit; font-size: 13.5px; }
+.ax-chat-send { align-self: stretch; background: #dfe35a; border-color: #dfe35a; color: #0d0f0e; font-weight: 600; }
+@media (max-width: 600px) { .ax-chat { right: 8px; left: 8px; width: auto; bottom: calc(70px + env(safe-area-inset-bottom, 0px)); height: calc(100vh - 140px); } .ax-chat-fab { right: 12px; } }
+
+.ax-mdtable { font-size: 12.5px; margin: 6px 0; } .ax-mdtable th, .ax-mdtable td { padding: 4px 8px; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -397,6 +470,10 @@ body { margin: 0; background: #e3f3f0; }
       <!-- 3. Campaigns -->
       <section class="ax-page" id="campaigns" data-page="campaigns" hidden>
         <p class="ax-take" id="cp-take" data-source="meta_daily crm_leads campaigns">&nbsp;</p>
+        <div class="ax-grid" id="cp-wf" style="margin-bottom:var(--cds-gap-md)">
+          <div class="ax-card" id="cp-win-card"><div class="ax-chead"><h3>🏆 Winners</h3><span class="ax-note" style="margin:0">Best lead campaigns in the period</span></div><div id="cp-win" data-source="meta_daily crm_leads"></div></div>
+          <div class="ax-card" id="cp-flop-card"><div class="ax-chead"><h3>⚠ Flops</h3><span class="ax-note" style="margin:0">Spending without results</span></div><div id="cp-flop" data-source="meta_daily crm_leads"></div></div>
+        </div>
         <div class="ax-card" id="cp-table-card"><h3>All campaigns</h3><p class="ax-note">Click a row for details. Tick up to four to compare. CPL and cost per admission are coloured against the programme's targets. Assessment needs enough spend and leads before it judges a campaign, and never recommends action on CPL alone.</p><div id="cp-table" data-source="meta_daily crm_leads campaigns"></div></div>
         <div class="ax-card" id="cp-compare-card" style="margin-top:var(--cds-gap-md)" hidden><h3>Comparison</h3><div id="cp-compare" data-source="meta_daily crm_leads campaigns"></div></div>
         <div class="ax-card" id="cp-detail-card" style="margin-top:var(--cds-gap-md)" hidden><h3 id="cp-detail-title">Campaign detail</h3><div id="cp-detail" data-source="meta_daily crm_leads campaigns"></div></div>
@@ -412,7 +489,7 @@ body { margin: 0; background: #e3f3f0; }
 
       <!-- Creative & audience -->
       <section class="ax-page" id="creative" data-page="creative" hidden>
-        <p class="ax-take" id="cr-take" data-source="meta_ads">&nbsp;</p>
+        <p class="ax-take" id="cv-take" data-source="meta_ads">&nbsp;</p>
         <div class="ax-sec" id="cr-h-aud"><span>Audience</span> Who and where your leads come from</div>
         <p class="ax-note" id="cr-aud-note"></p>
         <div class="ax-grid" id="cr-aud" data-source="meta_daily"></div>
@@ -425,6 +502,16 @@ body { margin: 0; background: #e3f3f0; }
           <div class="ax-aidoc" id="cr-ai-doc"></div>
           <div class="ax-aihist" id="cr-ai-hist"></div>
         </div>
+        <div class="ax-sec" id="cg-h"><span>Creative gallery</span> See every ad with its results</div>
+        <div class="ax-frow1" id="cg-controls" style="margin-bottom:10px;display:flex;flex-wrap:wrap;gap:14px"></div>
+        <div class="ax-ggrid" id="cg-grid" data-source="meta_ads"></div>
+        <div class="ax-sec" id="cf-h"><span>Formats &amp; placements</span> What kind of creative works</div>
+        <div class="ax-grid">
+          <div class="ax-card" id="cf-format-card"><h3>By format</h3><p class="ax-note">Video, image, carousel and link ads compared for the period. Video hold = ThruPlays ÷ video plays.</p><div id="cf-format" data-source="meta_ads"></div></div>
+          <div class="ax-card" id="cf-place-card"><h3>Reels vs Feed vs Stories</h3><p class="ax-note">Placements grouped, from Meta’s placement breakdown.</p><div id="cf-place" data-source="meta_daily"></div></div>
+        </div>
+        <div class="ax-sec" id="cab-h"><span>A/B tests</span> Ads competing in the same ad set</div>
+        <div class="ax-card" id="cab-card"><p class="ax-note" id="cab-note"></p><div id="cab-table" data-source="meta_ads"></div></div>
         <div class="ax-sec" id="cr-h-fatigue"><span>Creative fatigue</span> Ads losing steam</div>
         <div class="ax-card" id="cr-fatigue-card"><p class="ax-note" id="cr-fatigue-note"></p><div id="cr-fatigue" data-source="meta_ads"></div></div>
         <div class="ax-sec" id="cr-h-board"><span>Creative leaderboard</span> Every ad in the period</div>
@@ -435,6 +522,7 @@ body { margin: 0; background: #e3f3f0; }
       <section class="ax-page" id="sales" data-page="sales" hidden>
         <p class="ax-take" id="sl-take" data-source="crm_leads">&nbsp;</p>
         <div class="ax-kpis big" id="sl-kpis" data-source="crm_leads"></div>
+        <div class="ax-card" id="sl-board-card" style="margin-top:var(--cds-gap-md)"><div class="ax-chead"><h3>Counsellor leaderboard · today</h3></div><p class="ax-note">Live from LeadSquared calls today, scored against the daily targets. Score = average of the three targets met (capped at 100% each).</p><div id="sl-targets" style="margin:6px 0 10px"></div><div id="sl-board" data-source="crm_leads"></div></div>
         <div class="ax-grid" style="margin-top:var(--cds-gap-md)">
           <div class="ax-card" id="sl-dist-card"><h3>Time to first call</h3><p class="ax-note">How long new leads waited for the first call. Green is within an hour.</p><div class="ax-chart" id="sl-dist" data-source="crm_leads"></div></div>
           <div class="ax-card" id="sl-speedq-card"><h3>Faster calls, better leads?</h3><p class="ax-note">Share of leads that qualified, by how quickly they were first called.</p><div class="ax-chart" id="sl-speedq" data-source="crm_leads"></div></div>
@@ -442,6 +530,15 @@ body { margin: 0; background: #e3f3f0; }
         <div class="ax-card" id="sl-calls-card" style="margin-top:var(--cds-gap-md)"><h3>Calls per day by counsellor</h3><p class="ax-note">Outbound and inbound calls plus logged calls, credited to the lead owner. Top five by volume.</p><div class="ax-chart" id="sl-calls" data-source="crm_leads"></div></div>
         <div class="ax-card" id="sl-score-card" style="margin-top:var(--cds-gap-md)"><h3>Counsellor scorecard</h3><p class="ax-note">Each counsellor’s leads in the period: speed, effort and results. Click a column to sort.</p><div id="sl-score" data-source="crm_leads"></div></div>
         <div class="ax-card" id="sl-queue-card" style="margin-top:var(--cds-gap-md)"><h3>Leads waiting for a first call</h3><p class="ax-note" id="sl-queue-note"></p><div id="sl-queue" data-source="crm_leads"></div></div>
+        <div class="ax-sec" id="sl-h-loss"><span>Why leads are lost</span> Reasons recorded by counsellors</div>
+        <div class="ax-grid">
+          <div class="ax-card" id="sl-loss-card"><h3>Loss reasons</h3><p class="ax-note" id="sl-loss-note"></p><div class="ax-chart" id="sl-loss-chart" data-source="crm_leads"></div></div>
+          <div class="ax-card" id="sl-loss-by-card"><h3>Where losses happen</h3><div id="sl-loss-by" style="margin-bottom:8px"></div><div id="sl-loss-table" data-source="crm_leads"></div></div>
+        </div>
+        <div class="ax-sec" id="sl-h-gap"><span>Follow-up gaps</span> Open leads nobody has touched</div>
+        <div class="ax-card" id="sl-gap-card"><div id="sl-gap-controls" style="margin-bottom:8px"></div><p class="ax-note" id="sl-gap-note"></p>
+          <div class="ax-grid"><div class="ax-chart" id="sl-gap-owner" data-source="crm_leads"></div><div id="sl-gap-table" data-source="crm_leads"></div></div></div>
+
       </section>
 
       <!-- Cohorts & forecast -->
@@ -459,6 +556,8 @@ body { margin: 0; background: #e3f3f0; }
       <!-- 4. CRM -->
       <section class="ax-page" id="crm" data-page="crm" hidden>
         <p class="ax-take" id="cr-take" data-source="crm_leads">&nbsp;</p>
+        <div class="ax-card" id="crm-attr-card" style="margin-bottom:var(--cds-gap-md)"><h3>Attribution tracker</h3><p class="ax-note" id="crm-attr-note"></p><div id="crm-attr" data-source="crm_leads"></div>
+          <h4 style="margin:14px 0 6px">Campaign names that don’t match a Meta campaign</h4><div id="crm-attr-names" data-source="crm_leads"></div></div>
         <div class="ax-grid wide">
           <div class="ax-card" id="cr-funnel-card"><h3>LeadSquared progression</h3><p class="ax-note">Cohort: leads created in the period. A lead counts at every stage it has reached, so stages overlap by design. Conversion is from the stage above and from New.</p><div class="ax-funnel" id="cr-funnel" data-source="crm_leads"></div></div>
           <div class="ax-card" id="cr-dq-card"><h3>Data quality</h3><p class="ax-note">Problems that make the funnel less trustworthy.</p><div id="cr-dq" data-source="meta_daily crm_leads"></div></div>
@@ -476,6 +575,7 @@ body { margin: 0; background: #e3f3f0; }
       <section class="ax-page" id="programmes" data-page="programmes" hidden>
         <p class="ax-take" id="pg-take" data-source="meta_daily crm_leads campaigns">&nbsp;</p>
         <div class="ax-grid" id="pg-cards" data-source="meta_daily crm_leads campaigns"></div>
+        <div class="ax-card" id="pg-wow-card" style="margin-top:var(--cds-gap-md)"><h3>Programme scorecard · week on week</h3><p class="ax-note" id="pg-wow-note"></p><div id="pg-wow" data-source="meta_daily crm_leads"></div></div>
         <div class="ax-grid" style="margin-top:var(--cds-gap-md)">
           <div class="ax-card" id="pg-compare-card"><h3>Programme comparison</h3><div class="ax-tools"><label class="ax-ctl">Metric <select id="pg-metric" aria-label="Comparison metric"></select></label></div><div class="ax-chart" id="pg-compare" data-source="meta_daily crm_leads campaigns"></div></div>
           <div class="ax-card" id="pg-alloc-card"><h3>Budget allocation this month</h3><p class="ax-note">Assigned monthly budget vs spend so far this month.</p><div class="ax-chart" id="pg-alloc" data-source="meta_daily campaigns"></div></div>
@@ -486,6 +586,7 @@ body { margin: 0; background: #e3f3f0; }
       <section class="ax-page" id="budget" data-page="budget" hidden>
         <p class="ax-take" id="bg-take" data-source="meta_daily crm_leads">&nbsp;</p>
         <div class="ax-kpis" id="bg-kpis" data-source="meta_daily crm_leads"></div>
+        <div class="ax-card" id="bg-pace-card" style="margin-top:var(--cds-gap-md)"><h3>Budget pacing · this month</h3><p class="ax-note" id="bg-pace-note"></p><div id="bg-pace" data-source="meta_daily"></div></div>
         <div class="ax-card" id="bg-burn-card" style="margin-top:var(--cds-gap-md)"><h3>Month-to-date burn</h3><p class="ax-note">Cumulative spend vs an even pace to the monthly budget; dotted line projects the current daily average to month end.</p><div class="ax-chart" id="bg-burn" data-source="meta_daily"></div></div>
         <div class="ax-card" id="bg-prog-card" style="margin-top:var(--cds-gap-md)"><h3>Programme budgets this month</h3><div id="bg-prog" data-source="meta_daily crm_leads campaigns"></div></div>
         <div class="ax-card" id="bg-camp-card" style="margin-top:var(--cds-gap-md)"><h3>Campaign budgets this month</h3><p class="ax-note">Planned = daily budget × days the campaign is scheduled this month.</p><div id="bg-camp" data-source="meta_daily campaigns"></div></div>
@@ -704,6 +805,7 @@ body { margin: 0; background: #e3f3f0; }
       o.createdTs = ts(r.created_iso) ?? ts(String(r.created_at || '').replace(' ', 'T') + 'Z');
       o.firstCallTs = ts(r.first_call_at); o.firstConnectTs = ts(r.first_connect_at);
       o.calls = num(r.calls); o.connCalls = num(r.connected_calls); o.talk = num(r.talk_secs);
+      o.lastActTs = ts(r.last_activity_at);
       o.rank = STAGES.reduce((m, [k], i) => (k !== 'new' && o[k] ? i : m), 0);
       return o;
     });
@@ -1724,17 +1826,30 @@ body { margin: 0; background: #e3f3f0; }
   };
   AX.pages.campaigns = function (D) {
     const P = AX.p(), per = AX.period(P, D.asOf);
-    const rows = AX.campaignRows(D, P, per.start, per.end);
+    const allRows = AX.campaignRows(D, P, per.start, per.end);
+    const U = (AX.ui.cpf = AX.ui.cpf || { act: 'active', status: 'all', obj: 'all' });
+    const isActive = (r) => r.spend > 0 || r.leads > 0 || r.crm > 0;
+    const isOn = (s) => !!s && !/not|pause|off|archiv|delet|complet|inactive|stop/i.test(s);
+    const rows = allRows.filter((r) => (U.act === 'all' || isActive(r)) && (U.status === 'all' || (U.status === 'on') === isOn(r.status)) && (U.obj === 'all' || r.objective === U.obj));
+    let fbox = AX.$('cp-filters');
+    if (!fbox) { fbox = h('div', { id: 'cp-filters', class: 'ax-frow1', style: { marginBottom: '10px', display: 'flex', flexWrap: 'wrap', gap: '14px' } }); AX.$('cp-table').before(fbox); }
+    const seg = (label, key, opts) => h('div', null, h('span', { class: 'ax-flabel', text: label }), h('div', { class: 'ax-seg', role: 'group', 'aria-label': label },
+      opts.map(([v, t]) => h('button', { 'aria-pressed': U[key] === v ? 'true' : 'false', onclick: () => { U[key] = v; const tb = AX.$('cp-table'); if (tb) tb._st = null; AX.render(); } }, t))));
+    const nAct = allRows.filter(isActive).length;
+    AX.fill(fbox,
+      seg('Show', 'act', [['active', 'Active in period (' + nAct + ')'], ['all', 'All campaigns (' + allRows.length + ')']]),
+      seg('Delivery', 'status', [['all', 'Any'], ['on', 'Delivering'], ['off', 'Not delivering']]),
+      seg('Objective', 'obj', [['all', 'Any'], ['Leads', 'Leads'], ['Awareness', 'Awareness'], ['Traffic & engagement', 'Traffic']]));
     const cols = AX.CAMP_COLS();
     const tot = { name: 'Total', spend: d3.sum(rows, (r) => r.spend), imp: d3.sum(rows, (r) => r.imp), clicks: d3.sum(rows, (r) => r.clicks), leads: d3.sum(rows, (r) => r.leads), qualified: d3.sum(rows, (r) => r.qualified), booked: d3.sum(rows, (r) => r.booked), applied: d3.sum(rows, (r) => r.applied), admitted: d3.sum(rows, (r) => r.admitted), budget: d3.sum(rows, (r) => r.budget), crm: d3.sum(rows, (r) => r.crm) };
     tot.cpl = AX.div(tot.spend, tot.leads); tot.ctr = AX.div(tot.clicks * 100, tot.imp); tot.cpc = AX.div(tot.spend, tot.clicks); tot.cpm = AX.div(tot.spend * 1000, tot.imp); tot.cpa = AX.div(tot.spend, tot.admitted); tot.qlRate = AX.div(tot.qualified * 100, tot.crm); tot.cpql = AX.div(tot.spend, tot.qualified);
     const revRows = rows.filter((r) => r.revenue != null); if (revRows.length) { tot.revenue = d3.sum(revRows, (r) => r.revenue); tot.roas = AX.div(tot.revenue, tot.spend); }
     const above = rows.filter((r) => r.tCpl && r.cpl != null && r.cpl <= r.tCpl && r.leads >= AX.config.thresholds.min_leads_verdict).length;
     const below = rows.filter((r) => r.tCpl && r.cpl != null && r.cpl > r.tCpl * 1.1 && r.leads >= AX.config.thresholds.min_leads_verdict).length;
-    AX.fill('cp-take', per.label + ': ' + rows.length + ' campaigns, ' + above + ' at or under their programme CPL target and ' + below + ' more than 10% over it. Reach and frequency marked * are summed from daily figures and overstate unique people.');
+    AX.fill('cp-take', per.label + ': ' + rows.length + ' campaigns shown' + (rows.length < allRows.length ? ' (of ' + allRows.length + ')' : '') + ', ' + above + ' at or under their programme CPL target and ' + below + ' more than 10% over it. Reach and frequency marked * are summed from daily figures and overstate unique people.');
     if (AX.ui.detail && !rows.some((r) => r.id === AX.ui.detail)) AX.ui.detail = null;
     AX.ui.cmp = AX.ui.cmp.filter((id) => rows.some((r) => r.id === id));
-    AX.table('cp-table', cols, { rows, rowKey: 'id', search: true, searchPlaceholder: 'Search campaigns…', sort: { key: 'score', dir: 'desc' }, foot: tot, selected: AX.ui.detail, maxHeight: '32rem',
+    AX.table('cp-table', cols, { rows, rowKey: 'id', search: true, searchPlaceholder: 'Search campaigns…', sort: { key: 'spend', dir: 'desc' }, foot: tot, selected: AX.ui.detail, maxHeight: '32rem',
       onRow: (r) => { AX.ui.detail = AX.ui.detail === r.id ? null : r.id; AX.render(); if (AX.ui.detail) AX.$('cp-detail-card').scrollIntoView({ block: 'nearest' }); },
       checks: { get: () => AX.ui.cmp, on: (id, on) => { AX.ui.cmp = on ? [...new Set([...AX.ui.cmp, id])].slice(-4) : AX.ui.cmp.filter((x) => x !== id); AX.render(); } },
       exportName: 'aimer-campaigns-' + per.start + '-to-' + per.end + '.csv', exportMeta: () => AX.exportMeta(D, P, 'Campaign performance') });
@@ -2417,7 +2532,7 @@ body { margin: 0; background: #e3f3f0; }
       { key: 'spend', label: 'Spent', num: true, fmt: F.inr }, { key: 'leads', label: 'Leads', num: true, fmt: F.int }, { key: 'cpl', label: 'CPL', num: true, fmt: F.inr, cls: (r) => (r.cpl == null ? 'bad' : r.cpl <= tCpl ? 'ok' : r.cpl <= tCpl * 1.25 ? 'warn' : 'bad') },
       { key: 'ctr', label: 'CTR', num: true, fmt: (v) => F.pct(v, 2) }, { key: 'lpv', label: 'Landing page views', num: true, fmt: F.int }, { key: 'tp', label: 'ThruPlays', num: true, fmt: F.int }],
       { rows: board, sort: { key: 'leads', dir: 'desc' }, search: true, searchPlaceholder: 'Search ads…', pageSize: 50, exportName: 'aimer-creatives-' + per.start + '-to-' + per.end + '.csv', exportMeta: () => AX.exportMeta(D, P, 'Creative leaderboard') });
-    AX.fill('cr-take', per.label + ': ' + board.length + ' ads delivered. ' + (board.length ? 'Ranked by leads; colour shows cost per lead against the ' + F.inr(tCpl) + ' target. ' : '') + 'Lead quality per ad needs the ad ID passed into LeadSquared; until then, quality is judged per campaign on the Campaigns page.');
+    AX.fill('cv-take', per.label + ': ' + board.length + ' ads delivered. ' + (board.length ? 'Ranked by leads; colour shows cost per lead against the ' + F.inr(tCpl) + ' target. ' : '') + 'Lead quality per ad needs the ad ID passed into LeadSquared; until then, quality is judged per campaign on the Campaigns page.');
   };
 })();
 
@@ -2562,6 +2677,280 @@ body { margin: 0; background: #e3f3f0; }
 
 </script>
 <script>
+// Insight add-ons. Each extends an existing page after it renders:
+//  Creative & audience: creative gallery with previews, format comparison, A/B test tracker (+ weekly briefs in the AI panel)
+//  Sales team: live uncalled queue (auto-refresh), counsellor leaderboard vs daily targets, loss reasons, follow-up gaps
+//  Budget & ROI: monthly pacing   ·   Programmes: week-on-week scorecard   ·   Lead quality: attribution tracker
+(function () {
+  const AX = window.AX, h = AX.h, F = AX.fmt;
+  const n = (v) => { const x = Number(v); return isFinite(x) ? x : 0; };
+  const wrap = (name, fn) => { const orig = AX.pages[name]; AX.pages[name] = function (D) { if (orig) orig(D); try { fn(D); } catch (e) { console.error(name + ' add-on', e); } }; };
+  const seg = (label, cur, opts, set) => h('div', null, label ? h('span', { class: 'ax-flabel', text: label }) : null,
+    h('div', { class: 'ax-seg', role: 'group', 'aria-label': label || 'Options' }, opts.map(([v, t]) => h('button', { 'aria-pressed': v === cur ? 'true' : 'false', onclick: () => { set(v); AX.render(); } }, t))));
+  const pctTxt = (v, d = 0) => (v == null ? '—' : F.pct(v, d));
+  const istTime = (ts) => new Date(ts).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  const dur = (mins) => (mins == null ? '—' : mins < 60 ? Math.round(mins) + ' min' : mins < 48 * 60 ? (mins / 60).toFixed(1) + ' h' : (mins / 1440).toFixed(1) + ' days');
+  AX.ui = AX.ui || {};
+
+  // ===================== CREATIVE =====================
+  const fmtName = (t) => { const x = String(t || '').toUpperCase(); if (!x || x === 'FALSE' || x === 'NULL') return 'Other'; return x.includes('VIDEO') ? 'Video' : x.includes('PHOTO') || x.includes('IMAGE') ? 'Image' : x.includes('CAROUSEL') || x.includes('MULTI') ? 'Carousel' : x.includes('SHARE') || x.includes('LINK') ? 'Link / dynamic' : x ? x.charAt(0) + x.slice(1).toLowerCase() : 'Unknown'; };
+  const placeGroup = (v) => { const x = String(v || '').toLowerCase(); return x.includes('reel') ? 'Reels' : x.includes('stor') || x.includes('status') ? 'Stories & Status' : x.includes('feed') ? 'Feed' : x.includes('search') || x.includes('explore') ? 'Search & Explore' : 'Other'; };
+  function adAgg(rows) {
+    const a = { spend: 0, imp: 0, lc: 0, leads: 0, lpv: 0, vp: 0, tp: 0, days: new Set() };
+    for (const r of rows) { a.spend += n(r.spend); a.imp += n(r.impressions); a.lc += n(r.link_clicks); a.leads += n(r.leads); a.lpv += n(r.landing_page_views); a.vp += n(r.video_plays); a.tp += n(r.thruplays); if (n(r.spend) > 0) a.days.add(r.date); }
+    a.cpl = AX.div(a.spend, a.leads); a.ctr = AX.div(a.lc * 100, a.imp); a.lr = AX.div(a.leads, a.imp); a.hold = AX.div(a.tp * 100, a.vp); return a;
+  }
+  // two-proportion z-test on lead rate per impression -> confidence that A beats B
+  const confidence = (a, b) => {
+    const p1 = a.leads / a.imp, p2 = b.leads / b.imp, p = (a.leads + b.leads) / (a.imp + b.imp);
+    const se = Math.sqrt(p * (1 - p) * (1 / a.imp + 1 / b.imp)); if (!se) return 0;
+    const z = (p1 - p2) / se; const t = 1 / (1 + 0.2316419 * Math.abs(z)); const d = 0.3989423 * Math.exp((-z * z) / 2);
+    const q = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))); return z > 0 ? 1 - q : q;
+  };
+
+  wrap('creative', function (D) {
+    const P = AX.p(), per = AX.period(P, D.asOf), cfg = AX.config;
+    const tCpl = P.programme ? AX.progCfg(P.programme)?.target_cpl || cfg.target_cpl : cfg.target_cpl;
+    const ads = (dash.data('meta_ads').data || []).filter((r) => r.date >= per.start && r.date <= per.end && AX.campOk(D.cById.get(r.campaign_id), P));
+    const cr = new Map((dash.data('creatives').data || []).map((c) => [c.ad_id, c]));
+    const byAd = [...AX.groupBy(ads, (r) => r.ad_id)].map(([id, rs]) => { const a = adAgg(rs); const c = cr.get(id) || {}; const camp = D.cById.get(rs[0].campaign_id);
+      return Object.assign(a, { id, name: rs[rs.length - 1].ad_name || c.ad_name || id, adset: rs[rs.length - 1].adset_name || '', adsetId: rs[rs.length - 1].adset_id, campaign: camp ? camp.name : rs[0].campaign_id, objective: camp ? camp.objective : 'Leads', fmt: fmtName(c.object_type), c }); })
+      .filter((a) => a.spend > 0);
+
+    // ---- Gallery ----
+    const G = (AX.ui.gal = AX.ui.gal || { sort: 'spend', fmt: 'all' });
+    const fmts = [...new Set(byAd.map((a) => a.fmt))];
+    AX.fill('cg-controls', seg('Sort', G.sort, [['spend', 'Spend'], ['leads', 'Leads'], ['cpl', 'Lowest CPL'], ['ctr', 'CTR']], (v) => (G.sort = v)),
+      seg('Format', G.fmt, [['all', 'All']].concat(fmts.map((f) => [f, f])), (v) => (G.fmt = v)));
+    const sorter = { spend: (a, b) => b.spend - a.spend, leads: (a, b) => b.leads - a.leads, cpl: (a, b) => (a.cpl ?? 1e12) - (b.cpl ?? 1e12), ctr: (a, b) => (b.ctr || 0) - (a.ctr || 0) }[G.sort];
+    const list = byAd.filter((a) => G.fmt === 'all' || a.fmt === G.fmt).sort(sorter).slice(0, 24);
+    const verdict = (a) => (a.objective !== 'Leads' ? ['Awareness/traffic', ''] : a.leads === 0 && a.spend >= 1500 ? ['No leads', 'bad'] : a.cpl != null && a.cpl <= tCpl * 0.8 && a.leads >= 5 ? ['Winner', 'ok'] : a.cpl != null && a.cpl > tCpl * 1.25 ? ['Over target', 'warn'] : ['On track', '']);
+    const link = (href, text) => (href ? h('a', { class: 'ax-btn', href, target: '_blank', rel: 'noopener', text }) : null);
+    AX.fill('cg-grid', list.length ? list.map((a) => {
+      const [vt, vc] = verdict(a), img = a.c.thumbnail_url || a.c.image_url;
+      return h('div', { class: 'ax-card ax-gcard' },
+        h('div', { class: 'ax-gthumb' }, img ? h('img', { src: img, alt: 'Ad preview: ' + a.name, loading: 'lazy', referrerpolicy: 'no-referrer', onerror: (e) => { e.target.replaceWith(h('div', { class: 'ax-gnoimg', text: 'Preview expired · refreshes nightly' })); } }) : h('div', { class: 'ax-gnoimg', text: 'No thumbnail yet' }),
+          h('span', { class: 'ax-pill', style: { position: 'absolute', top: '8px', left: '8px' }, text: a.fmt }), h('span', { class: 'ax-pill ' + vc, style: { position: 'absolute', top: '8px', right: '8px' }, text: vt })),
+        h('div', { class: 'ax-gname', title: a.name, text: a.name }), h('div', { class: 'ax-note', style: { margin: '0 0 6px' }, title: a.campaign, text: AX.shortName(a.campaign) }),
+        a.c.title ? h('div', { class: 'ax-gcopy', text: '“' + String(a.c.title).slice(0, 80) + '”' }) : null,
+        h('div', { class: 'ax-gstats' }, h('span', null, h('b', { text: F.inr(a.spend) }), ' spent'), h('span', null, h('b', { text: F.int(a.leads) }), ' leads'), h('span', null, h('b', { text: F.inr(a.cpl) }), ' CPL'), h('span', null, h('b', { text: pctTxt(a.ctr, 2) }), ' CTR')),
+        h('div', { class: 'ax-gbtns' }, link(a.c.preview_mobile_url, 'Preview'), link(a.c.preview_instagram_url, 'Instagram'), link(a.c.post_url_ig || a.c.post_url, 'Post'), link(a.c.link_url, 'Landing page')));
+    }) : h('div', { class: 'ax-empty', text: cr.size ? 'No ads delivered in this period for these filters.' : 'Creative previews load with the next nightly sync.' }));
+
+    // ---- Format comparison ----
+    const fr = [...AX.groupBy(byAd, (a) => a.fmt)].map(([f, rs]) => { const s = { fmt: f, ads: rs.length, spend: d3.sum(rs, (r) => r.spend), imp: d3.sum(rs, (r) => r.imp), lc: d3.sum(rs, (r) => r.lc), leads: d3.sum(rs, (r) => r.leads), vp: d3.sum(rs, (r) => r.vp), tp: d3.sum(rs, (r) => r.tp), lpv: d3.sum(rs, (r) => r.lpv) };
+      s.cpl = AX.div(s.spend, s.leads); s.ctr = AX.div(s.lc * 100, s.imp); s.hold = AX.div(s.tp * 100, s.vp); return s; }).sort((a, b) => b.spend - a.spend);
+    AX.table('cf-format', [{ key: 'fmt', label: 'Format' }, { key: 'ads', label: 'Ads', num: true, fmt: F.int }, { key: 'spend', label: 'Spent', num: true, fmt: F.inr }, { key: 'leads', label: 'Leads', num: true, fmt: F.int },
+      { key: 'cpl', label: 'CPL', num: true, fmt: F.inr, cls: (r) => (r.cpl == null ? '' : r.cpl <= tCpl ? 'ok' : r.cpl <= tCpl * 1.25 ? 'warn' : 'bad') }, { key: 'ctr', label: 'CTR', num: true, fmt: (v) => pctTxt(v, 2) },
+      { key: 'lpv', label: 'Landing page views', num: true, fmt: F.int }, { key: 'hold', label: 'Video hold (ThruPlay %)', num: true, fmt: (v) => pctTxt(v, 1) }], { rows: fr, sort: { key: 'spend', dir: 'desc' } });
+    const camps = D.camps.filter((c) => AX.campOk(c, P)).map((c) => c.id);
+    const key = per.start + '|' + per.end + '|' + camps.join(',');
+    AX._brCache = AX._brCache || new Map();
+    const br = AX._brCache.get(key);
+    if (br === undefined && AX.fetchBreakdowns && AX._brPending !== key) { AX._brPending = key; AX.fetchBreakdowns(per.start, per.end, camps).then((r) => { AX._brCache.set(key, r || []); AX._brPending = null; if (AX.tab === 'creative') AX.render(); }).catch(() => { AX._brCache.set(key, []); AX._brPending = null; }); }
+    if (br) {
+      const pl = [...AX.groupBy(br.filter((r) => r[0] === 'placement'), (r) => placeGroup(r[1]))].map(([g, rs]) => { const s = { g, spend: d3.sum(rs, (r) => n(r[2])), imp: d3.sum(rs, (r) => n(r[3])), lc: d3.sum(rs, (r) => n(r[4])), leads: d3.sum(rs, (r) => n(r[5])) }; s.cpl = AX.div(s.spend, s.leads); s.ctr = AX.div(s.lc * 100, s.imp); return s; }).sort((a, b) => b.spend - a.spend);
+      AX.table('cf-place', [{ key: 'g', label: 'Placement group' }, { key: 'spend', label: 'Spent', num: true, fmt: F.inr }, { key: 'leads', label: 'Leads', num: true, fmt: F.int },
+        { key: 'cpl', label: 'CPL', num: true, fmt: F.inr, cls: (r) => (r.cpl == null ? 'bad' : r.cpl <= tCpl ? 'ok' : r.cpl <= tCpl * 1.25 ? 'warn' : 'bad') }, { key: 'ctr', label: 'CTR', num: true, fmt: (v) => pctTxt(v, 2) }], { rows: pl, sort: { key: 'spend', dir: 'desc' } });
+    } else AX.fill('cf-place', h('div', { class: 'ax-empty', text: 'Loading placements…' }));
+
+    // ---- A/B tests: ads competing in the same ad set ----
+    const tests = [...AX.groupBy(byAd.filter((a) => a.objective === 'Leads' && a.imp >= 1000 && a.adsetId), (a) => a.adsetId)].filter(([, rs]) => rs.length >= 2).map(([, rs]) => {
+      const s = rs.slice().sort((a, b) => (b.lr || 0) - (a.lr || 0)); const best = s[0], next = s[1];
+      const conf = best.leads + next.leads >= 10 ? confidence(best, next) : 0;
+      const status = conf >= 0.95 ? 'Winner (95%+ sure)' : conf >= 0.8 ? 'Likely winner (80%+)' : 'Too early';
+      return { adset: best.adset || '(ad set)', campaign: best.campaign, n: rs.length, best: best.name, bestCpl: best.cpl, runner: next.name, runnerCpl: next.cpl, lift: best.lr && next.lr ? ((best.lr / next.lr - 1) * 100) : null, conf: conf * 100, status, spend: d3.sum(rs, (r) => r.spend) };
+    }).sort((a, b) => b.spend - a.spend);
+    AX.table('cab-table', [{ key: 'adset', label: 'Ad set (the test)' }, { key: 'campaign', label: 'Campaign', fmt: (v) => AX.shortName(v) }, { key: 'n', label: 'Ads', num: true, fmt: F.int },
+      { key: 'best', label: 'Leader' }, { key: 'bestCpl', label: 'Leader CPL', num: true, fmt: F.inr }, { key: 'runner', label: 'Runner-up' }, { key: 'runnerCpl', label: 'Runner-up CPL', num: true, fmt: F.inr },
+      { key: 'lift', label: 'Lead-rate lift', num: true, fmt: (v) => (v == null ? '—' : '+' + v.toFixed(0) + '%') }, { key: 'conf', label: 'Confidence', num: true, fmt: (v) => F.pct(v, 0) },
+      { key: 'status', label: 'Result', cls: (r) => (r.conf >= 95 ? 'ok' : r.conf >= 80 ? 'warn' : 'muted') }], { rows: tests, sort: { key: 'spend', dir: 'desc' } });
+    AX.fill('cab-note', tests.length ? 'Each ad set running two or more ads is treated as a test. Confidence compares leads per impression of the leader vs the runner-up; act on 95%+, keep testing below 80%.' : 'No ad set ran two or more lead ads with enough impressions in this period. Put 2–3 variations in one ad set to start a test.');
+  });
+
+  // ===================== SALES =====================
+  let liveData = null, liveAt = 0, liveTimer = null, liveBusy = false;
+  async function refreshLive() {
+    if (liveBusy || !AX.salesLive) return; liveBusy = true;
+    try { liveData = await AX.salesLive(); liveAt = Date.now(); } catch (e) { console.error(e); } finally { liveBusy = false; }
+    if (AX.tab === 'sales') renderLive();
+  }
+  function renderLive() {
+    const L = liveData; if (!L) return;
+    const T = Object.assign({ calls_per_day: 60, called_within_1h_pct: 60, connect_rate_pct: 40, followup_gap_days: 3 }, L.targets || {});
+    const P = AX.p(), now = Date.now();
+    // live queue (respects programme / owner filters)
+    const q = (L.queue || []).map((r) => ({ id: r[0], created: r[1], owner: r[2] || 'Unassigned', source: r[3], campaign: r[4] || '', programme: r[5] || '', status: r[6] || '', waitMin: (now - Date.parse(r[1])) / 60000 }))
+      .filter((r) => (!P.programme || r.programme === P.programme) && (!P.owner || r.owner === P.owner));
+    AX.fill('sl-queue-note', h('span', null, h('span', { class: 'ax-live-dot' }), 'Live · updated ' + new Date(liveAt).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' }) + ' · refreshes every minute. ' + (q.length ? F.int(q.length) + ' open leads from the last 7 days have no call yet. Oldest first.' : 'Every open lead from the last 7 days has had a call.')));
+    AX.table('sl-queue', [{ key: 'id', label: 'LeadSquared ID' }, { key: 'created', label: 'Arrived (IST)', fmt: (v) => istTime(v) }, { key: 'waitMin', label: 'Waiting', num: true, fmt: dur, cls: (r) => (r.waitMin > 1440 ? 'bad' : r.waitMin > 60 ? 'warn' : 'ok') },
+      { key: 'owner', label: 'Owner' }, { key: 'source', label: 'Source' }, { key: 'campaign', label: 'Campaign', fmt: (v) => AX.shortName(v) }, { key: 'programme', label: 'Programme' }, { key: 'status', label: 'Stage' }],
+      { rows: q, sort: { key: 'waitMin', dir: 'desc' }, pageSize: 50, search: true, searchPlaceholder: 'Search owner, campaign…', exportName: 'aimer-uncalled-leads-live.csv' });
+    // leaderboard today
+    const calls = new Map((L.calls_today || []).map((c) => [c.owner, c]));
+    const owners = new Set([...(L.today || []).filter((t) => t.new_leads > 0).map((t) => t.owner), ...calls.keys()]);
+    const board = [...owners].filter((o) => !P.owner || o === P.owner).map((o) => {
+      const t = (L.today || []).find((x) => x.owner === o) || { new_leads: 0, called: 0, within_1h: 0 }, c = calls.get(o) || { calls: 0, connected: 0, talk_secs: 0 };
+      const r = { owner: o, newLeads: t.new_leads, called: t.called, w1: AX.div(t.within_1h * 100, t.new_leads), calls: c.calls, connected: c.connected, conn: AX.div(c.connected * 100, c.calls), talk: c.talk_secs / 60 };
+      const parts = [Math.min(1, r.calls / (T.calls_per_day || 1))]; if (r.w1 != null) parts.push(Math.min(1, r.w1 / (T.called_within_1h_pct || 1))); if (r.conn != null) parts.push(Math.min(1, r.conn / (T.connect_rate_pct || 1)));
+      r.score = (d3.mean(parts) || 0) * 100; return r;
+    }).sort((a, b) => b.score - a.score);
+    const bar = (v, t) => { const p = Math.max(0, Math.min(100, (v / (t || 1)) * 100)); return h('div', { class: 'ax-prog', title: Math.round(p) + '% of target' }, h('span', { style: { width: p + '%', background: p >= 100 ? '#12c784' : p >= 60 ? '#e8b322' : '#e5534b' } })); };
+    AX.fill('sl-board', board.length ? h('div', { class: 'ax-tablewrap' }, h('table', { class: 'ax-table' },
+      h('thead', null, h('tr', null, ['#', 'Counsellor', 'Calls today', 'vs ' + T.calls_per_day + '/day', 'New leads', 'Called <1 h', 'vs ' + T.called_within_1h_pct + '%', 'Connect rate', 'vs ' + T.connect_rate_pct + '%', 'Talk (min)', 'Score'].map((x, i) => h('th', { class: i > 1 ? 'num' : '', text: x })))),
+      h('tbody', null, board.map((r, i) => h('tr', null, h('td', { text: String(i + 1) }), h('td', { text: r.owner }), h('td', { class: 'num', text: F.int(r.calls) }), h('td', null, bar(r.calls, T.calls_per_day)), h('td', { class: 'num', text: F.int(r.newLeads) }),
+        h('td', { class: 'num', text: pctTxt(r.w1) }), h('td', null, r.w1 == null ? '—' : bar(r.w1, T.called_within_1h_pct)), h('td', { class: 'num', text: pctTxt(r.conn) }), h('td', null, r.conn == null ? '—' : bar(r.conn, T.connect_rate_pct)),
+        h('td', { class: 'num', text: F.int(r.talk) }), h('td', { class: 'num ' + (r.score >= 90 ? 'ok' : r.score >= 60 ? 'warn' : 'bad'), text: Math.round(r.score) + '%' })))))) : h('div', { class: 'ax-empty', text: 'No calls or new leads yet today.' }));
+    // targets editor (admin / marketing)
+    const box = AX.$('sl-targets');
+    if (box && ['admin', 'marketing'].includes(AX.role) && !box._built) {
+      box._built = true;
+      const inp = (k, label, step) => { const i = h('input', { type: 'number', min: '0', step: step || '1', value: String(T[k]), style: { width: '5.5rem' }, 'aria-label': label }); i.dataset.k = k; return h('label', { class: 'ax-flabel', style: { display: 'inline-flex', gap: '6px', alignItems: 'center', marginRight: '12px' } }, label, i); };
+      const save = h('button', { class: 'ax-btn', text: 'Save targets' }), msg = h('span', { class: 'ax-note', style: { marginLeft: '8px' } });
+      save.addEventListener('click', async () => { const v = Object.assign({}, T); box.querySelectorAll('input').forEach((i) => (v[i.dataset.k] = Number(i.value))); try { await AX.saveSalesTargets(v); msg.textContent = 'Saved for everyone.'; liveData.targets = v; renderLive(); } catch (e) { msg.textContent = 'Not saved: ' + e.message; } });
+      box.replaceChildren(h('span', { class: 'ax-flabel', style: { marginRight: '10px' }, text: 'Daily targets:' }), inp('calls_per_day', 'Calls per counsellor'), inp('called_within_1h_pct', 'Called within 1 h (%)'), inp('connect_rate_pct', 'Connect rate (%)'), inp('followup_gap_days', 'Follow-up gap (days)'), save, msg);
+    }
+  }
+  wrap('sales', function (D) {
+    if (!liveTimer) liveTimer = setInterval(() => { if (AX.tab === 'sales' && !document.hidden) refreshLive(); }, 60e3);
+    if (!liveData || Date.now() - liveAt > 60e3) refreshLive(); else renderLive();
+    if (!liveData) { AX.fill('sl-board', h('div', { class: 'ax-empty', text: 'Loading today’s numbers…' })); }
+    const P = AX.p(), per = AX.period(P, D.asOf);
+    const L = AX.leadsIn(D, P, per.start, per.end);
+    // ---- loss reasons ----
+    const lost = L.filter((l) => l.lost);
+    const reasons = [...AX.groupBy(lost, (l) => l.reason || 'No reason recorded')].map(([r, ls]) => ({ r, n: ls.length })).sort((a, b) => b.n - a.n);
+    AX.fill('sl-loss-note', lost.length ? F.int(lost.length) + ' of ' + F.int(L.length) + ' leads in the period are lost (' + F.pct((lost.length / L.length) * 100, 0) + '). ' + (reasons[0] ? 'Top reason: ' + reasons[0].r + ' (' + F.pct((reasons[0].n / lost.length) * 100, 0) + ').' : '') : 'No lost leads in this period.');
+    AX.chart.hbars('sl-loss-chart', reasons.slice(0, 10).map((x, i) => ({ label: x.r, value: x.n, color: i === 0 ? '#e5534b' : '#c9b8a6', sub: F.pct((x.n / (lost.length || 1)) * 100, 0) + ' of lost' })), { name: 'Lost leads', emptyText: 'No lost leads.' });
+    const LG = (AX.ui.lossBy = AX.ui.lossBy || 'campaign');
+    AX.fill('sl-loss-by', seg('Break down by', LG, [['campaign', 'Campaign'], ['programme', 'Programme'], ['source', 'Source'], ['owner', 'Counsellor']], (v) => (AX.ui.lossBy = v)));
+    const keyOf = (l) => (LG === 'campaign' ? (l.c ? l.c.name : '(no campaign)') : LG === 'programme' ? l.programme || 'Unmapped' : LG === 'source' ? l.source || 'Unknown' : l.owner || 'Unassigned');
+    const top3 = reasons.slice(0, 3).map((x) => x.r);
+    const lrows = [...AX.groupBy(L, keyOf)].map(([k, ls]) => { const lo = ls.filter((l) => l.lost); const o = { k, leads: ls.length, lost: lo.length, rate: AX.div(lo.length * 100, ls.length) }; top3.forEach((r, i) => (o['r' + i] = lo.filter((l) => (l.reason || 'No reason recorded') === r).length)); return o; }).filter((r) => r.leads >= 3);
+    AX.table('sl-loss-table', [{ key: 'k', label: LG === 'campaign' ? 'Campaign' : LG === 'programme' ? 'Programme' : LG === 'source' ? 'Source' : 'Counsellor', fmt: (v) => (LG === 'campaign' ? AX.shortName(v) : v) }, { key: 'leads', label: 'Leads', num: true, fmt: F.int }, { key: 'lost', label: 'Lost', num: true, fmt: F.int },
+      { key: 'rate', label: 'Loss rate', num: true, fmt: (v) => pctTxt(v), cls: (r) => (r.rate >= 60 ? 'bad' : r.rate >= 40 ? 'warn' : '') }].concat(top3.map((r, i) => ({ key: 'r' + i, label: r, num: true, fmt: F.int }))),
+      { rows: lrows, sort: { key: 'lost', dir: 'desc' }, exportName: 'aimer-loss-reasons.csv' });
+    // ---- follow-up gaps ----
+    const tgt = (liveData && liveData.targets && liveData.targets.followup_gap_days) || 3;
+    const gapDays = AX.ui.gapDays || tgt;
+    AX.fill('sl-gap-controls', seg('No activity for', gapDays, [[3, '3+ days'], [7, '7+ days'], [14, '14+ days']], (v) => (AX.ui.gapDays = v)));
+    const now = Date.now();
+    const open = AX.leadsIn(D, P, AX.d.add(D.asOf, -90), D.asOf).filter((l) => !l.lost && !l.admitted);
+    const gaps = open.map((l) => { const last = Math.max(l.lastActTs || 0, l.firstCallTs || 0, l.createdTs || 0); return { id: l.id, owner: l.owner || 'Unassigned', stage: l.status, programme: l.programme || '', campaign: l.c ? l.c.name : '', created: l.date, idle: (now - last) / 864e5 }; })
+      .filter((g) => g.idle >= gapDays);
+    const byOwner = [...AX.groupBy(gaps, (g) => g.owner)].map(([o, gs]) => ({ o, n: gs.length, worst: d3.max(gs, (g) => g.idle) })).sort((a, b) => b.n - a.n);
+    AX.fill('sl-gap-note', gaps.length ? F.int(gaps.length) + ' open leads (from the last 90 days) have had no call or stage change for ' + gapDays + '+ days. ' + (byOwner[0] ? 'Most with ' + byOwner[0].o + ' (' + byOwner[0].n + ').' : '') : 'No open lead has gone ' + gapDays + '+ days without activity.');
+    AX.chart.hbars('sl-gap-owner', byOwner.slice(0, 10).map((x) => ({ label: x.o, value: x.n, color: '#e8b322', sub: 'longest ' + x.worst.toFixed(0) + ' days' })), { name: 'Idle leads', emptyText: 'Nothing idle.' });
+    AX.table('sl-gap-table', [{ key: 'id', label: 'LeadSquared ID' }, { key: 'owner', label: 'Owner' }, { key: 'stage', label: 'Stage' }, { key: 'idle', label: 'Days idle', num: true, fmt: (v) => v.toFixed(0), cls: (r) => (r.idle >= 14 ? 'bad' : 'warn') },
+      { key: 'programme', label: 'Programme' }, { key: 'campaign', label: 'Campaign', fmt: (v) => AX.shortName(v) }, { key: 'created', label: 'Arrived' }],
+      { rows: gaps, sort: { key: 'idle', dir: 'desc' }, pageSize: 50, search: true, searchPlaceholder: 'Search owner, stage…', exportName: 'aimer-follow-up-gaps.csv' });
+  });
+
+  // ===================== BUDGET PACING =====================
+  AX.pacing = function (D, P) {
+    const A = D.asOf, ms = AX.d.monthStart(A), me = AX.d.monthEnd(A), dim = AX.d.diff(ms, me) + 1, done = AX.d.diff(ms, A) + 1;
+    const progs = AX.config.programmes.filter((p) => p.budget && (!P.programme || p.name === P.programme));
+    const spendOf = (name) => d3.sum(D.meta.filter((m) => m.date >= ms && m.date <= A && (!name || (m.c && m.c.programme === name)) && AX.campOk(m.c, Object.assign({}, P, { programme: name || P.programme }))), (m) => m.spend);
+    const row = (name, budget) => { const spent = spendOf(name); const expected = (budget * done) / dim; const proj = done ? (spent / done) * dim : 0; const pace = AX.div(proj * 100, budget);
+      return { name: name || 'All programmes', budget, spent, expected, proj, pace, need: Math.max(0, (budget - spent) / Math.max(1, dim - done)), status: pace == null ? '—' : pace > 110 ? 'Over pace' : pace < 90 ? 'Under pace' : 'On pace' }; };
+    const rows = progs.map((p) => row(p.name, p.budget));
+    if (!P.programme && AX.config.monthly_budget) rows.unshift(row(null, AX.config.monthly_budget));
+    return { rows, done, dim };
+  };
+  wrap('budget', function (D) {
+    const P = AX.p(), pc = AX.pacing(D, P);
+    AX.fill('bg-pace-note', 'Month to date: day ' + pc.done + ' of ' + pc.dim + '. Projection assumes the current daily spend continues. On pace = within ±10% of budget.');
+    AX.table('bg-pace', [{ key: 'name', label: 'Programme' }, { key: 'budget', label: 'Monthly budget', num: true, fmt: F.inr }, { key: 'spent', label: 'Spent so far', num: true, fmt: F.inr },
+      { key: 'expected', label: 'Expected by today', num: true, fmt: F.inr }, { key: 'proj', label: 'Projected month-end', num: true, fmt: F.inr }, { key: 'pace', label: 'Pace', num: true, fmt: (v) => pctTxt(v) },
+      { key: 'status', label: 'Status', cls: (r) => (r.status === 'On pace' ? 'ok' : r.status === 'Over pace' ? 'bad' : 'warn') }, { key: 'need', label: 'Daily spend to land on budget', num: true, fmt: F.inr }],
+      { rows: pc.rows, sort: null });
+  });
+
+  // ===================== PROGRAMME SCORECARD (week on week) =====================
+  wrap('programmes', function (D) {
+    const P = AX.p(), A = D.asOf, w1s = AX.d.add(A, -6), w0s = AX.d.add(A, -13), w0e = AX.d.add(A, -7);
+    const progs = [...new Set(D.camps.filter((c) => c.programme && c.inReports !== false).map((c) => c.programme))].filter((p) => !P.programme || p === P.programme);
+    const calc = (prog, s, e) => {
+      const m = D.meta.filter((x) => x.date >= s && x.date <= e && x.c && x.c.programme === prog);
+      const L = D.leads.filter((l) => l.date >= s && l.date <= e && l.programme === prog && !l.dup && AX.leadOk(l, Object.assign({}, P, { programme: prog }), { ignoreSource: true }));
+      const spend = d3.sum(m, (x) => x.spend), leads = d3.sum(m, (x) => x.leads), q = L.filter((l) => l.qualified).length;
+      const adm = D.leads.filter((l) => l.programme === prog && l.admitted && l.admitted >= s && l.admitted <= e).length;
+      return { spend, leads, cpl: AX.div(spend, leads), crm: L.length, q, cpq: AX.div(spend, q), adm };
+    };
+    const rows = progs.map((p) => { const a = calc(p, w1s, A), b = calc(p, w0s, w0e); return { p, a, b, t: AX.progCfg(p) }; });
+    const ch = (a, b, lowerBetter) => { const c = AX.chg(a, b).pct; if (c == null) return h('span', { class: 'muted', text: '' }); const good = lowerBetter ? c < 0 : c > 0; return h('span', { class: good ? 'ok' : 'bad', style: { fontSize: '11px', marginLeft: '4px' }, text: (c > 0 ? '▲' : '▼') + Math.abs(c).toFixed(0) + '%' }); };
+    const cell = (v, fmt, prev, lowerBetter) => h('td', { class: 'num' }, fmt(v), ch(v, prev, lowerBetter));
+    AX.fill('pg-wow', rows.length ? h('div', { class: 'ax-tablewrap' }, h('table', { class: 'ax-table' },
+      h('thead', null, h('tr', null, ['Programme', 'Spend', 'Meta leads', 'CPL', 'CRM leads', 'Qualified', 'Cost / qualified', 'Admissions', 'CPL vs target'].map((x, i) => h('th', { class: i ? 'num' : '', text: x })))),
+      h('tbody', null, rows.map((r) => h('tr', null, h('td', { text: r.p }), cell(r.a.spend, F.inr, r.b.spend), cell(r.a.leads, F.int, r.b.leads), cell(r.a.cpl, F.inr, r.b.cpl, true), cell(r.a.crm, F.int, r.b.crm),
+        cell(r.a.q, F.int, r.b.q), cell(r.a.cpq, F.inr, r.b.cpq, true), cell(r.a.adm, F.int, r.b.adm),
+        h('td', { class: 'num ' + (!r.t || !r.t.target_cpl || r.a.cpl == null ? '' : r.a.cpl <= r.t.target_cpl ? 'ok' : r.a.cpl <= r.t.target_cpl * 1.1 ? 'warn' : 'bad'), text: r.t && r.t.target_cpl ? F.inr(r.t.target_cpl) : '—' })))))) : h('div', { class: 'ax-empty', text: 'No programmes to compare.' }));
+    AX.fill('pg-wow-note', 'Last 7 days (' + AX.d.nice(w1s) + ' – ' + AX.d.nice(A) + ') vs the 7 days before. Arrows show the change; green is better. Admissions are counted on the day they happened.');
+  });
+
+  // ===================== ATTRIBUTION TRACKER =====================
+  const attrCache = new Map(); let attrPending = null;
+  wrap('crm', function (D) {
+    const P = AX.p(), per = AX.period(P, D.asOf), key = per.start + '|' + per.end;
+    const r = attrCache.get(key);
+    if (r === undefined && AX.attribution && attrPending !== key) { attrPending = key; AX.attribution(per.start, per.end).then((x) => { attrCache.set(key, x || {}); attrPending = null; if (AX.tab === 'crm') AX.render(); }).catch(() => { attrCache.set(key, {}); attrPending = null; }); }
+    if (!r) { AX.fill('crm-attr', h('div', { class: 'ax-empty', text: 'Loading attribution…' })); return; }
+    const rows = (r.by_source || []).map((x) => Object.assign({}, x, { pct: AX.div(x.linked * 100, x.total) }));
+    const meta = rows.filter((x) => /meta|facebook|instagram/i.test(x.source + ' ' + x.source_raw));
+    const mt = d3.sum(meta, (x) => x.total), ml = d3.sum(meta, (x) => x.linked), mu = d3.sum(meta, (x) => x.name_unmatched), mn = d3.sum(meta, (x) => x.no_campaign);
+    AX.fill('crm-attr-note', mt ? 'Meta leads in the CRM: ' + F.pct((ml / mt) * 100, 0) + ' linked to their campaign. Of the rest, ' + F.int(mu) + ' carry a campaign name the dashboard can’t match (fix the name or add a rule) and ' + F.int(mn) + ' arrive with no campaign at all (the form or integration is not passing it).' : 'No Meta leads in this period.');
+    AX.table('crm-attr', [{ key: 'source', label: 'Source' }, { key: 'source_raw', label: 'As sent by LeadSquared' }, { key: 'total', label: 'Leads', num: true, fmt: F.int }, { key: 'linked', label: 'Linked', num: true, fmt: F.int },
+      { key: 'pct', label: 'Linked %', num: true, fmt: (v) => pctTxt(v), cls: (x) => (x.pct == null ? '' : x.pct >= 90 ? 'ok' : x.pct >= 60 ? 'warn' : 'bad') }, { key: 'name_unmatched', label: 'Name not matched', num: true, fmt: F.int }, { key: 'no_campaign', label: 'No campaign sent', num: true, fmt: F.int }],
+      { rows, sort: { key: 'total', dir: 'desc' }, exportName: 'aimer-attribution.csv' });
+    AX.table('crm-attr-names', [{ key: 'name', label: 'Campaign name on the lead (not matched)' }, { key: 'source', label: 'Source' }, { key: 'n', label: 'Leads', num: true, fmt: F.int }], { rows: r.unmatched_names || [], sort: { key: 'n', dir: 'desc' } });
+  });
+
+  // ===================== WINNERS & FLOPS (Campaigns page) =====================
+  wrap('campaigns', function (D) {
+    const P = AX.p(), per = AX.period(P, D.asOf), cfg = AX.config;
+    const minSpend = Math.max(2000, (cfg.thresholds.min_spend_verdict || 3000) / 2);
+    const rows = AX.campaignRows(D, P, per.start, per.end).filter((r) => r.objective === 'Leads' && r.spend >= minSpend);
+    const tgt = (r) => r.tCpl || cfg.target_cpl;
+    const scored = rows.map((r) => {
+      const cpq = r.qualified ? r.spend / r.qualified : null;
+      const why = [], bad = [];
+      if (r.cpl != null && r.cpl <= tgt(r)) why.push('CPL ' + F.inr(r.cpl) + ' (target ' + F.inr(tgt(r)) + ')');
+      if (r.qualified) why.push(r.qualified + ' qualified · ' + F.inr(cpq) + ' each');
+      if (r.admitted) why.push(r.admitted + ' admitted');
+      if (!r.leads) bad.push(F.inr(r.spend) + ' spent, no Meta leads');
+      else if (r.cpl > tgt(r) * 1.5) bad.push('CPL ' + F.inr(r.cpl) + ' is ' + Math.round((r.cpl / tgt(r) - 1) * 100) + '% over target');
+      if (r.crm >= 10 && !r.qualified) bad.push(r.crm + ' CRM leads, 0 qualified');
+      // composite: cost per qualified when available, else CPL vs target
+      const rank = cpq != null ? cpq / (tgt(r) * 8) : r.cpl != null ? r.cpl / tgt(r) : 99;
+      return { r, why, bad, rank, win: r.leads >= 5 && r.cpl != null && r.cpl <= tgt(r) * 1.1 && !(r.crm >= 10 && !r.qualified) };
+    });
+    const winners = scored.filter((x) => x.win).sort((a, b) => a.rank - b.rank).slice(0, 5);
+    const flops = scored.filter((x) => x.bad.length).sort((a, b) => b.r.spend - a.r.spend).slice(0, 5);
+    const item = (x, kind) => h('div', { class: 'ax-wf ' + kind, onclick: () => { AX.ui.detail = x.r.id; AX.render(); const c = AX.$('cp-detail-card'); if (c) c.scrollIntoView({ block: 'nearest' }); } },
+      h('div', { class: 'ax-wf-top' }, h('b', { title: x.r.name, text: AX.shortName(x.r.name) }), h('span', { class: 'ax-note', style: { margin: 0 }, text: x.r.programme || 'Unmapped' })),
+      h('div', { class: 'ax-wf-nums', text: F.inr(x.r.spend) + ' · ' + F.int(x.r.leads) + ' leads · CPL ' + F.inr(x.r.cpl) + (x.r.crm ? ' · ' + x.r.crm + ' in CRM' : '') }),
+      h('div', { class: 'ax-wf-why' }, (kind === 'win' ? x.why : x.bad).map((t) => h('span', { class: 'ax-pill ' + (kind === 'win' ? 'ok' : 'bad'), text: t }))));
+    AX.fill('cp-win', winners.length ? winners.map((x) => item(x, 'win')) : h('div', { class: 'ax-empty', text: 'No lead campaign is at or under its CPL target with 5+ leads in this period.' }));
+    AX.fill('cp-flop', flops.length ? flops.map((x) => item(x, 'flop')) : h('div', { class: 'ax-empty', text: 'No campaign with meaningful spend is failing in this period.' }));
+  });
+
+  // ===================== ACTION PLAN: pacing items =====================
+  wrap('plan', function (D) {
+    if (AX.role === 'creative') return;
+    const pc = AX.pacing(D, AX.p()); if (pc.done < 5) return;
+    const off = pc.rows.filter((r) => r.status === 'Over pace' || r.status === 'Under pace');
+    if (!off.length) return;
+    const list = AX.$('pl-list'); if (!list) return;
+    const card = h('div', { class: 'ax-card', style: { marginBottom: '10px' } },
+      h('div', { class: 'ax-chead' }, h('h3', { text: 'Budget pacing needs a correction' }), h('div', { style: { display: 'flex', gap: '6px' } }, h('span', { class: 'ax-pill', text: 'Budget & campaigns' }), h('span', { class: 'ax-pill warn', text: 'Medium' }))),
+      h('dl', { class: 'ax-dl' }, h('dt', { text: 'Finding' }), h('dd', { text: off.map((r) => r.name + ': ' + r.status.toLowerCase() + ' (projected ' + F.inr(r.proj) + ' vs ' + F.inr(r.budget) + ')').join('; ') + '.' }),
+        h('dt', { text: 'Action' }), h('dd', { text: 'Adjust daily budgets to the “Daily spend to land on budget” figures on the Budget & ROI page.' }), h('dt', { text: 'Why' }), h('dd', { text: 'Keeps the month on plan without a last-week scramble.' })));
+    list.prepend(card);
+  });
+})();
+
+</script>
+<script>
 // Main: navigation, data-state header, settings persistence, and the render loop.
 (function () {
   const AX = window.AX, h = AX.h;
@@ -2632,6 +3021,7 @@ body { margin: 0; background: #e3f3f0; }
     nav.querySelectorAll('button[data-tab]').forEach((b) => b.setAttribute('aria-current', b.dataset.tab === AX.tab ? 'page' : 'false'));
     document.querySelectorAll('#ax .ax-page').forEach((p) => { p.hidden = p.dataset.page !== AX.tab; });
     AX.$('ax-ptitle').textContent = TITLES[AX.tab] || '';
+    const act = document.querySelector('#ax-nav [aria-current="page"]'); if (act && act.scrollIntoView) { try { act.scrollIntoView({ block: 'nearest', inline: 'center' }); } catch (_) {} }
     const cur = nav.querySelector('[aria-current="page"]'); if (cur && cur.scrollIntoView && nav.scrollWidth > nav.clientWidth) nav.scrollLeft = cur.offsetLeft - 20;
     const ds = Object.fromEntries(REQUIRED.map((id) => [id, dash.data(id)]));
     const failed = REQUIRED.filter((id) => ['error', 'missing', 'declined', 'connect'].includes(ds[id].status));
@@ -2709,6 +3099,9 @@ body { margin: 0; background: #e3f3f0; }
   const objective = (o, name) => { const n = s(name).toUpperCase(); if (/AWRS|AWARENESS|\bREACH\b/.test(n)) return 'Awareness'; if (/(^|[^A-Z])WEB([^A-Z]|$)|TRAFFIC|\bLPV\b/.test(n)) return 'Traffic & engagement'; const x = s(o).toUpperCase(); if (!x || x.includes('LEAD')) return 'Leads'; if (x.includes('AWARE') || x.includes('REACH')) return 'Awareness'; return 'Traffic & engagement'; };
 
   // Audience breakdowns are fetched on demand for the selected period and campaigns
+  AX.salesLive = async () => { const { data, error } = await sb.rpc('sales_live', { p_days: 7 }); if (error) throw error; return data; };
+  AX.attribution = async (since, until) => { const { data, error } = await sb.rpc('attribution_summary', { p_since: since, p_until: until }); if (error) throw error; return data; };
+  AX.saveSalesTargets = async (v) => { const { error } = await sb.from('settings').upsert({ key: 'sales_targets', value: v }); if (error) throw error; };
   AX.fetchBreakdowns = async (since, until, campaigns) => {
     const { data, error } = await sb.rpc('breakdown_summary', { p_since: since, p_until: until, p_campaigns: campaigns && campaigns.length ? campaigns : null });
     if (error) throw error;
@@ -2727,7 +3120,8 @@ body { margin: 0; background: #e3f3f0; }
     const camps = (B.campaigns || []).map((r) => ({ source: 'meta', campaign_id: r[0], name: r[1], objective: r[2], status: r[3], location: r[4], daily_budget: r[5], start_date: r[6], end_date: r[7], programmes: r[8] ? { name: r[8], in_reports: r[9] } : null }));
     const ins = toObj(['date', 'campaign_id', 'spend', 'impressions', 'reach', 'link_clicks', 'leads', 'is_partial_day'], B.insights);
     const adsRows = toObj(['date', 'ad_id', 'ad_name', 'adset_id', 'adset_name', 'campaign_id', 'spend', 'impressions', 'reach', 'link_clicks', 'clicks_all', 'unique_link_clicks', 'landing_page_views', 'post_engagement', 'video_plays', 'thruplays', 'leads'], B.ads);
-    const leads = toObj(['lead_id', 'created_at', 'created_date', 'source', 'campaign_id', 'programme', 'location', 'owner', 'lead_status', 'contacted_date', 'connected_date', 'qualified_date', 'counsel_booked_date', 'counsel_done_date', 'application_date', 'admission_date', 'lost_date', 'disq_reason', 'revenue', 'crm_updated_at', 'is_duplicate', 'first_call_at', 'first_connect_at', 'calls', 'connected_calls', 'talk_secs'], B.leads);
+    const leads = toObj(['lead_id', 'created_at', 'created_date', 'source', 'campaign_id', 'programme', 'location', 'owner', 'lead_status', 'contacted_date', 'connected_date', 'qualified_date', 'counsel_booked_date', 'counsel_done_date', 'application_date', 'admission_date', 'lost_date', 'disq_reason', 'revenue', 'crm_updated_at', 'is_duplicate', 'first_call_at', 'first_connect_at', 'calls', 'connected_calls', 'talk_secs', 'last_activity_at'], B.leads);
+    dash._set('creatives', toObj(['ad_id', 'campaign_id', 'adset_id', 'ad_name', 'object_type', 'title', 'body', 'cta', 'thumbnail_url', 'image_url', 'preview_mobile_url', 'preview_instagram_url', 'post_url', 'post_url_ig', 'link_url'], B.creatives));
     dash._set('calls_daily', toObj(['date', 'owner', 'calls', 'connected', 'talk'], B.calls_daily));
     return [camps, ins, leads, B.integrations || [], B.programmes || [], B.targets || [], B.rules || [], adsRows];
   }
@@ -2759,12 +3153,12 @@ body { margin: 0; background: #e3f3f0; }
         campaign_id: s(l.campaign_id), programme: s(l.programme), location: s(l.location), owner: s(l.owner), lead_status: s(l.lead_status), contacted_date: s(l.contacted_date), connected_date: s(l.connected_date),
         qualified_date: s(l.qualified_date), counsel_booked_date: s(l.counsel_booked_date), counsel_done_date: s(l.counsel_done_date), application_date: s(l.application_date), admission_date: s(l.admission_date),
         lost_date: s(l.lost_date), disq_reason: s(l.disq_reason), revenue: s(l.revenue), last_crm_update: s(l.crm_updated_at),
-        created_iso: s(l.created_at), first_call_at: s(l.first_call_at), first_connect_at: s(l.first_connect_at), calls: s(l.calls || 0), connected_calls: s(l.connected_calls || 0), talk_secs: s(l.talk_secs || 0) })));
+        created_iso: s(l.created_at), first_call_at: s(l.first_call_at), first_connect_at: s(l.first_connect_at), calls: s(l.calls || 0), connected_calls: s(l.connected_calls || 0), talk_secs: s(l.talk_secs || 0), last_activity_at: s(l.last_activity_at) })));
       const name = { meta: 'Meta Ads', leadsquared: 'LeadSquared CRM' };
       const lsq = integ.find((x) => x.source === 'leadsquared');
       const istIso = (t) => (t ? new Date(Date.parse(t) + 5.5 * 3600e3).toISOString().slice(0, 16) : '');
       dash._set('integration_status', integ.filter((x) => name[x.source]).map((x) => ({ source: name[x.source], mode: x.mode, last_sync: istIso(x.last_success_at), health: s(x.health), note: x.mode === 'live' ? 'Synced from the live account.' : 'Not connected yet.' }))
-        .concat([{ source: 'Revenue', mode: lsq?.mode === 'live' ? 'live' : 'unavailable', last_sync: istIso(lsq?.last_success_at), health: lsq?.mode === 'live' ? 'From LeadSquared' : 'Needs the LeadSquared sync', note: 'Fee revenue on admitted leads.' }]));
+        .concat([{ source: 'Revenue', mode: lsq?.mode === 'live' && leads.some((x) => x.revenue != null && x.revenue !== '') ? 'live' : 'unavailable', last_sync: istIso(lsq?.last_success_at), health: leads.some((x) => x.revenue != null && x.revenue !== '') ? 'From LeadSquared' : 'Not tracked yet: no fee field is mapped from LeadSquared', note: 'Fee revenue on admitted leads.' }]));
 
       // Shared targets for the current month (managed in the admin panel)
       const ym = new Date(Date.now() + 5.5 * 3600e3).toISOString().slice(0, 8) + '01';
@@ -2802,8 +3196,18 @@ body { margin: 0; background: #e3f3f0; }
   const md = (text) => {
     const box = h('div'); let list = null, type = '';
     const inline = (t) => t.split(/(\*\*[^*]+\*\*)/g).filter(Boolean).map((p) => (p.startsWith('**') && p.endsWith('**') ? h('b', { text: p.slice(2, -2) }) : document.createTextNode(p)));
+    let tbl = null;
     for (const raw of String(text).split('\n')) {
-      const line = raw.trimEnd(), hm = /^#{1,4}\s+(.*)$/.exec(line), ul = /^\s*[-*•]\s+(.*)$/.exec(line), ol = /^\s*\d+[.)]\s+(.*)$/.exec(line);
+      const line = raw.trimEnd();
+      if (/^\s*\|.*\|\s*$/.test(line)) {
+        const cells = line.trim().replace(/^\||\|$/g, '').split('|').map((c) => c.trim());
+        if (cells.every((c) => /^:?-{2,}:?$/.test(c))) continue;
+        if (!tbl) { tbl = h('table', { class: 'ax-table ax-mdtable' }); box.append(h('div', { class: 'ax-tablewrap' }, tbl)); tbl.append(h('thead', null, h('tr', null, cells.map((c) => h('th', null, inline(c)))))); tbl.append(h('tbody')); }
+        else tbl.lastChild.append(h('tr', null, cells.map((c) => h('td', null, inline(c)))));
+        list = null; continue;
+      }
+      tbl = null;
+      const hm = /^#{1,4}\s+(.*)$/.exec(line), ul = /^\s*[-*•]\s+(.*)$/.exec(line), ol = /^\s*\d+[.)]\s+(.*)$/.exec(line);
       if (ul || ol) { const t = ul ? 'ul' : 'ol'; if (!list || type !== t) { list = h(t); type = t; box.append(list); } list.append(h('li', null, inline((ul || ol)[1]))); continue; }
       list = null;
       if (hm) box.append(h('h4', { text: hm[1].replace(/\*\*/g, '') })); else if (line.trim()) box.append(h('p', null, inline(line)));
@@ -2827,7 +3231,7 @@ body { margin: 0; background: #e3f3f0; }
       const { data } = await sb.from('ai_insights').select('id,created_at,created_by_email,period_start,period_end,filters,model,content').order('created_at', { ascending: false }).limit(40);
       saved = (data || []).filter((x) => ((x.filters && x.filters.mode) || 'campaign') === mode).slice(0, 12);
       const c = current();
-      AX.fill(pfx + '-ai-hist', saved.map((x) => h('button', { 'data-id': x.id, text: x.period_start.slice(5) + ' → ' + x.period_end.slice(5) + (x.filters?.programme ? ' · ' + AX.shortName(x.filters.programme) : ''), onclick: () => show(x) })));
+      AX.fill(pfx + '-ai-hist', saved.map((x) => h('button', { 'data-id': x.id, text: (x.filters?.kind === 'weekly_brief' ? '★ Weekly brief · ' : '') + x.period_start.slice(5) + ' → ' + x.period_end.slice(5) + (x.filters?.programme ? ' · ' + AX.shortName(x.filters.programme) : ''), onclick: () => show(x) })));
       const match = saved.find((x) => x.period_start === c.since && x.period_end === c.until && (x.filters?.programme || null) === c.programme && (x.filters?.location || null) === c.location);
       if (match) show(match);
       else AX.fill(pfx + '-ai-doc', h('p', { class: 'ax-note', style: { color: '#9aa49f' }, text: saved.length ? 'No analysis saved for this exact period and filters yet. Pick a saved one below' + (CAN_RUN[mode].includes(role) ? ', or click Analyse.' : '.') : 'No analyses yet.' }));
@@ -2846,6 +3250,54 @@ body { margin: 0; background: #e3f3f0; }
     dash.onData(() => { if (AX.tab !== tab) return; const k = JSON.stringify(current()); if (k !== lastKey) { lastKey = k; loadAI(); } });
     if (AX.tab === tab) loadAI();
   }
+
+  // ---------- Ask AIMER AI: chat analyst on every page ----------
+  (function chat() {
+    const SUGGEST = {
+      creative: ['Which 5 ads had the lowest CPL in the last 7 days?', 'Do videos or images work better this month?', 'Which placements waste money?', 'Which ads are losing CTR week on week?'],
+      product_manager: ['How is my course doing this month vs budget and target?', 'Which campaign brings the most qualified leads?', 'Why are leads getting lost?', 'Which ad has the cheapest leads?'],
+      def: ['Which campaigns are flops this month and why?', 'Which programme has the cheapest qualified leads?', 'Who is the slowest counsellor to call new leads?', 'Top loss reasons for Future HR in the last 30 days', 'Are we on pace with this month’s budget?', 'Compare Instagram Reels vs Feed CPL'],
+    };
+    const fab = h('button', { class: 'ax-chat-fab', 'aria-label': 'Ask AIMER AI', 'aria-expanded': 'false' }, h('span', { 'aria-hidden': 'true', text: '✦' }), ' Ask AIMER AI');
+    const list = h('div', { class: 'ax-chat-list', role: 'log', 'aria-live': 'polite' });
+    const input = h('textarea', { rows: 2, placeholder: 'Ask about campaigns, ads, leads, counsellors…', 'aria-label': 'Your question' });
+    const send = h('button', { class: 'ax-btn ax-chat-send', text: 'Ask' });
+    const clear = h('button', { class: 'ax-chat-x', title: 'New conversation', text: '↺' });
+    const close = h('button', { class: 'ax-chat-x', title: 'Close', 'aria-label': 'Close', text: '✕' });
+    const panel = h('section', { class: 'ax-chat', role: 'dialog', 'aria-label': 'Ask AIMER AI', hidden: true },
+      h('div', { class: 'ax-chat-head' }, h('div', null, h('b', { text: 'AIMER AI analyst' }), h('div', { class: 'ax-chat-sub', text: role === 'creative' ? 'Meta Ads data · your access' : role === 'product_manager' ? 'Your courses only' : 'Meta Ads + LeadSquared' })), h('div', null, clear, close)),
+      list, h('div', { class: 'ax-chat-in' }, input, send));
+    document.body.append(fab, panel);
+    let convo = [];
+    const sugg = () => h('div', { class: 'ax-chat-sugg' }, h('div', { class: 'ax-chat-sub', text: 'Try asking:' }), (SUGGEST[role] || SUGGEST.def).map((q) => h('button', { text: q, onclick: () => ask(q) })));
+    const reset = () => { convo = []; list.replaceChildren(h('div', { class: 'ax-chat-msg ai' }, h('p', { text: 'Hi! Ask me anything about your Meta campaigns' + (role === 'creative' ? ', ads and audiences.' : ', ads, leads, counsellors and budgets.') + ' I read live data and tell you which numbers I used.' })), sugg()); };
+    reset();
+    const toggle = (open) => { panel.hidden = !open; fab.setAttribute('aria-expanded', String(open)); if (open) setTimeout(() => input.focus(), 50); };
+    fab.addEventListener('click', () => toggle(panel.hidden));
+    close.addEventListener('click', () => toggle(false));
+    clear.addEventListener('click', reset);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel.hidden) toggle(false); });
+    const TOOL_LABEL = { campaign_performance: 'campaigns', ad_performance: 'ads', audience_breakdown: 'audience', daily_trend: 'daily trend', lead_funnel: 'CRM funnel', loss_reasons: 'loss reasons', counsellor_performance: 'counsellors', budget_pacing: 'budget pacing' };
+    async function ask(q) {
+      q = String(q || '').trim(); if (!q) return;
+      const P = AX.p(); let ctx = '';
+      try { const D = AX.parse({ campaigns: dash.data('campaigns').data, meta: dash.data('meta_daily').data, leads: dash.data('crm_leads').data }); const per = AX.period(P, D.asOf); ctx = ' [Dashboard filters right now: ' + per.start + ' to ' + per.end + (P.programme ? ', programme ' + P.programme : '') + '. Use them only if my question doesn’t say otherwise.]'; } catch (_) {}
+      list.querySelector('.ax-chat-sugg')?.remove();
+      list.append(h('div', { class: 'ax-chat-msg me' }, h('p', { text: q })));
+      const wait = h('div', { class: 'ax-chat-msg ai' }, h('p', { class: 'ax-chat-sub', text: 'Reading the data…' }));
+      list.append(wait); list.scrollTop = list.scrollHeight;
+      convo.push({ role: 'user', content: q + ctx });
+      input.value = ''; send.disabled = true;
+      const { data, error } = await sb.functions.invoke('ai-chat', { body: { messages: convo } });
+      send.disabled = false;
+      if (error || !data?.answer) { let m = error?.message || 'No answer'; try { m = (await error.context.json()).error || m; } catch (_) {} wait.replaceChildren(h('p', { class: 'bad', text: m })); convo.pop(); return; }
+      convo.push({ role: 'assistant', content: data.answer });
+      wait.replaceChildren(md(data.answer), data.tools?.length ? h('div', { class: 'ax-chat-sub', text: 'Data used: ' + [...new Set(data.tools.map((t) => TOOL_LABEL[t] || t))].join(', ') }) : null);
+      list.scrollTop = list.scrollHeight;
+    }
+    send.addEventListener('click', () => ask(input.value));
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask(input.value); } });
+  })();
   mountAI('ov', 'campaign', 'overview');
   mountAI('cr', 'creative', 'creative');
 })();
