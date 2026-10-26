@@ -79,6 +79,10 @@ body { margin: 0; background: #e3f3f0; }
 #dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
 /* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
 #dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
 .ax {
   --g: #12c784; --g2: #0a7a4c; --g3: #b9f0d9; --lime: #dfe35a; --lime2: #f3f4c4;
   --mint: #dcf2ef; --cream: #fbfbe9; --ink: #0d0f0e; --ink2: #1b1f1d; --line: #e7ece9; --soft: #f5f7f6;
@@ -365,6 +369,17 @@ body { margin: 0; background: #e3f3f0; }
 .ax-gtrend { padding: 3px 10px; font-size: 12px; align-self: flex-start; margin: 2px 0 4px; }
 .ax-dlg { width: min(760px, calc(100vw - 24px)); border: 0; border-radius: 18px; padding: 18px; box-shadow: 0 18px 60px rgba(13,15,14,.3); }
 .ax-dlg::backdrop { background: rgba(13,15,14,.45); }
+
+.ax-ex-h { font-size: 22px; margin: 6px 0 2px; }
+.ax-exlist { margin: 4px 0 8px; padding-left: 18px; font-size: 13.5px; } .ax-exlist li { margin: 3px 0; }
+.ax-date { border: 1px solid rgba(13,15,14,.15); border-radius: 999px; padding: 6px 10px; font: inherit; font-size: 13px; }
+a.ax-btn { text-decoration: none; display: inline-block; }
+@media print {
+  .ax-chat-fab, .ax-chat, #ax-nav, .ax-filters, .ax-noprint, .ax-tools, header, .ax-userbar, .ax-srcbar { display: none !important; }
+  .ax-page[hidden] { display: none !important; } body { background: #fff !important; }
+  .ax-card { break-inside: avoid; box-shadow: none !important; border: 1px solid #ddd; }
+  .ax-card.dark { background: #fff !important; color: #000 !important; }
+}
 </style>
 </head>
 <body>
@@ -375,6 +390,7 @@ body { margin: 0; background: #e3f3f0; }
     <div class="ax-brand"><span class="ax-logo" aria-hidden="true"><i></i></span><div><div class="ax-bname1">AIMER Insights</div><div class="ax-bsub" id="ax-asof" data-source="meta_daily">&nbsp;</div></div></div>
     <nav class="ax-tabs" id="ax-nav" aria-label="Dashboard sections">
       <button data-tab="overview"><span aria-hidden="true">◎</span> Overview</button>
+      <button data-tab="exec" hidden><span aria-hidden="true">★</span> My summary</button>
       <button data-tab="plan"><span aria-hidden="true">✓</span> Action plan</button>
       <button data-tab="daily"><span aria-hidden="true">▤</span> Daily</button>
       <button data-tab="campaigns"><span aria-hidden="true">▥</span> Campaigns</button>
@@ -451,6 +467,23 @@ body { margin: 0; background: #e3f3f0; }
           <p class="ax-note">Checked against the thresholds in Integrations &amp; settings.</p>
           <div class="ax-alerts" id="ov-alerts" data-source="meta_daily crm_leads campaigns"></div>
         </div>
+      </section>
+
+      <!-- My summary (marketing head only) -->
+      <section class="ax-page" id="exec" data-page="exec" hidden>
+        <div class="ax-tools ax-noprint" style="flex-wrap:wrap;gap:10px"><div id="ex-controls" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center"></div>
+          <span><button class="ax-btn" id="ex-copy">Copy for WhatsApp</button> <a class="ax-btn" id="ex-wa" target="_blank" rel="noopener">Send on WhatsApp</a> <button class="ax-btn" id="ex-print">Print / Save PDF</button></span></div>
+        <div id="ex-title" data-source="meta_daily crm_leads"></div>
+        <div class="ax-kpis" id="ex-kpis" data-source="meta_daily crm_leads"></div>
+        <div class="ax-card dark ax-noprint-bg" id="ex-ai-card" style="margin-top:var(--cds-gap-md)"><div class="ax-chead"><h3>AI executive summary</h3><button class="ax-btn" id="ex-ai-run" style="background:#dfe35a;border-color:#dfe35a;color:#0d0f0e">Write my summary</button></div><div class="ax-aidoc" id="ex-ai"><p class="ax-note">One click: what happened in this period, with numbers, and three decisions for the week.</p></div></div>
+        <div class="ax-sec"><span>Leads</span> Where they came from</div>
+        <div class="ax-grid"><div class="ax-card"><h3>By source</h3><div id="ex-src" data-source="crm_leads"></div></div><div class="ax-card"><h3>By programme</h3><div id="ex-prog" data-source="crm_leads meta_daily"></div></div></div>
+        <div class="ax-sec"><span>Campaigns</span> Best, worst and budget</div>
+        <div class="ax-card"><div id="ex-camp" data-source="meta_daily crm_leads"></div><div id="ex-pace"></div></div>
+        <div class="ax-sec"><span>Creatives</span> Ads that won and lost</div>
+        <div class="ax-card"><div id="ex-cre" data-source="meta_ads"></div></div>
+        <div class="ax-sec"><span>Sales</span> Follow-up and results by counsellor</div>
+        <div class="ax-card"><p class="ax-note" id="ex-sales-note"></p><div id="ex-sales" data-source="crm_leads"></div></div>
       </section>
 
       <!-- Action plan -->
@@ -3076,10 +3109,141 @@ body { margin: 0; background: #e3f3f0; }
 
 </script>
 <script>
+// My summary: the marketing head's private daily / weekly / monthly / custom report.
+// Leads, campaigns, creatives and sales for the chosen period vs the previous equivalent period,
+// with an AI executive summary, copy-for-WhatsApp and print/PDF. Visible only to emails in settings.exec_summary_emails.
+(function () {
+  const AX = window.AX, h = AX.h, F = AX.fmt;
+  const n = (v) => { const x = Number(v); return isFinite(x) ? x : 0; };
+  AX.ui = AX.ui || {};
+  const seg = (cur, opts, set) => h('div', { class: 'ax-seg', role: 'group' }, opts.map(([v, t]) => h('button', { 'aria-pressed': v === cur ? 'true' : 'false', onclick: () => { set(v); AX.render(); } }, t)));
+  const pct = (v, d = 0) => (v == null ? '—' : F.pct(v, d));
+  const mondayOf = (d) => { const dt = new Date(d + 'T00:00:00Z'); const wd = (dt.getUTCDay() + 6) % 7; return AX.d.add(d, -wd); };
+
+  function range(D) {
+    const def = { mode: 'weekly', day: AX.d.add(D.asOf, -1), week: mondayOf(AX.d.add(D.asOf, -7)), month: D.asOf.slice(0, 7), from: AX.d.add(D.asOf, -13), to: D.asOf };
+    const S = (AX.ui.ex = AX.ui.ex || {});
+    for (const k of Object.keys(def)) { const ok = k === 'mode' ? ['daily', 'weekly', 'monthly', 'custom'].includes(S[k]) : k === 'month' ? /^\d{4}-\d{2}$/.test(S[k] || '') : /^\d{4}-\d{2}-\d{2}$/.test(S[k] || ''); if (!ok) S[k] = def[k]; }
+    let s, e, ps, pe, label;
+    if (S.mode === 'daily') { s = e = S.day; ps = pe = AX.d.add(s, -1); label = AX.d.dow(s) + ' ' + AX.d.nice(s); }
+    else if (S.mode === 'weekly') { s = mondayOf(S.week); e = AX.d.add(s, 6); ps = AX.d.add(s, -7); pe = AX.d.add(s, -1); label = 'Week of ' + AX.d.nice(s) + ' – ' + AX.d.nice(e); }
+    else if (S.mode === 'monthly') { s = S.month + '-01'; e = AX.d.monthEnd(s); const pm = AX.d.add(s, -1); ps = AX.d.monthStart(pm); pe = pm; label = new Date(s + 'T00:00:00Z').toLocaleString('en-IN', { month: 'long', year: 'numeric', timeZone: 'UTC' }); }
+    else { s = S.from <= S.to ? S.from : S.to; e = S.from <= S.to ? S.to : S.from; const len = AX.d.diff(s, e) + 1; pe = AX.d.add(s, -1); ps = AX.d.add(s, -len); label = AX.d.nice(s) + ' – ' + AX.d.nice(e); }
+    const partial = e >= D.asOf; if (e > D.asOf) e = D.asOf;
+    return { S, s, e, ps, pe, label, partial };
+  }
+
+  function calc(D, s, e) {
+    const P0 = { period: 'custom', start: s, end: e };
+    const meta = D.meta.filter((m) => m.date >= s && m.date <= e);
+    const spend = d3.sum(meta, (m) => m.spend), mleads = d3.sum(meta, (m) => m.leads);
+    const L = D.leads.filter((l) => l.date >= s && l.date <= e && !l.dup);
+    const metaL = L.filter((l) => l.source === 'Meta Ads');
+    const q = L.filter((l) => l.qualified).length, mq = metaL.filter((l) => l.qualified).length;
+    const adm = D.leads.filter((l) => l.admitted && l.admitted >= s && l.admitted <= e && !l.dup).length;
+    const lost = L.filter((l) => l.lost).length;
+    const callable = metaL.filter((l) => l.createdTs != null && Date.now() - l.createdTs > 2 * 3600e3);
+    const w1 = callable.filter((l) => l.firstCallTs != null && l.firstCallTs - l.createdTs <= 3600e3).length;
+    return { P0, meta, L, spend, mleads, cpl: AX.div(spend, mleads), crm: L.length, q, mq, cpq: AX.div(spend, mq), adm, lostPct: AX.div(lost * 100, L.length), w1: AX.div(w1 * 100, callable.length) };
+  }
+
+  AX.pages.exec = function (D) {
+    const R = range(D), S = R.S;
+    // ---------- controls ----------
+    const inp = (type, val, on) => { const i = h('input', { type, value: val, class: 'ax-date' }); i.addEventListener('change', (ev) => { on(ev.target.value); AX.render(); }); return i; };
+    AX.fill('ex-controls',
+      seg(S.mode, [['daily', 'Daily'], ['weekly', 'Weekly'], ['monthly', 'Monthly'], ['custom', 'Custom']], (v) => (S.mode = v)),
+      S.mode === 'daily' ? h('span', null, inp('date', S.day, (v) => (S.day = v)), h('button', { class: 'ax-btn', onclick: () => { S.day = D.asOf; AX.render(); } }, 'Today'), h('button', { class: 'ax-btn', onclick: () => { S.day = AX.d.add(D.asOf, -1); AX.render(); } }, 'Yesterday'))
+        : S.mode === 'weekly' ? h('span', null, inp('date', S.week, (v) => (S.week = v)), h('button', { class: 'ax-btn', onclick: () => { S.week = mondayOf(D.asOf); AX.render(); } }, 'This week'), h('button', { class: 'ax-btn', onclick: () => { S.week = mondayOf(AX.d.add(D.asOf, -7)); AX.render(); } }, 'Last week'))
+        : S.mode === 'monthly' ? h('span', null, inp('month', S.month, (v) => (S.month = v)), h('button', { class: 'ax-btn', onclick: () => { S.month = D.asOf.slice(0, 7); AX.render(); } }, 'This month'), h('button', { class: 'ax-btn', onclick: () => { S.month = AX.d.add(AX.d.monthStart(D.asOf), -1).slice(0, 7); AX.render(); } }, 'Last month'))
+        : h('span', null, inp('date', S.from, (v) => (S.from = v)), ' to ', inp('date', S.to, (v) => (S.to = v))));
+    const cur = calc(D, R.s, R.e), prev = calc(D, R.ps, R.pe);
+    AX.fill('ex-title', h('div', null, h('h2', { class: 'ax-ex-h', text: R.label + (R.partial ? ' (so far)' : '') }), h('p', { class: 'ax-note', text: 'Compared with ' + AX.d.nice(R.ps) + (R.ps !== R.pe ? ' – ' + AX.d.nice(R.pe) : '') + '. All programmes in reports, all lead sources; Meta spend and leads from ads.' })));
+
+    // ---------- headline KPIs ----------
+    const kpi = (label, a, b, fmt, lowerBetter) => { const c = AX.chg(a, b).pct; const good = c == null ? null : lowerBetter ? c < 0 : c > 0;
+      return h('div', { class: 'ax-kpi' }, h('div', { class: 'l', text: label }), h('div', { class: 'v', text: fmt(a) }), h('div', { class: 't ' + (c == null ? '' : good ? 'ok' : 'bad'), text: c == null ? 'prev ' + fmt(b) : (c > 0 ? '▲ ' : '▼ ') + Math.abs(c).toFixed(0) + '% vs ' + fmt(b) })); };
+    AX.fill('ex-kpis', kpi('Ad spend', cur.spend, prev.spend, F.inr, false), kpi('Meta leads', cur.mleads, prev.mleads, F.int), kpi('Cost per lead', cur.cpl, prev.cpl, F.inr, true),
+      kpi('CRM leads (all sources)', cur.crm, prev.crm, F.int), kpi('Qualified', cur.q, prev.q, F.int), kpi('Cost per qualified (Meta)', cur.cpq, prev.cpq, F.inr, true),
+      kpi('Admissions', cur.adm, prev.adm, F.int), kpi('Meta leads called <1 h', cur.w1, prev.w1, (v) => pct(v)), kpi('Lost so far', cur.lostPct, prev.lostPct, (v) => pct(v), true));
+
+    // ---------- leads ----------
+    const grp = (L, key) => [...AX.groupBy(L, key)].map(([k, ls]) => ({ k, n: ls.length, q: ls.filter((l) => l.qualified).length, a: ls.filter((l) => l.admitted).length, lost: ls.filter((l) => l.lost).length }));
+    const prevBy = (key) => new Map(grp(prev.L, key).map((x) => [x.k, x.n]));
+    const pS = prevBy((l) => l.source || 'Unknown');
+    AX.table('ex-src', [{ key: 'k', label: 'Source' }, { key: 'n', label: 'Leads', num: true, fmt: F.int }, { key: 'd', label: 'vs before', num: true, fmt: (v) => (v == null ? '—' : (v > 0 ? '+' : '') + v) },
+      { key: 'q', label: 'Qualified', num: true, fmt: F.int }, { key: 'a', label: 'Admitted', num: true, fmt: F.int }, { key: 'lr', label: 'Lost %', num: true, fmt: (v) => pct(v) }],
+      { rows: grp(cur.L, (l) => l.source || 'Unknown').map((x) => ({ ...x, d: x.n - (pS.get(x.k) || 0), lr: AX.div(x.lost * 100, x.n) })), sort: { key: 'n', dir: 'desc' }, search: false, colFilters: false });
+    const spendBy = new Map([...AX.groupBy(cur.meta, (m) => (m.c && m.c.programme) || 'Unmapped')].map(([k, ms]) => [k, { s: d3.sum(ms, (m) => m.spend), l: d3.sum(ms, (m) => m.leads) }]));
+    const pP = prevBy((l) => l.programme || 'Unmapped');
+    AX.table('ex-prog', [{ key: 'k', label: 'Programme' }, { key: 'spend', label: 'Spend', num: true, fmt: F.inr }, { key: 'ml', label: 'Meta leads', num: true, fmt: F.int }, { key: 'cpl', label: 'CPL', num: true, fmt: F.inr },
+      { key: 'n', label: 'CRM leads', num: true, fmt: F.int }, { key: 'd', label: 'vs before', num: true, fmt: (v) => (v == null ? '—' : (v > 0 ? '+' : '') + v) }, { key: 'q', label: 'Qualified', num: true, fmt: F.int }, { key: 'a', label: 'Admitted', num: true, fmt: F.int }],
+      { rows: grp(cur.L, (l) => l.programme || 'Unmapped').map((x) => { const sp = spendBy.get(x.k) || { s: 0, l: 0 }; return { ...x, spend: sp.s, ml: sp.l, cpl: AX.div(sp.s, sp.l), d: x.n - (pP.get(x.k) || 0) }; }), sort: { key: 'spend', dir: 'desc' }, search: false, colFilters: false });
+
+    // ---------- campaigns ----------
+    const rows = AX.campaignRows(D, cur.P0, R.s, R.e).filter((r) => r.objective === 'Leads' && r.spend >= 1000);
+    const t = (r) => r.tCpl || AX.config.target_cpl;
+    const best = rows.filter((r) => r.leads >= 3 && r.cpl != null && r.cpl <= t(r) * 1.1).sort((a, b) => (a.qualified ? a.spend / a.qualified : a.cpl * 8) - (b.qualified ? b.spend / b.qualified : b.cpl * 8)).slice(0, 4);
+    const worst = rows.filter((r) => !r.leads || r.cpl > t(r) * 1.5 || (r.crm >= 10 && !r.qualified)).sort((a, b) => b.spend - a.spend).slice(0, 4);
+    const line = (r, kind) => h('li', null, h('b', { text: AX.shortName(r.name) }), ' — ' + F.inr(r.spend) + ', ' + F.int(r.leads) + ' leads, CPL ' + F.inr(r.cpl) + (r.qualified ? ', ' + r.qualified + ' qualified' : '') + (kind === 'bad' ? (!r.leads ? ' · no leads' : r.cpl > t(r) * 1.5 ? ' · ' + Math.round((r.cpl / t(r) - 1) * 100) + '% over target' : ' · 0 qualified') : ''));
+    AX.fill('ex-camp', h('div', { class: 'ax-grid' },
+      h('div', null, h('h4', { text: '🏆 Best campaigns' }), best.length ? h('ul', { class: 'ax-exlist' }, best.map((r) => line(r, 'ok'))) : h('p', { class: 'ax-note', text: 'None at or under target with 3+ leads.' })),
+      h('div', null, h('h4', { text: '⚠ Needs action' }), worst.length ? h('ul', { class: 'ax-exlist' }, worst.map((r) => line(r, 'bad'))) : h('p', { class: 'ax-note', text: 'No campaign failing with ₹1,000+ spend.' }))));
+    if (AX.pacing) { const pc = AX.pacing(D, { }); AX.fill('ex-pace', pc.rows.length ? h('p', { class: 'ax-note', text: 'Budget pacing this month (day ' + pc.done + '/' + pc.dim + '): ' + pc.rows.map((r) => r.name + ' ' + r.status.toLowerCase() + ' (' + F.inr(r.spent) + ' of ' + F.inr(r.budget) + ')').join(' · ') }) : null); }
+
+    // ---------- creatives ----------
+    const ads = (dash.data('meta_ads').data || []).filter((r) => r.date >= R.s && r.date <= R.e && AX.campOk(D.cById.get(r.campaign_id), {}));
+    const firstSpend = new Map(); for (const r of dash.data('meta_ads').data || []) if (n(r.spend) > 0 && (!firstSpend.has(r.ad_id) || r.date < firstSpend.get(r.ad_id))) firstSpend.set(r.ad_id, r.date);
+    const byAd = [...AX.groupBy(ads, (r) => r.ad_id)].map(([id, rs]) => { const sp = d3.sum(rs, (r) => n(r.spend)), le = d3.sum(rs, (r) => n(r.leads)), im = d3.sum(rs, (r) => n(r.impressions)), lc = d3.sum(rs, (r) => n(r.link_clicks)); const camp = D.cById.get(rs[0].campaign_id);
+      return { id, name: rs[rs.length - 1].ad_name || id, camp: camp ? camp.name : '', obj: camp ? camp.objective : 'Leads', spend: sp, leads: le, cpl: AX.div(sp, le), ctr: AX.div(lc * 100, im), isNew: (firstSpend.get(id) || '') >= R.s }; }).filter((a) => a.spend > 0);
+    const leadAds = byAd.filter((a) => a.obj === 'Leads');
+    const topAds = leadAds.filter((a) => a.leads >= 3).sort((a, b) => a.cpl - b.cpl).slice(0, 5);
+    const badAds = leadAds.filter((a) => a.spend >= 1500 && (!a.leads || a.cpl > AX.config.target_cpl * 1.5)).sort((a, b) => b.spend - a.spend).slice(0, 5);
+    const newAds = byAd.filter((a) => a.isNew);
+    const al = (a) => h('li', null, h('b', { text: a.name }), ' (' + AX.shortName(a.camp) + ') — ' + F.inr(a.spend) + ', ' + F.int(a.leads) + ' leads' + (a.cpl != null ? ', CPL ' + F.inr(a.cpl) : '') + ', CTR ' + pct(a.ctr, 2));
+    AX.fill('ex-cre', h('div', { class: 'ax-grid' },
+      h('div', null, h('h4', { text: '🎯 Cheapest leads' }), topAds.length ? h('ul', { class: 'ax-exlist' }, topAds.map(al)) : h('p', { class: 'ax-note', text: 'No lead ad with 3+ leads.' })),
+      h('div', null, h('h4', { text: '🛑 Wasting spend' }), badAds.length ? h('ul', { class: 'ax-exlist' }, badAds.map(al)) : h('p', { class: 'ax-note', text: 'No lead ad over ₹1,500 is failing.' }))),
+      h('p', { class: 'ax-note', text: F.int(byAd.length) + ' ads delivered · ' + newAds.length + ' new ad' + (newAds.length === 1 ? '' : 's') + ' launched in this period' + (newAds.length ? ': ' + newAds.slice(0, 6).map((a) => a.name).join(', ') : '') + '.' }));
+
+    // ---------- sales ----------
+    const metaL = cur.L;
+    const owners = [...AX.groupBy(metaL, (l) => l.owner || 'Unassigned')].map(([o, ls]) => { const c = ls.filter((l) => l.createdTs != null && Date.now() - l.createdTs > 2 * 3600e3); const waits = c.filter((l) => l.firstCallTs != null).map((l) => (l.firstCallTs - l.createdTs) / 3600e3).sort((a, b) => a - b);
+      return { o, n: ls.length, w1: AX.div(c.filter((l) => l.firstCallTs != null && l.firstCallTs - l.createdTs <= 3600e3).length * 100, c.length), med: waits.length ? waits[Math.floor(waits.length / 2)] : null, q: ls.filter((l) => l.qualified).length, a: ls.filter((l) => l.admitted).length, lost: AX.div(ls.filter((l) => l.lost).length * 100, ls.length) }; }).filter((x) => x.n >= 3);
+    AX.table('ex-sales', [{ key: 'o', label: 'Counsellor' }, { key: 'n', label: 'Leads', num: true, fmt: F.int }, { key: 'w1', label: 'Called <1 h', num: true, fmt: (v) => pct(v), cls: (r) => (r.w1 == null ? '' : r.w1 >= 60 ? 'ok' : r.w1 >= 30 ? 'warn' : 'bad') },
+      { key: 'med', label: 'Median first call', num: true, fmt: (v) => (v == null ? '—' : v < 1 ? Math.round(v * 60) + ' min' : v.toFixed(1) + ' h') }, { key: 'q', label: 'Qualified', num: true, fmt: F.int }, { key: 'a', label: 'Admitted', num: true, fmt: F.int }, { key: 'lost', label: 'Lost %', num: true, fmt: (v) => pct(v) }],
+      { rows: owners, sort: { key: 'n', dir: 'desc' }, search: false, colFilters: false });
+    const reasons = [...AX.groupBy(metaL.filter((l) => l.lost), (l) => l.reason || 'No reason recorded')].map(([r, ls]) => [r, ls.length]).sort((a, b) => b[1] - a[1]).slice(0, 3);
+    const idle = D.leads.filter((l) => !l.lost && !l.admitted && l.date >= AX.d.add(D.asOf, -60) && Date.now() - Math.max(l.lastActTs || 0, l.firstCallTs || 0, l.createdTs || 0) > 3 * 864e5).length;
+    AX.fill('ex-sales-note', 'Top loss reasons: ' + (reasons.length ? reasons.map((r) => r[0] + ' (' + r[1] + ')').join(', ') : 'none') + '. Open leads untouched for 3+ days (last 60 days): ' + F.int(idle) + '.');
+
+    // ---------- WhatsApp text, print, AI ----------
+    const txt = '*AIMER marketing summary — ' + R.label + (R.partial ? ' (so far)' : '') + '*\n' +
+      'Spend ' + F.inr(cur.spend) + ' · Meta leads ' + F.int(cur.mleads) + ' · CPL ' + F.inr(cur.cpl) + '\n' +
+      'CRM leads ' + F.int(cur.crm) + ' · Qualified ' + F.int(cur.q) + ' · Admissions ' + F.int(cur.adm) + '\n' +
+      'Called within 1 h: ' + pct(cur.w1) + ' · Lost: ' + pct(cur.lostPct) + '\n' +
+      (best[0] ? 'Best campaign: ' + AX.shortName(best[0].name) + ' (CPL ' + F.inr(best[0].cpl) + ')\n' : '') +
+      (worst[0] ? 'Needs action: ' + AX.shortName(worst[0].name) + '\n' : '') +
+      (topAds[0] ? 'Best ad: ' + topAds[0].name + ' (CPL ' + F.inr(topAds[0].cpl) + ')\n' : '');
+    const copyBtn = AX.$('ex-copy'); if (copyBtn) copyBtn.onclick = async () => { try { await navigator.clipboard.writeText(txt); copyBtn.textContent = 'Copied ✓'; setTimeout(() => (copyBtn.textContent = 'Copy for WhatsApp'), 2000); } catch (_) { window.prompt('Copy this text:', txt); } };
+    const waBtn = AX.$('ex-wa'); if (waBtn) waBtn.href = 'https://wa.me/?text=' + encodeURIComponent(txt);
+    const printBtn = AX.$('ex-print'); if (printBtn) printBtn.onclick = () => window.print();
+    const aiBtn = AX.$('ex-ai-run');
+    if (aiBtn) aiBtn.onclick = async () => {
+      if (!AX.askAI) return; aiBtn.disabled = true; AX.fill('ex-ai', h('p', { class: 'ax-note', text: 'Writing your summary… about 20–40 seconds.' }));
+      const q = 'Write my executive summary as Head of Marketing for ' + R.s + ' to ' + R.e + ' compared with ' + R.ps + ' to ' + R.pe + '. Cover: leads and cost per lead, campaigns (best and worst), creatives (best and worst ads), sales follow-up (call speed, counsellors, loss reasons) and budget pacing. Use the tools for both periods. Format: 5 short bullets of what happened with numbers, then "Decisions for this week" with 3 numbered actions.';
+      try { const res = await AX.askAI(q); AX.fill('ex-ai', AX.md ? AX.md(res.answer) : h('pre', { text: res.answer })); } catch (e) { AX.fill('ex-ai', h('p', { class: 'bad', text: e.message || 'The AI is busy, try again in a minute.' })); }
+      aiBtn.disabled = false;
+    };
+  };
+})();
+
+</script>
+<script>
 // Main: navigation, data-state header, settings persistence, and the render loop.
 (function () {
   const AX = window.AX, h = AX.h;
-  const TABS = ['overview', 'plan', 'daily', 'campaigns', 'ads', 'creative', 'sales', 'cohorts', 'crm', 'programmes', 'budget', 'reports', 'settings'];
+  const TABS = ['overview', 'exec', 'plan', 'daily', 'campaigns', 'ads', 'creative', 'sales', 'cohorts', 'crm', 'programmes', 'budget', 'reports', 'settings'];
   const fromHash = location.hash.slice(1);
   AX.tab = TABS.includes(fromHash) ? fromHash : 'overview';
   AX.renderRev = 0;
@@ -3089,7 +3253,7 @@ body { margin: 0; background: #e3f3f0; }
   document.querySelectorAll('#ax [data-source]').forEach((el) => el.classList.add('dash-skeleton'));
 
   const nav = AX.$('ax-nav');
-  const TITLES = { overview: 'Overview', plan: 'Action plan', daily: 'Daily performance', campaigns: 'Campaign performance', ads: 'Ads Manager', creative: 'Creative & audience', sales: 'Sales team', cohorts: 'Cohorts & forecast', crm: 'Lead quality & CRM', programmes: 'Programme performance', budget: 'Budget & ROI', reports: 'Reports & export', settings: 'Integrations & settings' };
+  const TITLES = { overview: 'Overview', exec: 'My summary', plan: 'Action plan', daily: 'Daily performance', campaigns: 'Campaign performance', ads: 'Ads Manager', creative: 'Creative & audience', sales: 'Sales team', cohorts: 'Cohorts & forecast', crm: 'Lead quality & CRM', programmes: 'Programme performance', budget: 'Budget & ROI', reports: 'Reports & export', settings: 'Integrations & settings' };
   nav.addEventListener('click', (e) => {
     const b = e.target.closest('button[data-tab]'); if (!b) return;
     AX.tab = b.dataset.tab; dash.setLink(AX.tab);
@@ -3142,6 +3306,7 @@ body { margin: 0; background: #e3f3f0; }
   const REQUIRED = ['campaigns', 'meta_daily', 'crm_leads', 'integration_status'];
   AX.render = function () {
     if (AX.allowedTabs && !AX.allowedTabs.includes(AX.tab)) AX.tab = AX.allowedTabs[0];
+    if (AX.tab === 'exec' && !AX.execOk) AX.tab = (AX.allowedTabs && AX.allowedTabs[0]) || 'overview';
     AX.renderRev++;
     nav.querySelectorAll('button[data-tab]').forEach((b) => b.setAttribute('aria-current', b.dataset.tab === AX.tab ? 'page' : 'false'));
     document.querySelectorAll('#ax .ax-page').forEach((p) => { p.hidden = p.dataset.page !== AX.tab; });
@@ -3198,6 +3363,14 @@ body { margin: 0; background: #e3f3f0; }
     product_manager: ['overview', 'plan', 'daily', 'campaigns', 'ads', 'creative', 'cohorts', 'crm', 'programmes', 'budget', 'reports'],
   };
   AX.role = role;
+  // My summary: only for the emails an admin listed (checked in the database)
+  AX.execOk = false;
+  sb.rpc('can_see_exec_summary').then(({ data }) => {
+    AX.execOk = data === true;
+    const b = document.querySelector('#ax-nav [data-tab="exec"]');
+    if (b) { if (AX.execOk) b.hidden = false; else b.remove(); }
+    if (AX.execOk && AX.allowedTabs && !AX.allowedTabs.includes('exec')) AX.allowedTabs.unshift('exec');
+  });
   AX.allowedTabs = ROLE_TABS[role] || null;
   if (AX.allowedTabs) {
     document.querySelectorAll('#ax-nav [data-tab]').forEach((b) => { if (!AX.allowedTabs.includes(b.dataset.tab)) b.remove(); });
@@ -3423,6 +3596,8 @@ body { margin: 0; background: #e3f3f0; }
     send.addEventListener('click', () => ask(input.value));
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask(input.value); } });
   })();
+  AX.md = md;
+  AX.askAI = async (q) => { const { data, error } = await sb.functions.invoke('ai-chat', { body: { messages: [{ role: 'user', content: q }] } }); if (error) { let m = error.message; try { m = (await error.context.json()).error || m; } catch (_) {} throw new Error(m); } return data; };
   mountAI('ov', 'campaign', 'overview');
   mountAI('cr', 'creative', 'creative');
 })();
