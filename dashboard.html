@@ -83,6 +83,8 @@ body { margin: 0; background: #e3f3f0; }
 #dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
 /* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
 #dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
 .ax {
   --g: #12c784; --g2: #0a7a4c; --g3: #b9f0d9; --lime: #dfe35a; --lime2: #f3f4c4;
   --mint: #dcf2ef; --cream: #fbfbe9; --ink: #0d0f0e; --ink2: #1b1f1d; --line: #e7ece9; --soft: #f5f7f6;
@@ -380,6 +382,12 @@ a.ax-btn { text-decoration: none; display: inline-block; }
   .ax-card { break-inside: avoid; box-shadow: none !important; border: 1px solid #ddd; }
   .ax-card.dark { background: #fff !important; color: #000 !important; }
 }
+
+.ax-lk-bar { display: flex; gap: 8px; } .ax-lk-in { flex: 1; border: 1px solid rgba(13,15,14,.18); border-radius: 999px; padding: 11px 16px; font: inherit; font-size: 15px; }
+.ax-lk-go { background: #0d0f0e; color: #fff; border-color: #0d0f0e; padding: 0 20px; }
+.ax-lk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px 16px; margin-top: 8px; }
+.ax-lk-kv { display: flex; flex-direction: column; font-size: 13px; padding: 6px 0; border-bottom: 1px solid rgba(13,15,14,.06); } .ax-lk-kv span { color: var(--color-fg-muted); font-size: 11.5px; } .ax-lk-kv b { font-weight: 600; word-break: break-word; }
+.ax-lk-tl { list-style: none; padding: 0; margin: 6px 0; max-height: 420px; overflow-y: auto; } .ax-lk-tl li { padding: 6px 0; border-bottom: 1px solid rgba(13,15,14,.06); font-size: 13px; }
 </style>
 </head>
 <body>
@@ -391,6 +399,7 @@ a.ax-btn { text-decoration: none; display: inline-block; }
     <nav class="ax-tabs" id="ax-nav" aria-label="Dashboard sections">
       <button data-tab="overview"><span aria-hidden="true">◎</span> Overview</button>
       <button data-tab="exec" hidden><span aria-hidden="true">★</span> My summary</button>
+      <button data-tab="lookup"><span aria-hidden="true">⌕</span> Lead lookup</button>
       <button data-tab="plan"><span aria-hidden="true">✓</span> Action plan</button>
       <button data-tab="daily"><span aria-hidden="true">▤</span> Daily</button>
       <button data-tab="campaigns"><span aria-hidden="true">▥</span> Campaigns</button>
@@ -484,6 +493,13 @@ a.ax-btn { text-decoration: none; display: inline-block; }
         <div class="ax-card"><div id="ex-cre" data-source="meta_ads"></div></div>
         <div class="ax-sec"><span>Sales</span> Follow-up and results by counsellor</div>
         <div class="ax-card"><p class="ax-note" id="ex-sales-note"></p><div id="ex-sales" data-source="crm_leads"></div></div>
+      </section>
+
+      <!-- Lead lookup -->
+      <section class="ax-page" id="lookup" data-page="lookup" hidden>
+        <p class="ax-take">Search any lead by name, phone or email. Details come live from LeadSquared and are never stored in the dashboard; every lookup is logged.</p>
+        <div class="ax-card"><div class="ax-lk-bar" id="lk-bar"></div><div id="lk-msg" role="status"></div><p class="ax-note" id="lk-results-note"></p><div id="lk-results"></div></div>
+        <div id="lk-detail" style="margin-top:var(--cds-gap-md)"></div>
       </section>
 
       <!-- Action plan -->
@@ -3240,10 +3256,83 @@ a.ax-btn { text-decoration: none; display: inline-block; }
 
 </script>
 <script>
+// Lead lookup: search LeadSquared live by name, phone or email and open a lead's complete record, combined with the
+// dashboard's own view (campaign, programme, stage dates, every call). Nothing personal is stored in the dashboard or
+// the browser cache. Admin, marketing and counselling-lead roles only; every search and view is audit-logged.
+(function () {
+  const AX = window.AX, h = AX.h, F = AX.fmt;
+  const st = { q: '', results: null, busy: false, err: '', detail: null, dbusy: false, fq: '' };
+  const ist = (ts) => (ts ? new Date(ts).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—');
+  const label = (k) => String(k).replace(/^mx_/, '').replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/\s+/g, ' ').trim();
+  const dur = (s) => (s == null ? '—' : s < 60 ? s + ' s' : Math.floor(s / 60) + ' min ' + (s % 60) + ' s');
+  const telDigits = (p) => String(p || '').replace(/[^\d+]/g, '');
+  const waDigits = (p) => { let d = String(p || '').replace(/\D/g, ''); if (d.length === 10) d = '91' + d; return d; };
+
+  async function search() {
+    const q = st.q.trim(); if (q.length < 3) { st.err = 'Type at least 3 characters (name, phone or email).'; AX.render(); return; }
+    st.busy = true; st.err = ''; st.detail = null; AX.render();
+    try { const r = await AX.leadLookup({ q }); st.results = r.results || []; } catch (e) { st.err = e.message; st.results = null; }
+    st.busy = false; AX.render();
+  }
+  async function open(id) {
+    st.dbusy = true; st.err = ''; AX.render();
+    try { st.detail = await AX.leadLookup({ lead_id: id }); st.fq = ''; } catch (e) { st.err = e.message; }
+    st.dbusy = false; AX.render();
+    const el = AX.$('lk-detail'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }
+
+  AX.pages.lookup = function () {
+    // search bar
+    const inp = h('input', { type: 'search', class: 'ax-lk-in', placeholder: 'Name, phone number or email…', value: st.q, 'aria-label': 'Search leads' });
+    inp.addEventListener('input', (e) => (st.q = e.target.value));
+    inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') search(); });
+    AX.fill('lk-bar', inp, h('button', { class: 'ax-btn ax-lk-go', disabled: st.busy, onclick: search }, st.busy ? 'Searching…' : 'Search'));
+    AX.fill('lk-msg', st.err ? h('p', { class: 'bad', text: st.err }) : st.results && !st.results.length ? h('p', { class: 'ax-note', text: 'No lead found for “' + st.q + '”. Try another spelling, the last 10 digits of the phone, or the full email.' }) : null);
+    // results
+    if (st.results && st.results.length) {
+      AX.table('lk-results', [{ key: 'name', label: 'Name' }, { key: 'phone', label: 'Phone' }, { key: 'email', label: 'Email' }, { key: 'stage', label: 'Stage' }, { key: 'owner', label: 'Owner' }, { key: 'source', label: 'Source' },
+        { key: 'created', label: 'Created', fmt: (v) => ist(v) }, { key: 'in_dashboard', label: 'In dashboard', fmt: (v) => (v ? 'Yes' : 'No') }],
+        { rows: st.results, rowKey: 'lead_id', onRow: (r) => open(r.lead_id), sort: { key: 'created', dir: 'desc' }, search: false, colFilters: false });
+      AX.fill('lk-results-note', st.results.length + ' match' + (st.results.length > 1 ? 'es' : '') + ' — click a row to open the full record.');
+    } else { AX.fill('lk-results'); AX.fill('lk-results-note'); }
+    // detail
+    const D = st.detail;
+    if (st.dbusy) { AX.fill('lk-detail', h('div', { class: 'ax-empty', text: 'Opening the lead from LeadSquared…' })); return; }
+    if (!D) { AX.fill('lk-detail'); return; }
+    const f = D.fields || {}, L = D.local || {}, S = D.summary || {};
+    const name = [f.FirstName, f.LastName].filter(Boolean).join(' ') || '(no name)';
+    const phone = f.Phone || f.Mobile || '', email = f.EmailAddress || '';
+    const btn = (href, text) => (href ? h('a', { class: 'ax-btn', href, target: href.startsWith('http') ? '_blank' : null, rel: 'noopener', text }) : null);
+    const kv = (k, v) => h('div', { class: 'ax-lk-kv' }, h('span', { text: k }), h('b', { text: v == null || v === '' ? '—' : String(v) }));
+    const stages = [['Created', L.created_at], ['Contacted', L.contacted_at], ['Connected', L.connected_at], ['Qualified', L.qualified_at], ['Counselling booked', L.counsel_booked_at], ['Counselling done', L.counsel_done_at], ['Applied', L.application_at], ['Admitted', L.admission_at], ['Lost', L.lost_at]].filter(([, v]) => v);
+    const acts = (D.activities || []).slice().reverse();
+    const fieldRows = Object.entries(f).filter(([k, v]) => !st.fq || (label(k) + ' ' + v).toLowerCase().includes(st.fq.toLowerCase())).sort((a, b) => label(a[0]).localeCompare(label(b[0])));
+    const fsearch = h('input', { type: 'search', placeholder: 'Filter fields…', value: st.fq, class: 'ax-colf', style: { maxWidth: '260px' } });
+    fsearch.addEventListener('input', (e) => { st.fq = e.target.value; const box = AX.$('lk-fields'); if (box) box.replaceChildren(...Object.entries(f).filter(([k, v]) => !st.fq || (label(k) + ' ' + v).toLowerCase().includes(st.fq.toLowerCase())).sort((a, b) => label(a[0]).localeCompare(label(b[0]))).map(([k, v]) => kv(label(k), v))); });
+    AX.fill('lk-detail',
+      h('div', { class: 'ax-card' },
+        h('div', { class: 'ax-chead' }, h('div', null, h('h2', { class: 'ax-ex-h', text: name }), h('p', { class: 'ax-note', style: { margin: 0 }, text: (f.ProspectStage || L.lead_status || '—') + ' · owner ' + (f.OwnerIdName || L.owner || '—') + ' · created ' + ist(L.created_at || f.CreatedOn) })),
+          h('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '6px' } }, btn(phone ? 'tel:' + telDigits(phone) : null, '📞 Call'), btn(phone ? 'https://wa.me/' + waDigits(phone) : null, 'WhatsApp'), btn(email ? 'mailto:' + email : null, 'Email'), btn(D.lsq_url, 'Open in LeadSquared ↗'))),
+        h('div', { class: 'ax-lk-grid' }, kv('Phone', phone), kv('Email', email), kv('Source', f.Source || L.source), kv('Campaign', L.campaign_name || f.SourceCampaign), kv('Programme', L.programme), kv('Location', L.location || f.mx_Country), kv('Loss reason', L.disq_reason), kv('In dashboard', L.lead_id ? 'Yes' : 'No (e.g. bulk list)'))),
+      h('div', { class: 'ax-grid', style: { marginTop: 'var(--cds-gap-md)' } },
+        h('div', { class: 'ax-card' }, h('h3', { text: 'Follow-up' }), h('div', { class: 'ax-lk-grid' },
+          kv('Time to first call', S.minutes_to_first_call == null ? 'No call yet' : S.minutes_to_first_call < 60 ? S.minutes_to_first_call + ' min' : (S.minutes_to_first_call / 60).toFixed(1) + ' h'),
+          kv('Calls', S.calls), kv('Connected calls', S.connected), kv('Talk time', dur(S.talk_secs))),
+          h('h4', { text: 'Stage journey' }), stages.length ? h('ul', { class: 'ax-exlist' }, stages.map(([k, v]) => h('li', null, h('b', { text: k }), ' — ' + ist(v)))) : h('p', { class: 'ax-note', text: 'No stage dates recorded.' })),
+        h('div', { class: 'ax-card' }, h('h3', { text: 'Timeline (latest first)' }), acts.length ? h('ul', { class: 'ax-lk-tl' }, acts.slice(0, 60).map((a) => h('li', null,
+          h('span', { class: 'ax-note', style: { margin: 0 }, text: ist(a.created_at) }),
+          h('div', { text: a.event_code === 3002 ? 'Stage: ' + (a.previous_stage || '—') + ' → ' + (a.current_stage || '—') : (a.call_direction === 'inbound' ? '📥 Inbound call' : '📞 Outbound call') + ' · ' + dur(a.duration_secs) + ((a.duration_secs || 0) > 0 ? '' : ' (not connected)') + (a.created_by_name ? ' · ' + a.created_by_name : '') })))) : h('p', { class: 'ax-note', text: 'No calls or stage changes recorded yet.' }))),
+      h('div', { class: 'ax-card', style: { marginTop: 'var(--cds-gap-md)' } }, h('div', { class: 'ax-chead' }, h('h3', { text: 'All LeadSquared fields (' + Object.keys(f).length + ')' }), fsearch),
+        h('div', { class: 'ax-lk-grid', id: 'lk-fields' }, fieldRows.map(([k, v]) => kv(label(k), v)))));
+  };
+})();
+
+</script>
+<script>
 // Main: navigation, data-state header, settings persistence, and the render loop.
 (function () {
   const AX = window.AX, h = AX.h;
-  const TABS = ['overview', 'exec', 'plan', 'daily', 'campaigns', 'ads', 'creative', 'sales', 'cohorts', 'crm', 'programmes', 'budget', 'reports', 'settings'];
+  const TABS = ['overview', 'exec', 'lookup', 'plan', 'daily', 'campaigns', 'ads', 'creative', 'sales', 'cohorts', 'crm', 'programmes', 'budget', 'reports', 'settings'];
   const fromHash = location.hash.slice(1);
   AX.tab = TABS.includes(fromHash) ? fromHash : 'overview';
   AX.renderRev = 0;
@@ -3253,7 +3342,7 @@ a.ax-btn { text-decoration: none; display: inline-block; }
   document.querySelectorAll('#ax [data-source]').forEach((el) => el.classList.add('dash-skeleton'));
 
   const nav = AX.$('ax-nav');
-  const TITLES = { overview: 'Overview', exec: 'My summary', plan: 'Action plan', daily: 'Daily performance', campaigns: 'Campaign performance', ads: 'Ads Manager', creative: 'Creative & audience', sales: 'Sales team', cohorts: 'Cohorts & forecast', crm: 'Lead quality & CRM', programmes: 'Programme performance', budget: 'Budget & ROI', reports: 'Reports & export', settings: 'Integrations & settings' };
+  const TITLES = { overview: 'Overview', exec: 'My summary', lookup: 'Lead lookup', plan: 'Action plan', daily: 'Daily performance', campaigns: 'Campaign performance', ads: 'Ads Manager', creative: 'Creative & audience', sales: 'Sales team', cohorts: 'Cohorts & forecast', crm: 'Lead quality & CRM', programmes: 'Programme performance', budget: 'Budget & ROI', reports: 'Reports & export', settings: 'Integrations & settings' };
   nav.addEventListener('click', (e) => {
     const b = e.target.closest('button[data-tab]'); if (!b) return;
     AX.tab = b.dataset.tab; dash.setLink(AX.tab);
@@ -3307,6 +3396,7 @@ a.ax-btn { text-decoration: none; display: inline-block; }
   AX.render = function () {
     if (AX.allowedTabs && !AX.allowedTabs.includes(AX.tab)) AX.tab = AX.allowedTabs[0];
     if (AX.tab === 'exec' && !AX.execOk) AX.tab = (AX.allowedTabs && AX.allowedTabs[0]) || 'overview';
+    if (AX.tab === 'lookup' && AX.noLookup) AX.tab = (AX.allowedTabs && AX.allowedTabs[0]) || 'overview';
     AX.renderRev++;
     nav.querySelectorAll('button[data-tab]').forEach((b) => b.setAttribute('aria-current', b.dataset.tab === AX.tab ? 'page' : 'false'));
     document.querySelectorAll('#ax .ax-page').forEach((p) => { p.hidden = p.dataset.page !== AX.tab; });
@@ -3363,6 +3453,9 @@ a.ax-btn { text-decoration: none; display: inline-block; }
     product_manager: ['overview', 'plan', 'daily', 'campaigns', 'ads', 'creative', 'cohorts', 'crm', 'programmes', 'budget', 'reports'],
   };
   AX.role = role;
+  // Lead lookup (live contact details): admin, marketing and counselling lead only
+  if (!['admin', 'marketing', 'counselling_lead'].includes(role)) { const lb = document.querySelector('#ax-nav [data-tab="lookup"]'); if (lb) lb.remove(); AX.noLookup = true; }
+  AX.leadLookup = async (body) => { const { data, error } = await sb.functions.invoke('lead-lookup', { body }); if (error) { let m = error.message; try { m = (await error.context.json()).error || m; } catch (_) {} throw new Error(m); } return data; };
   // My summary: only for the emails an admin listed (checked in the database)
   AX.execOk = false;
   sb.rpc('can_see_exec_summary').then(({ data }) => {
