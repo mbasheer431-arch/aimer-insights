@@ -85,6 +85,12 @@ body { margin: 0; background: #e3f3f0; }
 #dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
 /* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
 #dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
 .ax {
   --g: #12c784; --g2: #0a7a4c; --g3: #b9f0d9; --lime: #dfe35a; --lime2: #f3f4c4;
   --mint: #dcf2ef; --cream: #fbfbe9; --ink: #0d0f0e; --ink2: #1b1f1d; --line: #e7ece9; --soft: #f5f7f6;
@@ -388,6 +394,12 @@ a.ax-btn { text-decoration: none; display: inline-block; }
 .ax-lk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px 16px; margin-top: 8px; }
 .ax-lk-kv { display: flex; flex-direction: column; font-size: 13px; padding: 6px 0; border-bottom: 1px solid rgba(13,15,14,.06); } .ax-lk-kv span { color: var(--color-fg-muted); font-size: 11.5px; } .ax-lk-kv b { font-weight: 600; word-break: break-word; }
 .ax-lk-tl { list-style: none; padding: 0; margin: 6px 0; max-height: 420px; overflow-y: auto; } .ax-lk-tl li { padding: 6px 0; border-bottom: 1px solid rgba(13,15,14,.06); font-size: 13px; }
+
+.ax-dlg.ax { font-family: inherit; color: var(--color-fg, #0d0f0e); max-height: calc(100vh - 40px); overflow-y: auto; } .ax-dlg h4 { margin: 14px 0 6px; }
+
+.ax-cellbtn { background: none; border: 0; padding: 2px 6px; border-radius: 8px; font: inherit; color: inherit; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; }
+.ax-cellbtn:hover, .ax-cellbtn.on { background: #e3f7ee; color: #0a6b43; text-decoration: none; }
+.ax-totrow td { border-top: 2px solid rgba(13,15,14,.15); font-weight: 600; }
 </style>
 </head>
 <body>
@@ -399,6 +411,7 @@ a.ax-btn { text-decoration: none; display: inline-block; }
     <nav class="ax-tabs" id="ax-nav" aria-label="Dashboard sections">
       <button data-tab="overview"><span aria-hidden="true">◎</span> Overview</button>
       <button data-tab="exec" hidden><span aria-hidden="true">★</span> My summary</button>
+      <button data-tab="salesmgr"><span aria-hidden="true">◎</span> Sales manager</button>
       <button data-tab="lookup"><span aria-hidden="true">⌕</span> Lead lookup</button>
       <button data-tab="plan"><span aria-hidden="true">✓</span> Action plan</button>
       <button data-tab="daily"><span aria-hidden="true">▤</span> Daily</button>
@@ -493,6 +506,22 @@ a.ax-btn { text-decoration: none; display: inline-block; }
         <div class="ax-card"><div id="ex-cre" data-source="meta_ads"></div></div>
         <div class="ax-sec"><span>Sales</span> Follow-up and results by counsellor</div>
         <div class="ax-card"><p class="ax-note" id="ex-sales-note"></p><div id="ex-sales" data-source="crm_leads"></div></div>
+      </section>
+
+      <!-- Sales manager -->
+      <section class="ax-page" id="salesmgr" data-page="salesmgr" hidden>
+        <div class="ax-frow1" id="sm-controls" style="display:flex;flex-wrap:wrap;gap:14px;margin-bottom:10px"></div>
+        <p class="ax-take" id="sm-take" data-source="crm_leads">&nbsp;</p>
+        <div class="ax-card" id="sm-course-card"><h3>Lead status by course</h3><p class="ax-note">Leads created in the range and how far each has got. Click a number to list those leads.</p><div id="sm-course" data-source="crm_leads"></div></div>
+        <div class="ax-card" id="sm-list-card" hidden style="margin-top:var(--cds-gap-md)"><h3>Leads</h3><p class="ax-note" id="sm-list-note"></p><div id="sm-list" data-source="crm_leads"></div></div>
+        <div class="ax-card" style="margin-top:var(--cds-gap-md)"><h3>Current LeadSquared stage by course</h3><p class="ax-note">Where each lead sits right now, using LeadSquared's own stage names. Darker = bigger share of that course.</p><div id="sm-stages" data-source="crm_leads"></div></div>
+        <div class="ax-sec"><span>Team performance</span> Speed, effort and results by counsellor</div>
+        <div class="ax-card"><p class="ax-note" id="sm-team-note"></p><div id="sm-team" data-source="crm_leads"></div></div>
+        <div class="ax-grid" style="margin-top:var(--cds-gap-md)">
+          <div class="ax-card"><h3>Counsellor × course</h3><div id="sm-mx-ctl" style="margin-bottom:8px"></div><div id="sm-mx" data-source="crm_leads"></div></div>
+          <div class="ax-card"><h3>Weekly trend</h3><div id="sm-trend-ctl" style="margin-bottom:8px"></div><div class="ax-chart" id="sm-trend" data-source="crm_leads"></div></div>
+        </div>
+        <div class="ax-card" style="margin-top:var(--cds-gap-md)"><h3>Stage speed by course</h3><p class="ax-note">Median days between stages, for leads in the range that reached them.</p><div id="sm-speed" data-source="crm_leads"></div></div>
       </section>
 
       <!-- Lead lookup -->
@@ -1142,7 +1171,12 @@ a.ax-btn { text-decoration: none; display: inline-block; }
     const yFmt = opts.yFmt || AX.fmt.compact, y2Fmt = opts.y2Fmt || AX.fmt.compact;
     const y = d3.scaleLinear([0, yMax], [H - 26, 10]).nice();
     const y2 = d3.scaleLinear([0, y2Max], [H - 26, 10]).nice();
-    const yTicks = y.ticks(4), y2Ticks = rightVals.length ? y2.ticks(4) : [];
+    // whole-number series (like leads) get whole-number ticks, so the axis never repeats 0, 0, 1, 1
+    const intL = leftVals.length && leftVals.every(Number.isInteger), intR = rightVals.length && rightVals.every(Number.isInteger);
+    if (intR && y2.domain()[1] < 4) y2.domain([0, Math.max(1, Math.ceil(d3.max(rightVals) || 1))]);
+    if (intL && y.domain()[1] < 4) y.domain([0, Math.max(1, Math.ceil(d3.max(leftVals) || 1))]);
+    const whole = (sc, n) => [...new Set(sc.ticks(n).map(Math.round))].filter((t) => t >= sc.domain()[0] && t <= sc.domain()[1]);
+    const yTicks = intL ? whole(y, 4) : y.ticks(4), y2Ticks = rightVals.length ? (intR ? whole(y2, 4) : y2.ticks(4)) : [];
     const ml = Math.ceil(d3.max(yTicks.map((t) => textWidth(svg.node(), yFmt(t)))) || 20) + 10;
     const mr = rightVals.length ? Math.ceil(d3.max(y2Ticks.map((t) => textWidth(svg.node(), y2Fmt(t)))) || 20) + 10 : 8;
     const x = d3.scaleBand(keys, [ml, W - mr]).paddingInner(0.25).paddingOuter(0.1);
@@ -2795,14 +2829,23 @@ a.ax-btn { text-decoration: none; display: inline-block; }
   let dlg = null;
   function openTrend(a, D) {
     const rows = (dash.data('meta_ads').data || []).filter((r) => r.ad_id === a.id).sort((x, y) => x.date.localeCompare(y.date));
-    if (!dlg) { dlg = h('dialog', { class: 'ax-dlg' }); document.body.append(dlg); dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); }); }
+    if (!dlg) { dlg = h('dialog', { class: 'ax-dlg ax' }); (document.getElementById('dash-root') || document.body).append(dlg); dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); }); }
     const keys = rows.map((r) => r.date);
     const S = new Map(rows.map((r) => [r.date, n(r.spend)])), L = new Map(rows.map((r) => [r.date, n(r.leads)])), C = new Map(rows.map((r) => [r.date, n(r.impressions) ? (n(r.link_clicks) * 100) / n(r.impressions) : null]));
     const chartBox = h('div', { style: { position: 'relative', minHeight: '220px' } }), ctrBox = h('div', { style: { position: 'relative', minHeight: '160px' } });
     dlg.replaceChildren(h('div', { class: 'ax-chead' }, h('h3', { text: a.name }), h('button', { class: 'ax-btn', onclick: () => dlg.close(), text: 'Close' })),
       h('p', { class: 'ax-note', text: AX.shortName(a.campaign) + ' · ' + a.fmt + ' · ' + langOf(a.c) + ' · ' + rows.length + ' days of data' }),
+      (() => { const sp = d3.sum(rows, (r) => n(r.spend)), le = d3.sum(rows, (r) => n(r.leads)), im = d3.sum(rows, (r) => n(r.impressions)), lc = d3.sum(rows, (r) => n(r.link_clicks));
+        const card = (l, v) => h('div', { class: 'ax-kpi' }, h('div', { class: 'l', text: l }), h('div', { class: 'v', text: v }));
+        return h('div', { class: 'ax-kpis', style: { margin: '6px 0 12px' } }, card('Total spend', F.inr(sp)), card('Leads', F.int(le)), card('Cost per lead', le ? F.inr(sp / le) : '— (no leads)'), card('CTR', im ? F.pct((lc * 100) / im, 2) : '—')); })(),
       h('h4', { text: 'Daily spend and leads' }), AX.chart.legend([{ name: 'Spend (₹, left)', color: AX.PAL[0] }, { name: 'Leads (right)', color: AX.PAL[1] }]), chartBox,
-      h('h4', { text: 'Daily CTR (%)' }), ctrBox);
+      h('h4', { text: 'Daily CTR (%)' }), ctrBox,
+      h('h4', { text: 'Day by day' }),
+      h('div', { class: 'ax-tablewrap' }, h('table', { class: 'ax-table' },
+        h('thead', null, h('tr', null, ['Date', 'Spend', 'Leads', 'CPL', 'Impressions', 'Link clicks', 'CTR'].map((t, i) => h('th', { class: i ? 'num' : '', text: t })))),
+        h('tbody', null, rows.slice().reverse().map((r) => { const sp = n(r.spend), le = n(r.leads), im = n(r.impressions), lc = n(r.link_clicks);
+          return h('tr', null, h('td', { text: AX.d.dow(r.date) + ' ' + AX.d.nice(r.date) }), h('td', { class: 'num', text: F.inr(sp) }), h('td', { class: 'num', text: F.int(le) }),
+            h('td', { class: 'num ' + (le ? '' : 'muted'), text: le ? F.inr(sp / le) : '—' }), h('td', { class: 'num', text: F.int(im) }), h('td', { class: 'num', text: F.int(lc) }), h('td', { class: 'num', text: im ? F.pct((lc * 100) / im, 2) : '—' })); })))));
     dlg.showModal();
     if (keys.length >= 2) {
       AX.chart.time(chartBox, { keys, bars: { name: 'Spend', values: S, color: AX.PAL[0], fmt: F.inr }, lines: [{ name: 'Leads', values: L, color: AX.PAL[1], right: true }], yFmt: F.inrShort, label: 'Daily spend and leads' });
@@ -3281,6 +3324,9 @@ a.ax-btn { text-decoration: none; display: inline-block; }
     const el = AX.$('lk-detail'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start', behavior: 'smooth' });
   }
 
+  // open a lead from another page (e.g. Sales manager)
+  AX.openLead = (id) => { st.results = null; st.q = ''; AX.tab = 'lookup'; try { history.replaceState(null, '', '#lookup'); } catch (_) {} AX.render(); open(id); };
+
   AX.pages.lookup = function () {
     // search bar
     const inp = h('input', { type: 'search', class: 'ax-lk-in', placeholder: 'Name, phone number or email…', value: st.q, 'aria-label': 'Search leads' });
@@ -3329,10 +3375,119 @@ a.ax-btn { text-decoration: none; display: inline-block; }
 
 </script>
 <script>
+// Sales manager: course-wise lead status for any range (or all data), live LeadSquared stages by course, team performance
+// by counsellor, counsellor x course, weekly trend and stage speed. Click any course/stage number to list those leads;
+// admin, marketing and counselling-lead roles can open a lead's full record via Lead lookup.
+(function () {
+  const AX = window.AX, h = AX.h, F = AX.fmt;
+  AX.ui = AX.ui || {};
+  const seg = (label, cur, opts, set) => h('div', null, label ? h('span', { class: 'ax-flabel', text: label }) : null, h('div', { class: 'ax-seg', role: 'group' }, opts.map(([v, t]) => h('button', { 'aria-pressed': v === cur ? 'true' : 'false', onclick: () => { set(v); AX.render(); } }, t))));
+  const pct = (a, b, d = 0) => (b ? F.pct((a * 100) / b, d) : '—');
+  const median = (arr) => { const a = arr.filter((x) => x != null && isFinite(x)).sort((x, y) => x - y); return a.length ? a[Math.floor(a.length / 2)] : null; };
+  const STAGES = [['leads', 'Leads'], ['untouched', 'Not contacted'], ['contacted', 'Contacted'], ['qualified', 'Qualified'], ['booked', 'Counselling'], ['applied', 'Applied'], ['admitted', 'Admitted'], ['lost', 'Lost'], ['open', 'Open']];
+  const inStage = { leads: () => true, untouched: (l) => !l.contacted && !l.qualified && !l.lost && !l.admitted && l.firstCallTs == null, contacted: (l) => !!(l.contacted || l.firstCallTs != null), qualified: (l) => !!l.qualified, booked: (l) => !!l.booked, applied: (l) => !!l.applied, admitted: (l) => !!l.admitted, lost: (l) => !!l.lost, open: (l) => !l.lost && !l.admitted };
+
+  AX.pages.salesmgr = function (D) {
+    const P = AX.p(), S = (AX.ui.sm = AX.ui.sm || { range: 'period', src: 'all', pick: null });
+    let s, e, label;
+    if (S.range === 'all') { s = D.leads.reduce((m, l) => (l.date && l.date < m ? l.date : m), D.asOf); e = D.asOf; label = 'All data (' + AX.d.nice(s) + ' – ' + AX.d.nice(e) + ')'; }
+    else { const per = AX.period(P, D.asOf); s = per.start; e = per.end; label = per.label; }
+    const PP = Object.assign({}, P, S.src === 'meta' ? { source: 'Meta Ads' } : {});
+    const L = AX.leadsIn(D, PP, s, e, S.src === 'all' ? { ignoreSource: true } : undefined);
+    AX.fill('sm-controls', seg('Range', S.range, [['period', 'Dashboard period'], ['all', 'All data']], (v) => (S.range = v)), seg('Leads from', S.src, [['all', 'All sources'], ['meta', 'Meta Ads only']], (v) => (S.src = v)));
+    const adm = L.filter((l) => l.admitted).length, q = L.filter((l) => l.qualified).length, lost = L.filter((l) => l.lost).length;
+    AX.fill('sm-take', label + ': ' + F.int(L.length) + ' leads · ' + F.int(q) + ' qualified (' + pct(q, L.length, 1) + ') · ' + F.int(adm) + ' admitted (' + pct(adm, L.length, 1) + ') · ' + pct(lost, L.length) + ' lost. Click any number in the course table to see those leads.');
+
+    // ---------- course-wise status ----------
+    const byProg = [...AX.groupBy(L, (l) => l.programme || 'Unmapped')].map(([p, ls]) => { const o = { p, ls }; for (const [k] of STAGES) o[k] = ls.filter(inStage[k]).length; o.qPct = AX.div(o.qualified * 100, o.leads); o.aPct = AX.div(o.admitted * 100, o.leads); return o; }).sort((a, b) => b.leads - a.leads);
+    const tot = { p: 'All courses', ls: L }; for (const [k] of STAGES) tot[k] = L.filter(inStage[k]).length; tot.qPct = AX.div(tot.qualified * 100, tot.leads); tot.aPct = AX.div(tot.admitted * 100, tot.leads);
+    const cell = (r, k) => h('td', { class: 'num' }, h('button', { class: 'ax-cellbtn' + (S.pick && S.pick.p === r.p && S.pick.k === k ? ' on' : ''), title: 'Show these leads', onclick: () => { S.pick = { p: r.p, k }; AX.render(); setTimeout(() => { const el = AX.$('sm-list-card'); if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); }, 50); } }, F.int(r[k])));
+    const row = (r, bold) => h('tr', { class: bold ? 'ax-totrow' : '' }, h('td', null, bold ? h('b', { text: r.p }) : r.p), STAGES.map(([k]) => cell(r, k)), h('td', { class: 'num', text: F.pct(r.qPct, 1) }), h('td', { class: 'num ' + (r.aPct >= 2 ? 'ok' : r.aPct > 0 ? 'warn' : ''), text: F.pct(r.aPct, 2) }));
+    AX.fill('sm-course', h('div', { class: 'ax-tablewrap' }, h('table', { class: 'ax-table' },
+      h('thead', null, h('tr', null, h('th', { text: 'Course' }), STAGES.map(([, t]) => h('th', { class: 'num', text: t })), h('th', { class: 'num', text: 'Qualified %' }), h('th', { class: 'num', text: 'Admitted %' }))),
+      h('tbody', null, byProg.map((r) => row(r)), row(tot, true)))));
+
+    // ---------- lead list for the clicked cell ----------
+    if (S.pick) {
+      const src = S.pick.p === 'All courses' ? L : (byProg.find((r) => r.p === S.pick.p) || { ls: [] }).ls;
+      const ls = src.filter(inStage[S.pick.k]);
+      const canOpen = !AX.noLookup && AX.openLead;
+      AX.fill('sm-list-note', S.pick.p + ' · ' + (STAGES.find((x) => x[0] === S.pick.k) || [, ''])[1] + ': ' + F.int(ls.length) + ' leads' + (canOpen ? ' · click a row to open the full record' : ''));
+      AX.table('sm-list', [{ key: 'id', label: 'LeadSquared ID' }, { key: 'date', label: 'Created' }, { key: 'owner', label: 'Owner' }, { key: 'status', label: 'Stage now' }, { key: 'source', label: 'Source' },
+        { key: 'camp', label: 'Campaign', fmt: (v) => AX.shortName(v) }, { key: 'firstCall', label: 'First call after', num: true, fmt: (v) => (v == null ? 'not called' : v < 60 ? Math.round(v) + ' min' : (v / 60).toFixed(1) + ' h') }, { key: 'reason', label: 'Loss reason' }],
+        { rows: ls.map((l) => ({ id: l.id, date: l.date, owner: l.owner || 'Unassigned', status: l.status, source: l.source, camp: l.c ? l.c.name : '', firstCall: l.firstCallTs != null && l.createdTs != null ? (l.firstCallTs - l.createdTs) / 60000 : null, reason: l.reason || '' })),
+          rowKey: 'id', onRow: canOpen ? (r) => AX.openLead(r.id) : null, sort: { key: 'date', dir: 'desc' }, pageSize: 50, exportName: 'aimer-leads-' + S.pick.p.replace(/\W+/g, '-') + '-' + S.pick.k + '.csv' });
+      AX.$('sm-list-card').hidden = false;
+    } else { const c = AX.$('sm-list-card'); if (c) c.hidden = true; }
+
+    // ---------- live LeadSquared stages by course ----------
+    const stageNames = [...AX.groupBy(L, (l) => l.status || 'Unknown')].map(([k, v]) => [k, v.length]).sort((a, b) => b[1] - a[1]).slice(0, 9).map((x) => x[0]);
+    AX.fill('sm-stages', h('div', { class: 'ax-tablewrap' }, h('table', { class: 'ax-table' },
+      h('thead', null, h('tr', null, h('th', { text: 'Course' }), stageNames.map((n) => h('th', { class: 'num', text: n })))),
+      h('tbody', null, byProg.concat([tot]).map((r) => h('tr', { class: r === tot ? 'ax-totrow' : '' }, h('td', null, r === tot ? h('b', { text: r.p }) : r.p),
+        stageNames.map((n) => { const c = r.ls.filter((l) => (l.status || 'Unknown') === n).length; return h('td', { class: 'num', style: c ? { background: 'rgba(18,199,132,' + Math.min(0.55, 0.06 + c / Math.max(1, r.leads) * 0.9).toFixed(2) + ')' } : null, text: c ? F.int(c) : '' }); })))))));
+
+    // ---------- team performance ----------
+    const now = Date.now();
+    const team = [...AX.groupBy(L, (l) => l.owner || 'Unassigned')].map(([o, ls]) => {
+      const callable = ls.filter((l) => l.createdTs != null && now - l.createdTs > 2 * 3600e3);
+      const waits = callable.filter((l) => l.firstCallTs != null).map((l) => (l.firstCallTs - l.createdTs) / 60000);
+      const calls = d3.sum(ls, (l) => l.calls), conn = d3.sum(ls, (l) => l.connCalls);
+      const idle = ls.filter((l) => !l.lost && !l.admitted && now - Math.max(l.lastActTs || 0, l.firstCallTs || 0, l.createdTs || 0) > 3 * 864e5).length;
+      return { o, n: ls.length, w1: AX.div(waits.filter((m) => m <= 60).length * 100, callable.length), med: median(waits), calls, conn: AX.div(conn * 100, calls), talk: d3.sum(ls, (l) => l.talk) / 60,
+        q: ls.filter((l) => l.qualified).length, b: ls.filter((l) => l.booked).length, a: ls.filter((l) => l.admitted).length, lost: AX.div(ls.filter((l) => l.lost).length * 100, ls.length), idle };
+    }).map((r) => Object.assign(r, { qPct: AX.div(r.q * 100, r.n), aPct: AX.div(r.a * 100, r.n) }));
+    const dur = (m) => (m == null ? '—' : m < 60 ? Math.round(m) + ' min' : (m / 60).toFixed(1) + ' h');
+    AX.table('sm-team', [{ key: 'o', label: 'Counsellor' }, { key: 'n', label: 'Leads', num: true, fmt: F.int },
+      { key: 'w1', label: 'Called <1 h', num: true, fmt: (v) => (v == null ? '—' : F.pct(v, 0)), cls: (r) => (r.w1 == null ? '' : r.w1 >= 60 ? 'ok' : r.w1 >= 30 ? 'warn' : 'bad') }, { key: 'med', label: 'Median first call', num: true, fmt: dur },
+      { key: 'calls', label: 'Calls', num: true, fmt: F.int }, { key: 'conn', label: 'Connect %', num: true, fmt: (v) => (v == null ? '—' : F.pct(v, 0)) }, { key: 'talk', label: 'Talk (min)', num: true, fmt: F.int },
+      { key: 'q', label: 'Qualified', num: true, fmt: F.int }, { key: 'qPct', label: 'Qualified %', num: true, fmt: (v) => F.pct(v, 1) }, { key: 'b', label: 'Counselling', num: true, fmt: F.int },
+      { key: 'a', label: 'Admitted', num: true, fmt: F.int }, { key: 'aPct', label: 'Admitted %', num: true, fmt: (v) => F.pct(v, 2), cls: (r) => (r.aPct >= 2 ? 'ok' : '') },
+      { key: 'lost', label: 'Lost %', num: true, fmt: (v) => F.pct(v, 0), cls: (r) => (r.lost >= 60 ? 'bad' : r.lost >= 40 ? 'warn' : '') }, { key: 'idle', label: 'Idle 3+ days', num: true, fmt: F.int, cls: (r) => (r.idle ? 'warn' : '') }],
+      { rows: team, sort: { key: 'n', dir: 'desc' }, exportName: 'aimer-team-performance.csv' });
+    const best = team.filter((r) => r.n >= 10).sort((a, b) => (b.aPct || 0) - (a.aPct || 0) || (b.qPct || 0) - (a.qPct || 0))[0];
+    const slow = team.filter((r) => r.n >= 10 && r.w1 != null).sort((a, b) => a.w1 - b.w1)[0];
+    AX.fill('sm-team-note', (best ? 'Best conversion: ' + best.o + ' (' + F.pct(best.qPct, 1) + ' qualified, ' + best.a + ' admitted). ' : '') + (slow ? 'Slowest first call: ' + slow.o + ' (' + F.pct(slow.w1, 0) + ' within 1 h, median ' + dur(slow.med) + '). ' : '') + 'Counsellors with fewer than 10 leads are left out of these call-outs.');
+
+    // ---------- counsellor x course ----------
+    const MX = (AX.ui.smMetric = AX.ui.smMetric || 'q');
+    AX.fill('sm-mx-ctl', seg('Show', MX, [['n', 'Leads'], ['q', 'Qualified'], ['a', 'Admitted'], ['qp', 'Qualified %']], (v) => (AX.ui.smMetric = v)));
+    const progs = byProg.map((r) => r.p).slice(0, 8);
+    AX.fill('sm-mx', h('div', { class: 'ax-tablewrap' }, h('table', { class: 'ax-table' },
+      h('thead', null, h('tr', null, h('th', { text: 'Counsellor' }), progs.map((p) => h('th', { class: 'num', text: AX.shortName(p) })))),
+      h('tbody', null, team.sort((a, b) => b.n - a.n).map((t) => h('tr', null, h('td', { text: t.o }), progs.map((p) => {
+        const ls = L.filter((l) => (l.owner || 'Unassigned') === t.o && (l.programme || 'Unmapped') === p);
+        const v = MX === 'n' ? ls.length : MX === 'q' ? ls.filter((l) => l.qualified).length : MX === 'a' ? ls.filter((l) => l.admitted).length : AX.div(ls.filter((l) => l.qualified).length * 100, ls.length);
+        return h('td', { class: 'num', text: !ls.length ? '' : MX === 'qp' ? F.pct(v, 0) : F.int(v) });
+      })))))));
+
+    // ---------- weekly trend ----------
+    const TM = (AX.ui.smTrend = AX.ui.smTrend || 'q');
+    AX.fill('sm-trend-ctl', seg('Measure', TM, [['q', 'Qualified'], ['a', 'Admitted'], ['n', 'Leads']], (v) => (AX.ui.smTrend = v)));
+    const weeks = [...new Set(L.map((l) => AX.bucket(l.date, 'week')))].sort();
+    const top = team.filter((t) => t.o !== 'Unassigned').sort((a, b) => b.n - a.n).slice(0, 5).map((t) => t.o);
+    const box = AX.$('sm-trend');
+    if (weeks.length < 2 || !top.length) AX.fill(box, h('div', { class: 'ax-empty', text: 'Pick a range of at least two weeks to see the trend.' }));
+    else {
+      const evDate = (l) => (TM === 'q' ? l.qualified : TM === 'a' ? l.admitted : l.date);
+      AX.fill(box, AX.chart.legend(top.map((o, i) => ({ name: o, color: AX.PAL[i] }))), h('div', { style: { position: 'relative' } }));
+      AX.chart.time(box.lastChild, { keys: weeks, lines: top.map((o, i) => ({ name: o, color: AX.PAL[i], values: new Map(weeks.map((w) => [w, D.leads.filter((l) => (l.owner || 'Unassigned') === o && evDate(l) && AX.bucket(evDate(l), 'week') === w && AX.leadOk(l, PP, S.src === 'all' ? { ignoreSource: true } : undefined)).length])) })), label: 'Per counsellor per week', xFmt: (k) => AX.d.nice(k) });
+    }
+
+    // ---------- stage speed ----------
+    const days = (a, b) => (a && b ? AX.d.diff(a, b) : null);
+    AX.table('sm-speed', [{ key: 'p', label: 'Course' }, { key: 'lq', label: 'Lead → qualified (median days)', num: true, fmt: (v) => (v == null ? '—' : String(v)) },
+      { key: 'qa', label: 'Qualified → admitted', num: true, fmt: (v) => (v == null ? '—' : String(v)) }, { key: 'la', label: 'Lead → admitted', num: true, fmt: (v) => (v == null ? '—' : String(v)) }, { key: 'nA', label: 'Admissions measured', num: true, fmt: F.int }],
+      { rows: byProg.map((r) => ({ p: r.p, lq: median(r.ls.filter((l) => l.qualified).map((l) => days(l.date, l.qualified))), qa: median(r.ls.filter((l) => l.admitted && l.qualified).map((l) => days(l.qualified, l.admitted))), la: median(r.ls.filter((l) => l.admitted).map((l) => days(l.date, l.admitted))), nA: r.admitted })), sort: { key: 'nA', dir: 'desc' }, search: false, colFilters: false });
+  };
+})();
+
+</script>
+<script>
 // Main: navigation, data-state header, settings persistence, and the render loop.
 (function () {
   const AX = window.AX, h = AX.h;
-  const TABS = ['overview', 'exec', 'lookup', 'plan', 'daily', 'campaigns', 'ads', 'creative', 'sales', 'cohorts', 'crm', 'programmes', 'budget', 'reports', 'settings'];
+  const TABS = ['overview', 'exec', 'salesmgr', 'lookup', 'plan', 'daily', 'campaigns', 'ads', 'creative', 'sales', 'cohorts', 'crm', 'programmes', 'budget', 'reports', 'settings'];
   const fromHash = location.hash.slice(1);
   AX.tab = TABS.includes(fromHash) ? fromHash : 'overview';
   AX.renderRev = 0;
@@ -3342,7 +3497,7 @@ a.ax-btn { text-decoration: none; display: inline-block; }
   document.querySelectorAll('#ax [data-source]').forEach((el) => el.classList.add('dash-skeleton'));
 
   const nav = AX.$('ax-nav');
-  const TITLES = { overview: 'Overview', exec: 'My summary', lookup: 'Lead lookup', plan: 'Action plan', daily: 'Daily performance', campaigns: 'Campaign performance', ads: 'Ads Manager', creative: 'Creative & audience', sales: 'Sales team', cohorts: 'Cohorts & forecast', crm: 'Lead quality & CRM', programmes: 'Programme performance', budget: 'Budget & ROI', reports: 'Reports & export', settings: 'Integrations & settings' };
+  const TITLES = { overview: 'Overview', exec: 'My summary', lookup: 'Lead lookup', salesmgr: 'Sales manager', plan: 'Action plan', daily: 'Daily performance', campaigns: 'Campaign performance', ads: 'Ads Manager', creative: 'Creative & audience', sales: 'Sales team', cohorts: 'Cohorts & forecast', crm: 'Lead quality & CRM', programmes: 'Programme performance', budget: 'Budget & ROI', reports: 'Reports & export', settings: 'Integrations & settings' };
   nav.addEventListener('click', (e) => {
     const b = e.target.closest('button[data-tab]'); if (!b) return;
     AX.tab = b.dataset.tab; dash.setLink(AX.tab);
@@ -3453,6 +3608,7 @@ a.ax-btn { text-decoration: none; display: inline-block; }
     product_manager: ['overview', 'plan', 'daily', 'campaigns', 'ads', 'creative', 'cohorts', 'crm', 'programmes', 'budget', 'reports'],
   };
   AX.role = role;
+  if (role === 'counselling_lead' && !location.hash) AX.tab = 'salesmgr';
   // Lead lookup (live contact details): admin, marketing and counselling lead only
   if (!['admin', 'marketing', 'counselling_lead'].includes(role)) { const lb = document.querySelector('#ax-nav [data-tab="lookup"]'); if (lb) lb.remove(); AX.noLookup = true; }
   AX.leadLookup = async (body) => { const { data, error } = await sb.functions.invoke('lead-lookup', { body }); if (error) { let m = error.message; try { m = (await error.context.json()).error || m; } catch (_) {} throw new Error(m); } return data; };
