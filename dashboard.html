@@ -93,6 +93,12 @@ body { margin: 0; background: #e3f3f0; }
 #dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
 /* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
 #dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
 .ax {
   --g: #12c784; --g2: #0a7a4c; --g3: #b9f0d9; --lime: #dfe35a; --lime2: #f3f4c4;
   --mint: #dcf2ef; --cream: #fbfbe9; --ink: #0d0f0e; --ink2: #1b1f1d; --line: #e7ece9; --soft: #f5f7f6;
@@ -402,6 +408,14 @@ a.ax-btn { text-decoration: none; display: inline-block; }
 .ax-cellbtn { background: none; border: 0; padding: 2px 6px; border-radius: 8px; font: inherit; color: inherit; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; }
 .ax-cellbtn:hover, .ax-cellbtn.on { background: #e3f7ee; color: #0a6b43; text-decoration: none; }
 .ax-totrow td { border-top: 2px solid rgba(13,15,14,.15); font-weight: 600; }
+
+.ax-lk-bulk { width: 100%; border: 1px solid rgba(13,15,14,.18); border-radius: 14px; padding: 10px 14px; font: inherit; font-size: 14px; resize: vertical; }
+.ax-lk-group { margin-top: 10px; } .ax-lk-group h4 { margin: 8px 0 2px; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--color-fg-muted); }
+.ax-steps { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.ax-step { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 104px; padding: 10px 8px; border-radius: 12px; background: #f1f4f2; font-size: 12.5px; text-align: center; }
+.ax-step .dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #c9d1cd; display: grid; place-items: center; font-weight: 700; color: #fff; }
+.ax-step.done { background: #e3f7ee; } .ax-step.done .dot { background: #12c784; border-color: #12c784; }
+.ax-step small { color: var(--color-fg-muted); font-size: 11px; }
 </style>
 </head>
 <body>
@@ -541,8 +555,8 @@ a.ax-btn { text-decoration: none; display: inline-block; }
 
       <!-- Lead lookup -->
       <section class="ax-page" id="lookup" data-page="lookup" hidden>
-        <p class="ax-take">Search any lead by name, phone or email. Details come live from LeadSquared and are never stored in the dashboard; every lookup is logged.</p>
-        <div class="ax-card"><div class="ax-lk-bar" id="lk-bar"></div><div id="lk-msg" role="status"></div><p class="ax-note" id="lk-results-note"></p><div id="lk-results"></div></div>
+        <p class="ax-take">Find one lead by name, phone or email, or check the status of many at once. Details come live from LeadSquared and are never stored in the dashboard; every lookup is logged.</p>
+        <div class="ax-card"><div id="lk-mode" style="margin-bottom:10px"></div><div class="ax-lk-bar" id="lk-bar"></div><div id="lk-msg" role="status"></div><p class="ax-note" id="lk-results-note"></p><div id="lk-results"></div></div>
         <div id="lk-detail" style="margin-top:var(--cds-gap-md)"></div>
       </section>
 
@@ -3320,7 +3334,10 @@ a.ax-btn { text-decoration: none; display: inline-block; }
 // the browser cache. Admin, marketing and counselling-lead roles only; every search and view is audit-logged.
 (function () {
   const AX = window.AX, h = AX.h, F = AX.fmt;
-  const st = { q: '', results: null, busy: false, err: '', detail: null, dbusy: false, fq: '' };
+  const st = { q: '', results: null, busy: false, err: '', detail: null, dbusy: false, fq: '', mode: 'one', bulkText: '', bulk: null, bbusy: false, bcols: 'key', showEmpty: false };
+  const KEY_COLS = ['First Name', 'Last Name', 'Phone Number', 'Email', 'Lead Stage', 'Owner', 'Status', 'Course Interested in', 'Interest Level', 'Lead Source', 'Source Campaign', 'Source Medium', 'Source Content', 'Ad Set Name', 'Follow up date', 'Not Interested Concern', 'Exam Link Sent', 'Exam Done', 'Interview Done', 'Selected', 'COL Sent', 'Admission Done', 'Fees Paid', 'Created on'];
+  const STEPS = ['Exam Link Sent', 'Exam Done', 'Interview Scheduled', 'Interview Done', 'Selected', 'COL Sent', 'Admission Done'];
+  const yes = (v) => v != null && v !== '' && !/^(no|false|0|n)$/i.test(String(v).trim());
   const ist = (ts) => (ts ? new Date(ts).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—');
   const label = (k) => String(k).replace(/^mx_/, '').replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/\s+/g, ' ').trim();
   const dur = (s) => (s == null ? '—' : s < 60 ? s + ' s' : Math.floor(s / 60) + ' min ' + (s % 60) + ' s');
@@ -3333,6 +3350,14 @@ a.ax-btn { text-decoration: none; display: inline-block; }
     try { const r = await AX.leadLookup({ q }); st.results = r.results || []; } catch (e) { st.err = e.message; st.results = null; }
     st.busy = false; AX.render();
   }
+  async function runBulk() {
+    const items = st.bulkText.split(/[\n,;\t]+/).map((x) => x.trim()).filter((x) => x.length >= 3);
+    if (!items.length) { st.err = 'Paste phone numbers, emails or lead IDs, one per line.'; AX.render(); return; }
+    if (items.length > 100) { st.err = 'Up to 100 at a time, please (you pasted ' + items.length + ').'; AX.render(); return; }
+    st.bbusy = true; st.err = ''; st.bulk = null; AX.render();
+    try { st.bulk = await AX.leadLookup({ bulk: items }); } catch (e) { st.err = e.message; }
+    st.bbusy = false; AX.render();
+  }
   async function open(id) {
     st.dbusy = true; st.err = ''; AX.render();
     try { st.detail = await AX.leadLookup({ lead_id: id }); st.fq = ''; } catch (e) { st.err = e.message; }
@@ -3343,7 +3368,31 @@ a.ax-btn { text-decoration: none; display: inline-block; }
   // open a lead from another page (e.g. Sales manager)
   AX.openLead = (id) => { st.results = null; st.q = ''; AX.tab = 'lookup'; try { history.replaceState(null, '', '#lookup'); } catch (_) {} AX.render(); open(id); };
 
+  function renderBulk() {
+    const ta = h('textarea', { class: 'ax-lk-bulk', rows: 6, placeholder: 'Paste up to 100 phone numbers, emails or LeadSquared IDs (one per line, or separated by commas)', 'aria-label': 'Leads to check' }, st.bulkText);
+    ta.addEventListener('input', (e) => (st.bulkText = e.target.value));
+    const n = st.bulkText.split(/[\n,;\t]+/).filter((x) => x.trim().length >= 3).length;
+    AX.fill('lk-bar', h('div', { style: { flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' } }, ta,
+      h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' } }, h('button', { class: 'ax-btn ax-lk-go', disabled: st.bbusy, onclick: runBulk }, st.bbusy ? 'Checking… (about 1 second per lead)' : 'Check status'),
+        h('span', { class: 'ax-note', style: { margin: 0 }, text: n ? n + ' to check' : '' }))));
+    AX.fill('lk-msg', st.err ? h('p', { class: 'bad', text: st.err }) : null);
+    const B = st.bulk;
+    if (!B) { AX.fill('lk-results'); AX.fill('lk-results-note'); AX.fill('lk-detail'); return; }
+    const labels = st.bcols === 'key' ? KEY_COLS : B.labels.map((x) => x.label);
+    const rows = B.rows.map((r) => Object.assign({ input: r.input, found: r.found, lead_id: r.lead_id || '' }, r.values || {}));
+    const found = B.rows.filter((r) => r.lead_id).length, missing = B.rows.filter((r) => !r.lead_id).length;
+    AX.fill('lk-results-note', h('span', null, found + ' found · ' + missing + ' not found' + (B.not_processed && B.not_processed.length ? ' · ' + B.not_processed.length + ' not checked (time limit) — run them again' : '') + ' · click a row to open the full record. ',
+      h('span', { class: 'ax-seg', role: 'group', style: { marginLeft: '8px' } }, [['key', 'Key fields'], ['all', 'All form fields']].map(([v, t]) => h('button', { 'aria-pressed': st.bcols === v ? 'true' : 'false', onclick: () => { st.bcols = v; AX.render(); } }, t)))));
+    AX.table('lk-results', [{ key: 'input', label: 'You entered' }, { key: 'found', label: 'Result', cls: (r) => (r.found === 'Found' ? 'ok' : r.found === 'Multiple matches' ? 'warn' : 'bad') }]
+      .concat(labels.map((l) => ({ key: l, label: l, cls: (r) => (STEPS.includes(l) && yes(r[l]) ? 'ok' : '') }))),
+      { rows, rowKey: 'lead_id', onRow: (r) => r.lead_id && open(r.lead_id), sort: null, pageSize: 100, exportName: 'aimer-lead-status-' + new Date().toISOString().slice(0, 10) + '.csv' });
+    AX.fill('lk-detail');
+  }
+
   AX.pages.lookup = function () {
+    AX.fill('lk-mode', h('div', { class: 'ax-seg', role: 'group' }, [['one', 'Find one lead'], ['many', 'Check many leads']].map(([v, t]) => h('button', { 'aria-pressed': st.mode === v ? 'true' : 'false', onclick: () => { if (st.mode !== v) st.detail = null; st.mode = v; st.err = ''; AX.render(); } }, t))));
+    if (st.mode === 'many' && !st.detail) { renderBulk(); return; }
+    if (st.mode === 'many' && st.detail) AX.fill('lk-results-note', h('button', { class: 'ax-btn', onclick: () => { st.detail = null; AX.render(); } }, '← Back to the list'));
     // search bar
     const inp = h('input', { type: 'search', class: 'ax-lk-in', placeholder: 'Name, phone number or email…', value: st.q, 'aria-label': 'Search leads' });
     inp.addEventListener('input', (e) => (st.q = e.target.value));
@@ -3356,7 +3405,7 @@ a.ax-btn { text-decoration: none; display: inline-block; }
         { key: 'created', label: 'Created', fmt: (v) => ist(v) }, { key: 'in_dashboard', label: 'In dashboard', fmt: (v) => (v ? 'Yes' : 'No') }],
         { rows: st.results, rowKey: 'lead_id', onRow: (r) => open(r.lead_id), sort: { key: 'created', dir: 'desc' }, search: false, colFilters: false });
       AX.fill('lk-results-note', st.results.length + ' match' + (st.results.length > 1 ? 'es' : '') + ' — click a row to open the full record.');
-    } else { AX.fill('lk-results'); AX.fill('lk-results-note'); }
+    } else if (st.mode === 'one') { AX.fill('lk-results'); AX.fill('lk-results-note'); } else AX.fill('lk-results');
     // detail
     const D = st.detail;
     if (st.dbusy) { AX.fill('lk-detail', h('div', { class: 'ax-empty', text: 'Opening the lead from LeadSquared…' })); return; }
@@ -3384,7 +3433,16 @@ a.ax-btn { text-decoration: none; display: inline-block; }
         h('div', { class: 'ax-card' }, h('h3', { text: 'Timeline (latest first)' }), acts.length ? h('ul', { class: 'ax-lk-tl' }, acts.slice(0, 60).map((a) => h('li', null,
           h('span', { class: 'ax-note', style: { margin: 0 }, text: ist(a.created_at) }),
           h('div', { text: a.event_code === 3002 ? 'Stage: ' + (a.previous_stage || '—') + ' → ' + (a.current_stage || '—') : (a.call_direction === 'inbound' ? '📥 Inbound call' : '📞 Outbound call') + ' · ' + dur(a.duration_secs) + ((a.duration_secs || 0) > 0 ? '' : ' (not connected)') + (a.created_by_name ? ' · ' + a.created_by_name : '') })))) : h('p', { class: 'ax-note', text: 'No calls or stage changes recorded yet.' }))),
-      h('div', { class: 'ax-card', style: { marginTop: 'var(--cds-gap-md)' } }, h('div', { class: 'ax-chead' }, h('h3', { text: 'All LeadSquared fields (' + Object.keys(f).length + ')' }), fsearch),
+      (D.groups || []).length ? (() => {
+        const adm = (D.groups || []).find((g) => g.title === 'Admission process');
+        const tracker = adm ? h('div', { class: 'ax-steps' }, STEPS.map((s) => { const it = adm.items.find((i) => i.label === s); const done = it && yes(it.value); return h('div', { class: 'ax-step' + (done ? ' done' : '') }, h('span', { class: 'dot', text: done ? '✓' : '' }), h('span', { text: s }), it && it.value ? h('small', { text: it.value }) : null); })) : null;
+        const toggle = h('label', { class: 'ax-flabel', style: { display: 'inline-flex', gap: '6px', alignItems: 'center' } }, (() => { const c = h('input', { type: 'checkbox' }); c.checked = st.showEmpty; c.addEventListener('change', () => { st.showEmpty = c.checked; AX.render(); }); return c; })(), 'Show empty fields');
+        return h('div', { style: { marginTop: 'var(--cds-gap-md)' } },
+          tracker ? h('div', { class: 'ax-card' }, h('h3', { text: 'Admission process' }), tracker) : null,
+          h('div', { class: 'ax-card', style: { marginTop: 'var(--cds-gap-md)' } }, h('div', { class: 'ax-chead' }, h('h3', { text: 'Lead details (as in LeadSquared)' }), toggle),
+            (D.groups || []).map((g) => { const items = g.items.filter((i) => i.exists && (st.showEmpty || i.value)); return items.length ? h('div', { class: 'ax-lk-group' }, h('h4', { text: g.title }), h('div', { class: 'ax-lk-grid' }, items.map((i) => kv(i.label, i.value)))) : null; }),
+            Object.keys(D.other || {}).length ? h('details', { style: { marginTop: '10px' } }, h('summary', { text: 'Other LeadSquared fields (' + Object.keys(D.other).length + ')' }), h('div', { class: 'ax-lk-grid' }, Object.entries(D.other).sort((a, b) => label(a[0]).localeCompare(label(b[0]))).map(([k, v]) => kv(label(k), v)))) : null));
+      })() : h('div', { class: 'ax-card', style: { marginTop: 'var(--cds-gap-md)' } }, h('div', { class: 'ax-chead' }, h('h3', { text: 'All LeadSquared fields (' + Object.keys(f).length + ')' }), fsearch),
         h('div', { class: 'ax-lk-grid', id: 'lk-fields' }, fieldRows.map(([k, v]) => kv(label(k), v)))));
   };
 })();
