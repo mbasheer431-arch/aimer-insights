@@ -258,7 +258,8 @@
       <div class="panel" style="margin-bottom:14px"><div class="tw"><table><thead><tr><th>Role</th><th>Sees</th><th>Admin panel</th></tr></thead><tbody>
         <tr><td>Admin</td><td>Everything</td><td>Everything, incl. keys and users</td></tr>
         <tr><td>Marketing</td><td>Everything</td><td>Connections (test/sync), sync log, targets</td></tr>
-        <tr><td>Counselling lead / Viewer</td><td>Every dashboard page, read-only</td><td>No</td></tr>
+        <tr><td>Sales manager (counselling lead)</td><td>Every dashboard page; opens on the Sales manager view (course-wise lead status, team performance) and can use Lead lookup</td><td>No</td></tr>
+        <tr><td>Viewer</td><td>Every dashboard page, read-only</td><td>No</td></tr>
         <tr><td>Creative coordinator</td><td>Ads Manager, Creative &amp; audience, campaign delivery, daily trends, AI creative review. No leads or CRM.</td><td>No</td></tr>
         <tr><td>Product manager</td><td>All analysis pages, only for the courses you assign. No counsellor scorecard.</td><td>No</td></tr>
       </tbody></table></div></div>
@@ -281,7 +282,7 @@
         <form class="row" id="inviteForm">
           <input type="text" id="invName" placeholder="Name (optional)" maxlength="120" style="flex:1;min-width:150px">
           <input type="email" id="invEmail" placeholder="name@aimerbschool.com" required style="flex:2;min-width:220px">
-          <select id="invRole" style="flex:1;min-width:160px"><option value="viewer">Viewer (CEO, read-only)</option><option value="counselling_lead">Counselling lead</option><option value="marketing">Marketing</option><option value="creative">Creative coordinator</option><option value="product_manager">Product manager (chosen courses)</option><option value="admin">Admin</option></select>
+          <select id="invRole" style="flex:1;min-width:160px"><option value="viewer">Viewer (CEO, read-only)</option><option value="counselling_lead">Sales manager (counselling lead)</option><option value="marketing">Marketing</option><option value="creative">Creative coordinator</option><option value="product_manager">Product manager (chosen courses)</option><option value="admin">Admin</option></select>
           <button class="btn primary" type="submit" id="addBtn">Create invite link</button>
         </form>
         <div id="invMsg" role="status"></div>
@@ -802,7 +803,7 @@
     await loadAllProgs();
     const { data, error } = await sb.rpc('admin_list_users');
     if (error) return say($('usrMsg'), 'Could not load people: ' + error.message, 'bad');
-    const ROLES = [['', 'No access'], ['viewer', 'Viewer'], ['counselling_lead', 'Counselling lead'], ['marketing', 'Marketing'], ['creative', 'Creative coordinator'], ['product_manager', 'Product manager'], ['admin', 'Admin']];
+    const ROLES = [['', 'No access'], ['viewer', 'Viewer'], ['counselling_lead', 'Sales manager'], ['marketing', 'Marketing'], ['creative', 'Creative coordinator'], ['product_manager', 'Product manager'], ['admin', 'Admin']];
     $('usrBody').replaceChildren(...(data || []).map((u) => {
       const sel = h('select', { 'aria-label': 'Role for ' + u.email }, ROLES.map(([v, t]) => h('option', { value: v, text: t })));
       sel.value = u.role || '';
@@ -947,7 +948,7 @@
     $('reqPanel').hidden = !data.length;
     $('reqCount').textContent = data.length ? data.length + ' waiting' : '';
     $('reqBody').replaceChildren(...data.map((r) => {
-      const sel = h('select', { 'aria-label': 'Role for ' + r.email }, [['viewer', 'Viewer'], ['counselling_lead', 'Counselling lead'], ['marketing', 'Marketing'], ['creative', 'Creative coordinator'], ['product_manager', 'Product manager'], ['admin', 'Admin']].map(([v, t]) => h('option', { value: v, text: t })));
+      const sel = h('select', { 'aria-label': 'Role for ' + r.email }, [['viewer', 'Viewer'], ['counselling_lead', 'Sales manager'], ['marketing', 'Marketing'], ['creative', 'Creative coordinator'], ['product_manager', 'Product manager'], ['admin', 'Admin']].map(([v, t]) => h('option', { value: v, text: t })));
       const approve = h('button', { class: 'btn primary', text: 'Approve' }), reject = h('button', { class: 'btn danger', text: 'Reject' });
       approve.addEventListener('click', async () => {
         approve.disabled = true;
