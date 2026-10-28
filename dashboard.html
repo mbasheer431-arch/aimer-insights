@@ -99,6 +99,12 @@ body { margin: 0; background: #e3f3f0; }
 #dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
 /* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
 #dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
 .ax {
   --g: #12c784; --g2: #0a7a4c; --g3: #b9f0d9; --lime: #dfe35a; --lime2: #f3f4c4;
   --mint: #dcf2ef; --cream: #fbfbe9; --ink: #0d0f0e; --ink2: #1b1f1d; --line: #e7ece9; --soft: #f5f7f6;
@@ -976,6 +982,10 @@ a.ax-btn { text-decoration: none; display: inline-block; }
   };
 
   // Campaign-level filters apply to both Meta rows and CRM leads; lead-level filters only to CRM leads.
+  // Multi-select lead sources: stored as "Meta Ads|WhatsApp"
+  AX.srcList = (P) => String((P && P.source) || '').split('|').map((s) => s.trim()).filter((s) => s && s !== 'all');
+  AX.srcLabel = (P) => { const l = AX.srcList(P); return !l.length ? 'all sources' : l.length <= 2 ? l.join(' + ') : l.length + ' sources'; };
+  AX.adsOn = (P) => { const l = AX.srcList(P); return !l.length || l.includes('Meta Ads'); };
   AX.campOk = function (c, P) {
     if (!c) return !(P.campaign || P.cstatus || P.programme || P.location || P.objective);
     if (P.campaign && c.id !== P.campaign) return false;
@@ -987,7 +997,7 @@ a.ax-btn { text-decoration: none; display: inline-block; }
   };
   AX.leadOk = function (l, P, opts = {}) {
     if (AX.config.dedupe_by_phone && l.dup && !opts.keepDup) return false;
-    if (!opts.ignoreSource && P.source && l.source !== P.source) return false;
+    if (!opts.ignoreSource) { const sl = AX.srcList(P); if (sl.length && !sl.includes(l.source)) return false; }
     if (P.campaign && l.cid !== P.campaign) return false;
     if (P.cstatus && (!l.c || l.c.status !== P.cstatus)) return false;
     if (P.programme && l.programme !== P.programme) return false;
@@ -1585,7 +1595,7 @@ a.ax-btn { text-decoration: none; display: inline-block; }
     const dateIn = (name, v, label) => { const i = h('input', { type: 'date', min: D.firstDate || '2000-01-01', max: D.asOf || '2099-12-31', 'aria-label': label }); i.value = v || ''; i.addEventListener('change', () => { if (i.value && i.validity.valid && i.value >= i.min && i.value <= i.max) { const cur = AX.p(), pr = AX.period(cur, D.asOf); const other = name === 'start' ? 'end' : 'start'; dash.setParams({ [name]: i.value, [other]: cur.period === 'custom' && cur[other] ? cur[other] : pr[other], period: 'custom' }); } }); return i; };
     // active filter tags (click to clear)
     const NAMES = { programme: 'Programme', campaign: 'Campaign', cstatus: 'Status', objective: 'Objective', location: 'Location', source: 'Source', owner: 'Owner', lstatus: 'Lead status' };
-    const tags = Object.keys(NAMES).filter((k) => P[k]).map((k) => h('button', { class: 'ax-tag', title: 'Clear', onclick: () => dash.setParams({ [k]: null }) }, NAMES[k] + ': ' + (k === 'campaign' ? AX.shortName(D.cById.get(P[k])?.name || P[k]) : P[k]) + ' ×'));
+    const tags = Object.keys(NAMES).filter((k) => P[k] && !(k === 'source' && !AX.srcList(P).length)).map((k) => h('button', { class: 'ax-tag', title: 'Clear', onclick: () => dash.setParams({ [k]: k === 'source' ? 'all' : null }) }, NAMES[k] + ': ' + (k === 'campaign' ? AX.shortName(D.cById.get(P[k])?.name || P[k]) : k === 'source' ? AX.srcList(P).join(' + ') : P[k]) + ' ×'));
     AX.fill(el,
       h('div', { class: 'ax-frow1' },
         seg('Period', PER, P.period || 'last30', (v) => dash.setParams({ period: v })),
@@ -1608,8 +1618,11 @@ a.ax-btn { text-decoration: none; display: inline-block; }
     const srcCounts = [...AX.groupBy(AX.leadsIn(D, Object.assign({}, P, { lstatus: null }), per.start, per.end, { ignoreSource: true }), (l) => l.source)].map(([s0, v]) => [s0, v.length]).sort((x, y) => y[1] - x[1]);
     const total = d3.sum(srcCounts, (x) => x[1]);
     AX.fill('ax-chips',
-      h('button', { class: 'ax-chip2', 'aria-pressed': !P.source ? 'true' : 'false', onclick: () => dash.setParams({ source: null }) }, 'All leads', h('b', { text: F.int(total) })),
-      srcCounts.map(([s0, n0]) => h('button', { class: 'ax-chip2', 'aria-pressed': P.source === s0 ? 'true' : 'false', onclick: () => dash.setParams({ source: P.source === s0 ? null : s0 }) }, s0, h('b', { text: F.int(n0) }))),
+      h('button', { class: 'ax-chip2', 'aria-pressed': !AX.srcList(P).length ? 'true' : 'false', title: 'Show every lead source', onclick: () => dash.setParams({ source: 'all' }) }, 'All leads', h('b', { text: F.int(total) })),
+      srcCounts.map(([s0, n0]) => { const sel = AX.srcList(P), on = sel.includes(s0);
+        return h('button', { class: 'ax-chip2', 'aria-pressed': on ? 'true' : 'false', title: on ? 'Remove ' + s0 : 'Add ' + s0 + ' (select several to combine)',
+          onclick: () => { const next = on ? sel.filter((x) => x !== s0) : sel.concat([s0]); dash.setParams({ source: next.length ? next.join('|') : 'all' }); } }, on ? '✓ ' + s0 : s0, h('b', { text: F.int(n0) })); }),
+      !AX.adsOn(P) ? h('span', { class: 'ax-note', style: { margin: '0 6px' }, text: 'Ad spend, CPL, campaigns and creatives are hidden: ' + AX.srcLabel(P) + ' has no Meta ad data.' }) : null,
       h('button', { class: 'ax-iconbtn', 'aria-label': 'More filters', 'aria-expanded': AX.ui.moreFilters ? 'true' : 'false', 'aria-controls': 'ax-frow2', onclick: () => { AX.ui.moreFilters = !AX.ui.moreFilters; AX.render(); } }, '⚲'));
   };
 
@@ -1703,7 +1716,7 @@ a.ax-btn { text-decoration: none; display: inline-block; }
     AX.fill('ov-kpi-main',
       t({ label: 'Ad spend', cur: k.spend, prev: pk.spend, fmt: F.inr, goodUp: null, spark: sp('spend', AX.PAL[0]) }),
       t({ label: 'Leads (Meta)', cur: k.leads, prev: pk.leads, fmt: F.int, goodUp: true, spark: sp('leads', AX.PAL[1]) }),
-      t({ label: 'Leads in CRM', cur: k.crmLeads, prev: pk.crmLeads, fmt: F.int, goodUp: true, window: win + ' · ' + (P.source || 'all sources') + (k.leads && P.source === 'Meta Ads' ? ' · ' + F.pct(AX.div(k.crmLeads * 100, k.leads), 0) + ' of Meta leads reached CRM' : '') }),
+      t({ label: 'Leads in CRM', cur: k.crmLeads, prev: pk.crmLeads, fmt: F.int, goodUp: true, window: win + ' · ' + AX.srcLabel(P) + (k.leads && P.source === 'Meta Ads' ? ' · ' + F.pct(AX.div(k.crmLeads * 100, k.leads), 0) + ' of Meta leads reached CRM' : '') }),
       t({ label: 'Cost per lead', cur: k.cpl, prev: pk.cpl, fmt: F.inr, goodUp: false, target: AX.targetStatus(k.cpl, tCpl, true, F.inr), spark: sp('cpl', AX.PAL[2]) }),
       t({ label: 'Qualified-lead rate', cur: k.qlRate, prev: pk.qlRate, fmt: F.pct, goodUp: true, target: AX.targetStatus(k.qlRate, cfg.target_ql_rate, false, (v) => F.pct(v, 0)), spark: sp('ql', AX.PAL[3]) }),
       t({ label: 'Confirmed admissions', cur: k.admitted, prev: pk.admitted, fmt: F.int, goodUp: true, spark: sp('adm', AX.PAL[4]), window: win + ' · from leads created in period' }),
@@ -1732,7 +1745,7 @@ a.ax-btn { text-decoration: none; display: inline-block; }
       k.leads ? [h('b', { text: F.inr(k.spend) }), ' bought ', h('b', { text: F.int(k.leads) + ' leads' }), ' at ', h('b', { class: tCpl && k.cpl > tCpl ? 'bad' : 'ok', text: F.inr(k.cpl) }), cplVs ? ' (' + cplVs + ')' : '', '; '] : [h('b', { text: F.inr(k.spend) }), ' spent for ', h('b', { text: F.int(k.clicks) + ' link clicks' }), ' at ', h('b', { text: F.inr(k.cpc) }), ' per click; no leads recorded in the ad data for this period. '],
       k.crm.n ? [h('b', { text: F.pct(k.qlRate, 0) }), ' qualified and ', h('b', { text: F.int(k.admitted) + ' admitted' }), ' so far. '] : 'Lead quality and admissions appear once LeadSquared is connected. ',
       best ? ['Best: ', h('b', { text: AX.shortName(best.name) }), '. '] : '', worst ? ['Weakest: ', h('b', { text: AX.shortName(worst.name) }), '. '] : '',
-      al.length ? h('span', { class: bad ? 'bad' : 'warn', text: al.length + ' alert' + (al.length > 1 ? 's' : '') + (bad ? ' (' + bad + ' urgent)' : '') + '.' }) : 'No alerts.'] : 'No Meta spend in this period for these filters.');
+      al.length ? h('span', { class: bad ? 'bad' : 'warn', text: al.length + ' alert' + (al.length > 1 ? 's' : '') + (bad ? ' (' + bad + ' urgent)' : '') + '.' }) : 'No alerts.'] : AX.adsOff && k.crm.n ? [AX.srcLabel(P) + ': ', h('b', { text: F.int(k.crm.n) + ' leads' }), ', ', h('b', { text: F.pct(k.qlRate, 0) }), ' qualified and ', h('b', { text: F.int(k.admitted) + ' admitted' }), ' so far. These sources have no ad spend, so cost metrics are hidden.'] : 'No Meta spend in this period for these filters.');
     const why = (r) => {
       const pts = [];
       if (r.tCpl && r.cpl != null) pts.push(r.cpl <= r.tCpl ? 'CPL ' + F.pct((1 - r.cpl / r.tCpl) * 100, 0) + ' under target' : 'CPL ' + F.pct((r.cpl / r.tCpl - 1) * 100, 0) + ' over target');
@@ -2067,7 +2080,7 @@ a.ax-btn { text-decoration: none; display: inline-block; }
     const P = AX.p(), per = AX.period(P, D.asOf);
     const L = AX.leadsIn(D, P, per.start, per.end);
     const a = AX.aggLeads(L);
-    AX.fill('cr-take', a.n ? per.label + ': ' + F.int(a.n) + ' leads in LeadSquared (' + (P.source || 'all sources') + '); ' + F.pct(a.qlRate) + ' qualified, ' + F.int(a.admitted) + ' admitted so far, ' + F.int(a.lostdq) + ' lost or disqualified.' + (AX.config.dedupe_by_phone ? ' Duplicate records with the same phone are counted once.' : '') : 'No CRM leads for these filters.');
+    AX.fill('cr-take', a.n ? per.label + ': ' + F.int(a.n) + ' leads in LeadSquared (' + AX.srcLabel(P) + '); ' + F.pct(a.qlRate) + ' qualified, ' + F.int(a.admitted) + ' admitted so far, ' + F.int(a.lostdq) + ' lost or disqualified.' + (AX.config.dedupe_by_phone ? ' Duplicate records with the same phone are counted once.' : '') : 'No CRM leads for these filters.');
     AX.funnel('cr-funnel', a);
     // data quality
     const q = AX.dataQuality(D, P, per.start, per.end);
@@ -2522,7 +2535,7 @@ a.ax-btn { text-decoration: none; display: inline-block; }
     const groups = AX.groupBy(L, (l) => AX.bucket(l.date, grain));
     const keys = [...groups.keys()].sort().reverse();
     const meta = AX.groupBy(AX.metaIn(D, P, per.start, per.end), (m) => AX.bucket(m.date, grain));
-    const metaSourced = !P.source || P.source === 'Meta Ads';
+    const metaSourced = AX.adsOn(P) && AX.srcList(P).length <= 1;
     const heat = (v) => (v == null ? '' : 'rgba(18,199,132,' + Math.min(0.85, 0.08 + v / 60).toFixed(2) + ')');
     const cell = (v, n, digits, ageOk = true) => h('td', { class: 'num', style: ageOk && v != null ? { background: heat(v) } : null, title: ageOk ? null : 'Cohort too young to judge' }, ageOk ? F.pct(v, digits) : '…');
     const STG = [['contacted', 'Contacted'], ['qualified', 'Qualified'], ['booked', 'Counselling'], ['applied', 'Applied'], ['admitted', 'Admitted']];
@@ -3578,7 +3591,7 @@ a.ax-btn { text-decoration: none; display: inline-block; }
     const P = AX.p(), S = (AX.ui.ex2 = AX.ui.ex2 || { rows: 'source', cols: 'funnel', measure: 'n', range: 'period', pick: null });
     let s, e, label;
     if (S.range === 'all') { s = D.leads.reduce((m, l) => (l.date && l.date < m ? l.date : m), D.asOf); e = D.asOf; label = 'All data'; } else { const per = AX.period(P, D.asOf); s = per.start; e = per.end; label = per.label; }
-    const L = AX.leadsIn(D, P, s, e, { ignoreSource: !P.source || P.source === 'Meta Ads' ? true : false });
+    const L = AX.leadsIn(D, P, s, e, { ignoreSource: !AX.srcList(P).length });
     AX.fill('xp-controls', seg(S.range, [['period', 'Dashboard period'], ['all', 'All data']], (v) => (S.range = v)),
       sel('Analyse by', S.rows, DOPTS, (v) => { S.rows = v; S.pick = null; }),
       sel('Against', S.cols, [['funnel', 'Status funnel']].concat(DOPTS.filter(([k]) => k !== S.rows && k !== 'sub')), (v) => (S.cols = v)),
@@ -3727,7 +3740,12 @@ a.ax-btn { text-decoration: none; display: inline-block; }
     if (!D.asOf) { AX.fill('ov-take', 'No data available yet.'); return; }
     AX.pages.filters(D);
     const page = AX.pages[AX.tab];
-    try { page && page(D); }
+    // Selected lead sources without Meta: hide ad data everywhere (no spend, campaigns or creatives mixed in)
+    AX.adsOff = !AX.adsOn(AX.p());
+    if (!dash._origData) { dash._origData = dash.data.bind(dash); dash.data = (name) => (AX.adsOff && (name === 'meta_ads' || name === 'creatives') ? { status: 'ok', data: [] } : dash._origData(name)); }
+    let DV = D;
+    if (AX.adsOff) { if (!AX._noAds || AX._noAds.src !== D) AX._noAds = { src: D, v: Object.assign({}, D, { meta: [], camps: [], partialToday: false }) }; DV = AX._noAds.v; }
+    try { page && page(DV); }
     catch (err) {
       const el = AX.$(AX.tab).querySelector('.ax-take');
       if (el) AX.fill(el, h('span', { class: 'bad', text: 'This section couldn’t be drawn: ' + (err && err.message) }));
