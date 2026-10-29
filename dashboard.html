@@ -105,6 +105,16 @@ body { margin: 0; background: #e3f3f0; }
 #dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
 /* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
 #dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
 .ax {
   --g: #12c784; --g2: #0a7a4c; --g3: #b9f0d9; --lime: #dfe35a; --lime2: #f3f4c4;
   --mint: #dcf2ef; --cream: #fbfbe9; --ink: #0d0f0e; --ink2: #1b1f1d; --line: #e7ece9; --soft: #f5f7f6;
@@ -422,6 +432,39 @@ a.ax-btn { text-decoration: none; display: inline-block; }
 .ax-step .dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #c9d1cd; display: grid; place-items: center; font-weight: 700; color: #fff; }
 .ax-step.done { background: #e3f7ee; } .ax-step.done .dot { background: #12c784; border-color: #12c784; }
 .ax-step small { color: var(--color-fg-muted); font-size: 11px; }
+
+/* Ask AIMER AI v2 */
+.ax-chat { font-family: var(--font-anthropic-sans, system-ui, sans-serif); width: min(460px, calc(100vw - 24px)); height: min(680px, calc(100vh - 110px)); }
+.ax-chat-main { flex: 1; display: flex; min-height: 0; }
+.ax-chat-col { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.ax-chat-hist { display: none; width: 250px; flex: none; border-right: 1px solid rgba(13,15,14,.08); overflow-y: auto; background: #fbfcfb; padding: 10px; }
+.ax-chat.showhist .ax-chat-hist { display: block; }
+.ax-chat.full { inset: 16px; right: 16px; bottom: 16px; width: auto; height: auto; z-index: 70; }
+.ax-chat.full .ax-chat-msg { max-width: min(900px, 92%); font-size: 14.5px; }
+.ax-chat:not(.full).showhist .ax-chat-hist { position: absolute; top: 58px; left: 0; bottom: 0; z-index: 2; box-shadow: 8px 0 24px rgba(13,15,14,.12); }
+.ax-chat-hhead { font-weight: 600; font-size: 13px; margin: 2px 0 8px; }
+.ax-chat-hitem { display: flex; align-items: stretch; gap: 2px; border-radius: 10px; margin-bottom: 4px; }
+.ax-chat-hitem.on, .ax-chat-hitem:hover { background: #e9f6f0; }
+.ax-chat-hopen { flex: 1; min-width: 0; text-align: left; background: none; border: 0; padding: 7px 8px; cursor: pointer; font: inherit; color: inherit; display: flex; flex-direction: column; }
+.ax-chat-hopen span { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ax-chat-hopen small { font-size: 11px; color: #6c7470; }
+.ax-chat-hdel { background: none; border: 0; cursor: pointer; opacity: .45; padding: 0 6px; } .ax-chat-hdel:hover { opacity: 1; }
+.ax-chat-msg { overflow: visible; overflow-wrap: anywhere; }
+.ax-chat-msg .ax-tablewrap { overflow-x: auto; max-width: 100%; }
+.ax-chat-body > * + * { margin-top: 6px; }
+.ax-chat-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; padding-top: 6px; border-top: 1px dashed rgba(13,15,14,.1); }
+.ax-chat-mini { background: #f1f4f2; border: 0; border-radius: 999px; padding: 4px 10px; font: inherit; font-size: 12px; cursor: pointer; color: #0d0f0e; } .ax-chat-mini:hover { background: #dff3ea; }
+.ax-chat-typing::after { content: '…'; animation: axdots 1.2s infinite steps(4); display: inline-block; width: 1.2em; overflow: hidden; vertical-align: bottom; }
+@keyframes axdots { from { width: 0; } to { width: 1.2em; } }
+.ax-cchart { background: #fbfcfb; border: 1px solid rgba(13,15,14,.08); border-radius: 12px; padding: 10px 12px; }
+.ax-cchart svg { width: 100%; height: auto; display: block; }
+.ax-cchart-t { font-weight: 600; font-size: 13px; margin-bottom: 6px; }
+.ax-cchart-leg { display: flex; gap: 12px; font-size: 12px; margin-bottom: 6px; } .ax-cchart-leg i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
+.ax-cbar-row { display: grid; grid-template-columns: minmax(80px, 38%) 1fr; gap: 8px; align-items: center; margin: 4px 0; font-size: 12px; }
+.ax-cbar-l { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ax-cbar-trk { display: flex; flex-direction: column; gap: 2px; }
+.ax-cbar { height: 16px; border-radius: 5px; position: relative; min-width: 2px; }
+.ax-cbar b { position: absolute; left: calc(100% + 4px); top: 0; font-size: 11px; line-height: 16px; font-weight: 600; color: #0d0f0e; white-space: nowrap; }
+@media (max-width: 600px) { .ax-chat.full { inset: 0; border-radius: 0; } .ax-chat.full .ax-chat-hist { display: none; } .ax-chat.full.showhist .ax-chat-hist { display: block; position: absolute; top: 58px; bottom: 0; left: 0; z-index: 2; } }
 </style>
 </head>
 <body>
@@ -3665,6 +3708,7 @@ a.ax-btn { text-decoration: none; display: inline-block; }
 
   const nav = AX.$('ax-nav');
   const TITLES = { overview: 'Overview', exec: 'My summary', lookup: 'Lead lookup', salesmgr: 'Sales manager', explore: 'Lead explorer', plan: 'Action plan', daily: 'Daily performance', campaigns: 'Campaign performance', ads: 'Ads Manager', creative: 'Creative & audience', sales: 'Sales team', cohorts: 'Cohorts & forecast', crm: 'Lead quality & CRM', programmes: 'Programme performance', budget: 'Budget & ROI', reports: 'Reports & export', settings: 'Integrations & settings' };
+  AX.TITLES = TITLES;
   nav.addEventListener('click', (e) => {
     const b = e.target.closest('button[data-tab]'); if (!b) return;
     AX.tab = b.dataset.tab; dash.setLink(AX.tab);
@@ -3771,6 +3815,17 @@ a.ax-btn { text-decoration: none; display: inline-block; }
   const { data: sess } = await sb.auth.getSession();
   if (!sess.session) { location.replace('index.html?next=dashboard'); return; }
   const me = sess.session.user;
+  // finish account setup first (invite opened but password never saved, or a temporary password).
+  // Checked against FRESH account details from the server, and never more than once a minute, so it can't loop.
+  if (me.user_metadata?.needs_password || me.user_metadata?.must_change_password) {
+    let fresh = null; try { fresh = (await sb.auth.getUser()).data.user; } catch (_) {}
+    const m = (fresh || me).user_metadata || {};
+    let last = 0; try { last = Number(sessionStorage.getItem('ax_pw_redirect') || 0); } catch (_) {}
+    if ((m.needs_password || m.must_change_password) && Date.now() - last > 60000) {
+      try { sessionStorage.setItem('ax_pw_redirect', String(Date.now())); } catch (_) {}
+      location.replace('index.html?setpw=1'); return;
+    }
+  }
   const { data: r } = await sb.from('user_roles').select('role').eq('user_id', me.id).maybeSingle();
   const role = r?.role;
   if (!role) { await sb.auth.signOut(); location.replace('index.html'); return; }
@@ -3970,52 +4025,122 @@ a.ax-btn { text-decoration: none; display: inline-block; }
     if (AX.tab === tab) loadAI();
   }
 
-  // ---------- Ask AIMER AI: chat analyst on every page ----------
+  // ---------- Ask AIMER AI: chat analyst on every page (full screen, saved history, charts) ----------
   (function chat() {
     const SUGGEST = {
-      creative: ['Which 5 ads had the lowest CPL in the last 7 days?', 'Do videos or images work better this month?', 'Which placements waste money?', 'Which ads are losing CTR week on week?'],
-      product_manager: ['How is my course doing this month vs budget and target?', 'Which campaign brings the most qualified leads?', 'Why are leads getting lost?', 'Which ad has the cheapest leads?'],
-      def: ['Which campaigns are flops this month and why?', 'Which programme has the cheapest qualified leads?', 'Who is the slowest counsellor to call new leads?', 'Top loss reasons for Future HR in the last 30 days', 'Are we on pace with this month’s budget?', 'Compare Instagram Reels vs Feed CPL'],
+      creative: ['Which 5 ads had the lowest CPL in the last 7 days?', 'Which ads are getting worse this week?', 'Do videos or images work better this month?', 'Which ad set has the cheapest leads?'],
+      product_manager: ['How is my course doing this month vs budget?', 'Which campaign brings the most qualified leads?', 'Why are leads getting lost?', 'Which ads are getting worse this week?'],
+      def: ['Yesterday Meta vs CRM leads: which campaigns are missing?', 'Which campaigns are flops this month?', 'Leads by source and sub-source this month', 'Who is the slowest counsellor to call new leads?', 'Which ads are getting worse this week?', 'Are we on pace with this month’s budget?'],
     };
-    const fab = h('button', { class: 'ax-chat-fab', 'aria-label': 'Ask AIMER AI', 'aria-expanded': 'false' }, h('span', { 'aria-hidden': 'true', text: '✦' }), ' Ask AIMER AI');
+    const TOOL_LABEL = { campaign_performance: 'campaigns', crm_match: 'Meta vs CRM match', ad_performance: 'ads', ad_sets: 'ad sets', ad_trend: 'ad trend', audience_breakdown: 'audience', daily_trend: 'daily trend', lead_funnel: 'CRM funnel', loss_reasons: 'loss reasons', counsellor_performance: 'counsellors', budget_pacing: 'budget pacing' };
+    const PAL = ['#12c784', '#1b1f1d', '#9aa31a', '#e8b322', '#7fd6c5'];
+    const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const fmtN = (v) => (Math.abs(v) >= 1000 ? Math.round(v).toLocaleString('en-IN') : String(Math.round(v * 100) / 100));
+    // ---- charts inside answers ----
+    function chartSvg(spec) {
+      const labels = (spec.labels || []).map(String).slice(0, spec.type === 'line' ? 31 : 10);
+      const series = (spec.series || []).slice(0, 3).map((s, i) => ({ name: String(s.name || 'Series ' + (i + 1)), color: PAL[i], v: labels.map((_, j) => Number((s.values || [])[j]) || 0) }));
+      if (!labels.length || !series.length) return null;
+      const box = h('div', { class: 'ax-cchart' });
+      if (spec.title) box.append(h('div', { class: 'ax-cchart-t', text: String(spec.title) }));
+      if (series.length > 1) box.append(h('div', { class: 'ax-cchart-leg' }, series.map((s) => h('span', null, h('i', { style: { background: s.color } }), s.name))));
+      const max = Math.max(1, ...series.flatMap((s) => s.v));
+      if (spec.type === 'line') {
+        const W = 520, H = 200, L = 40, B = 24, T = 8;
+        const x = (j) => L + (labels.length < 2 ? 0 : (j * (W - L - 8)) / (labels.length - 1)), y = (v) => T + (H - T - B) * (1 - v / max);
+        let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(spec.title || 'chart')}">`;
+        for (const g of [0, 0.5, 1]) svg += `<line x1="${L}" x2="${W - 8}" y1="${y(max * g)}" y2="${y(max * g)}" stroke="#e7ece9"/><text x="${L - 6}" y="${y(max * g) + 4}" text-anchor="end" font-size="10" fill="#6c7470">${esc(fmtN(max * g))}</text>`;
+        const step = Math.max(1, Math.ceil(labels.length / 6));
+        labels.forEach((t, j) => { if (j % step === 0 || j === labels.length - 1) svg += `<text x="${x(j)}" y="${H - 6}" text-anchor="middle" font-size="10" fill="#6c7470">${esc(t.length > 10 ? t.slice(5) : t)}</text>`; });
+        for (const s of series) svg += `<polyline fill="none" stroke="${s.color}" stroke-width="2.5" points="${s.v.map((v, j) => x(j) + ',' + y(v)).join(' ')}"/>` + s.v.map((v, j) => `<circle cx="${x(j)}" cy="${y(v)}" r="3" fill="${s.color}"><title>${esc(labels[j] + ' · ' + s.name + ': ' + fmtN(v))}</title></circle>`).join('');
+        box.insertAdjacentHTML('beforeend', svg + '</svg>');
+      } else {
+        const rows = h('div', { class: 'ax-cbars' });
+        labels.forEach((t, j) => rows.append(h('div', { class: 'ax-cbar-row' }, h('span', { class: 'ax-cbar-l', title: t, text: t }),
+          h('div', { class: 'ax-cbar-trk' }, series.map((s) => h('div', { class: 'ax-cbar', title: s.name + ': ' + fmtN(s.v[j]), style: { width: Math.max(1, (s.v[j] / max) * 100) + '%', background: s.color } }, h('b', { text: fmtN(s.v[j]) })))))));
+        box.append(rows);
+      }
+      return box;
+    }
+    function render(text) {
+      const out = h('div', { class: 'ax-chat-body' });
+      const parts = String(text).split(/```chart\s*([\s\S]*?)```/);
+      parts.forEach((p, i) => { if (i % 2) { try { const c = chartSvg(JSON.parse(p)); if (c) out.append(c); } catch (_) {} } else if (p.trim()) out.append(md(p)); });
+      return out;
+    }
+    // ---- layout ----
+    const fab = h('button', { class: 'ax ax-chat-fab', 'aria-label': 'Ask AIMER AI', 'aria-expanded': 'false' }, h('span', { 'aria-hidden': 'true', text: '✦' }), ' Ask AIMER AI');
     const list = h('div', { class: 'ax-chat-list', role: 'log', 'aria-live': 'polite' });
+    const hist = h('aside', { class: 'ax-chat-hist', 'aria-label': 'Saved conversations' });
     const input = h('textarea', { rows: 2, placeholder: 'Ask about campaigns, ads, leads, counsellors…', 'aria-label': 'Your question' });
     const send = h('button', { class: 'ax-btn ax-chat-send', text: 'Ask' });
-    const clear = h('button', { class: 'ax-chat-x', title: 'New conversation', text: '↺' });
-    const close = h('button', { class: 'ax-chat-x', title: 'Close', 'aria-label': 'Close', text: '✕' });
-    const panel = h('section', { class: 'ax-chat', role: 'dialog', 'aria-label': 'Ask AIMER AI', hidden: true },
-      h('div', { class: 'ax-chat-head' }, h('div', null, h('b', { text: 'AIMER AI analyst' }), h('div', { class: 'ax-chat-sub', text: role === 'creative' ? 'Meta Ads data · your access' : role === 'product_manager' ? 'Your courses only' : 'Meta Ads + LeadSquared' })), h('div', null, clear, close)),
-      list, h('div', { class: 'ax-chat-in' }, input, send));
+    const btn = (t, title, on) => h('button', { class: 'ax-chat-x', title, 'aria-label': title, text: t, onclick: on });
+    const sub = h('div', { class: 'ax-chat-sub', text: role === 'creative' ? 'Meta Ads data · your access' : role === 'product_manager' ? 'Your courses only' : 'Meta Ads + LeadSquared · numbers only' });
+    const panel = h('section', { class: 'ax ax-chat', role: 'dialog', 'aria-label': 'Ask AIMER AI', hidden: true },
+      h('div', { class: 'ax-chat-head' }, h('div', null, h('b', { text: 'AIMER AI analyst' }), sub),
+        h('div', null, btn('☰', 'Saved conversations', () => { panel.classList.toggle('showhist'); if (panel.classList.contains('showhist')) loadHist(); }), btn('＋', 'New conversation', () => reset()), btn('⤢', 'Full screen', () => { panel.classList.toggle('full'); if (panel.classList.contains('full')) { panel.classList.add('showhist'); loadHist(); } }), btn('✕', 'Close', () => toggle(false)))),
+      h('div', { class: 'ax-chat-main' }, hist, h('div', { class: 'ax-chat-col' }, list, h('div', { class: 'ax-chat-in' }, input, send))));
     document.body.append(fab, panel);
-    let convo = [];
+    let convo = [], convId = null;
     const sugg = () => h('div', { class: 'ax-chat-sugg' }, h('div', { class: 'ax-chat-sub', text: 'Try asking:' }), (SUGGEST[role] || SUGGEST.def).map((q) => h('button', { text: q, onclick: () => ask(q) })));
-    const reset = () => { convo = []; list.replaceChildren(h('div', { class: 'ax-chat-msg ai' }, h('p', { text: 'Hi! Ask me anything about your Meta campaigns' + (role === 'creative' ? ', ads and audiences.' : ', ads, leads, counsellors and budgets.') + ' I read live data and tell you which numbers I used.' })), sugg()); };
-    reset();
+    function reset() { convo = []; convId = null; list.replaceChildren(h('div', { class: 'ax-chat-msg ai' }, h('p', { text: 'Hi! Ask me anything about your Meta campaigns' + (role === 'creative' ? ', ads and audiences.' : ', ads, leads, sources, counsellors and budgets.') + ' Short answers first — tap “More detail” for the full breakdown.' })), sugg()); markHist(); }
     const toggle = (open) => { panel.hidden = !open; fab.setAttribute('aria-expanded', String(open)); if (open) setTimeout(() => input.focus(), 50); };
     fab.addEventListener('click', () => toggle(panel.hidden));
-    close.addEventListener('click', () => toggle(false));
-    clear.addEventListener('click', reset);
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel.hidden) toggle(false); });
-    const TOOL_LABEL = { campaign_performance: 'campaigns', ad_performance: 'ads', audience_breakdown: 'audience', daily_trend: 'daily trend', lead_funnel: 'CRM funnel', loss_reasons: 'loss reasons', counsellor_performance: 'counsellors', budget_pacing: 'budget pacing' };
-    async function ask(q) {
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel.hidden) { if (panel.classList.contains('full')) panel.classList.remove('full'); else toggle(false); } });
+    // ---- saved history ----
+    async function loadHist() {
+      hist.replaceChildren(h('div', { class: 'ax-chat-sub', text: 'Loading…' }));
+      const { data, error } = await sb.from('ai_chat_log').select('conversation_id,title,question,created_at').eq('user_id', me.id).not('conversation_id', 'is', null).order('created_at', { ascending: false }).limit(400);
+      if (error) { hist.replaceChildren(h('div', { class: 'ax-chat-sub', text: 'Could not load history.' })); return; }
+      const seen = new Map();
+      for (const r of data || []) { const g = seen.get(r.conversation_id) || { id: r.conversation_id, last: r.created_at, title: null, first: r.question }; if (r.title) g.title = r.title; g.first = r.question; seen.set(r.conversation_id, g); }
+      const items = [...seen.values()].slice(0, 40);
+      hist.replaceChildren(h('div', { class: 'ax-chat-hhead', text: 'Saved conversations' }), items.length ? null : h('div', { class: 'ax-chat-sub', text: 'Your conversations will appear here.' }),
+        ...items.map((g) => h('div', { class: 'ax-chat-hitem', 'data-id': g.id },
+          h('button', { class: 'ax-chat-hopen', title: g.title || g.first, onclick: () => openConv(g.id) }, h('span', { text: g.title || g.first }), h('small', { text: new Date(g.last).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) })),
+          h('button', { class: 'ax-chat-hdel', title: 'Delete conversation', 'aria-label': 'Delete conversation', text: '🗑', onclick: async () => { if (!confirm('Delete this conversation?')) return; await sb.from('ai_chat_log').delete().eq('conversation_id', g.id).eq('user_id', me.id); if (convId === g.id) reset(); loadHist(); } }))));
+      markHist();
+    }
+    const markHist = () => hist.querySelectorAll('.ax-chat-hitem').forEach((el) => el.classList.toggle('on', el.dataset.id === convId));
+    async function openConv(id) {
+      const { data, error } = await sb.from('ai_chat_log').select('question,answer,tools,created_at').eq('conversation_id', id).eq('user_id', me.id).order('created_at');
+      if (error) return;
+      convId = id; convo = []; list.replaceChildren();
+      for (const r of data || []) { convo.push({ role: 'user', content: r.question }, { role: 'assistant', content: r.answer || '' }); list.append(h('div', { class: 'ax-chat-msg me' }, h('p', { text: r.question }))); list.append(answerEl(r.answer || '', (r.tools || []).map((t) => t.tool))); }
+      list.scrollTop = list.scrollHeight; markHist();
+      if (!panel.classList.contains('full')) panel.classList.remove('showhist');
+    }
+    function answerEl(answer, tools) {
+      const el = h('div', { class: 'ax-chat-msg ai' }, render(answer));
+      const meta = h('div', { class: 'ax-chat-actions' },
+        h('button', { class: 'ax-chat-mini', text: 'More detail', onclick: () => ask('Give me the details: full breakdown and recommendations.', true) }),
+        h('button', { class: 'ax-chat-mini', text: 'Copy', onclick: async (e) => { try { await navigator.clipboard.writeText(answer.replace(/```chart[\s\S]*?```/g, '')); e.target.textContent = 'Copied ✓'; } catch (_) {} } }),
+        tools && tools.length ? h('span', { class: 'ax-chat-sub', text: 'Data: ' + [...new Set(tools.map((t) => TOOL_LABEL[t] || t))].join(', ') }) : null);
+      el.append(meta); return el;
+    }
+    // ---- ask ----
+    async function ask(q, detail) {
       q = String(q || '').trim(); if (!q) return;
-      const P = AX.p(); let ctx = '';
-      try { const D = AX.parse({ campaigns: dash.data('campaigns').data, meta: dash.data('meta_daily').data, leads: dash.data('crm_leads').data }); const per = AX.period(P, D.asOf); ctx = ' [Dashboard filters right now: ' + per.start + ' to ' + per.end + (P.programme ? ', programme ' + P.programme : '') + '. Use them only if my question doesn’t say otherwise.]'; } catch (_) {}
+      const P = AX.p(); let context = { page: AX.TITLES ? AX.TITLES[AX.tab] : AX.tab };
+      try { const D = AX.parse({ campaigns: dash.data('campaigns').data, meta: dash.data('meta_daily').data, leads: dash.data('crm_leads').data }); const per = AX.period(P, D.asOf); context = Object.assign(context, { since: per.start, until: per.end, sources: AX.srcLabel ? AX.srcLabel(P) : P.source, programme: P.programme || null }); } catch (_) {}
       list.querySelector('.ax-chat-sugg')?.remove();
-      list.append(h('div', { class: 'ax-chat-msg me' }, h('p', { text: q })));
-      const wait = h('div', { class: 'ax-chat-msg ai' }, h('p', { class: 'ax-chat-sub', text: 'Reading the data…' }));
+      list.append(h('div', { class: 'ax-chat-msg me' }, h('p', { text: detail ? 'More detail, please' : q })));
+      const wait = h('div', { class: 'ax-chat-msg ai' }, h('p', { class: 'ax-chat-sub ax-chat-typing', text: 'Reading the data' }));
       list.append(wait); list.scrollTop = list.scrollHeight;
-      convo.push({ role: 'user', content: q + ctx });
+      convo.push({ role: 'user', content: q });
       input.value = ''; send.disabled = true;
-      const { data, error } = await sb.functions.invoke('ai-chat', { body: { messages: convo } });
+      const { data, error } = await sb.functions.invoke('ai-chat', { body: { messages: convo, conversation_id: convId, context, detail: !!detail } });
       send.disabled = false;
       if (error || !data?.answer) { let m = error?.message || 'No answer'; try { m = (await error.context.json()).error || m; } catch (_) {} wait.replaceChildren(h('p', { class: 'bad', text: m })); convo.pop(); return; }
+      const isNew = !convId; convId = data.conversation_id || convId;
       convo.push({ role: 'assistant', content: data.answer });
-      wait.replaceChildren(md(data.answer), data.tools?.length ? h('div', { class: 'ax-chat-sub', text: 'Data used: ' + [...new Set(data.tools.map((t) => TOOL_LABEL[t] || t))].join(', ') }) : null);
+      wait.replaceWith(answerEl(data.answer, data.tools));
       list.scrollTop = list.scrollHeight;
+      if (isNew && panel.classList.contains('showhist')) loadHist(); else markHist();
     }
     send.addEventListener('click', () => ask(input.value));
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask(input.value); } });
+    reset();
   })();
   AX.md = md;
   AX.askAI = async (q) => { const { data, error } = await sb.functions.invoke('ai-chat', { body: { messages: [{ role: 'user', content: q }] } }); if (error) { let m = error.message; try { m = (await error.context.json()).error || m; } catch (_) {} throw new Error(m); } return data; };
