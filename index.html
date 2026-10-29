@@ -407,7 +407,13 @@
     if (!STAFF.includes(role)) { $('aiRun').hidden = true; $('aiNote').textContent = 'AI analyses written by the marketing team for these periods.'; }
     // Everyone lands on the full dashboard; the admin sections stay reachable at index.html#connections etc.
     const view = location.hash.slice(1);
-    if (!view || view === 'dashboard' || new URLSearchParams(location.search).get('next') === 'dashboard' || !STAFF.includes(role)) { location.replace('dashboard.html'); return; }
+    if (!view || view === 'dashboard' || new URLSearchParams(location.search).get('next') === 'dashboard' || !STAFF.includes(role)) {
+      // never bounce back and forth with the dashboard (max 3 hops in 15 s)
+      let a = []; try { a = JSON.parse(sessionStorage.getItem('ax_hops') || '[]').filter((t) => Date.now() - t < 15000); } catch (_) {}
+      if (a.length >= 3) { $('gate').hidden = false; $('app').hidden = true; say($('loginMsg'), 'Your browser kept an old sign-in. Please sign in again.', 'bad'); try { await sb.auth.signOut(); sessionStorage.removeItem('ax_hops'); } catch (_) {} return; }
+      a.push(Date.now()); try { sessionStorage.setItem('ax_hops', JSON.stringify(a)); } catch (_) {}
+      location.replace('dashboard.html'); return;
+    }
     show(view);
   }
   $('login').addEventListener('submit', async (e) => {
