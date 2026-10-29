@@ -115,6 +115,8 @@ body { margin: 0; background: #e3f3f0; }
 #dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
 /* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
 #dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
+/* AIMER Insights — light canvas, pastel and black tiles, green / lime palette */
+#dash-root { --dash-gutter: clamp(0.25rem, 1.5vw, 1.25rem); }
 .ax {
   --g: #12c784; --g2: #0a7a4c; --g3: #b9f0d9; --lime: #dfe35a; --lime2: #f3f4c4;
   --mint: #dcf2ef; --cream: #fbfbe9; --ink: #0d0f0e; --ink2: #1b1f1d; --line: #e7ece9; --soft: #f5f7f6;
@@ -3812,8 +3814,19 @@ a.ax-btn { text-decoration: none; display: inline-block; }
   const AX = window.AX, h = AX.h;
   const STAFF = ['admin', 'marketing'];
 
+  // Redirects between the sign-in page and the dashboard: never more than 3 within 15 s (no blinking loops)
+  const hop = (url) => {
+    let a = []; try { a = JSON.parse(sessionStorage.getItem('ax_hops') || '[]').filter((t) => Date.now() - t < 15000); } catch (_) {}
+    if (a.length >= 3) {
+      document.body.innerHTML = '<div style="font-family:system-ui,sans-serif;max-width:520px;margin:12vh auto;padding:28px;border-radius:18px;background:#fff;box-shadow:0 10px 40px rgba(0,0,0,.08)"><h2 style="margin:0 0 8px">Sign-in needs a fresh start</h2><p style="color:#555;line-height:1.5">Your browser kept an old sign-in. Click below to sign out, clear it and sign in again.</p><button id="axReset" style="margin-top:10px;padding:10px 18px;border:0;border-radius:999px;background:#0d0f0e;color:#fff;font-size:15px;cursor:pointer">Start again</button></div>';
+      document.getElementById('axReset').onclick = async () => { try { await sb.auth.signOut(); } catch (_) {} try { Object.keys(localStorage).filter((k) => k.startsWith('sb-')).forEach((k) => localStorage.removeItem(k)); sessionStorage.clear(); indexedDB.deleteDatabase('aimer-insights'); } catch (_) {} location.href = 'index.html'; };
+      return false;
+    }
+    a.push(Date.now()); try { sessionStorage.setItem('ax_hops', JSON.stringify(a)); } catch (_) {}
+    location.replace(url); return true;
+  };
   const { data: sess } = await sb.auth.getSession();
-  if (!sess.session) { location.replace('index.html?next=dashboard'); return; }
+  if (!sess.session) { hop('index.html?next=dashboard'); return; }
   const me = sess.session.user;
   // finish account setup first (invite opened but password never saved, or a temporary password).
   // Checked against FRESH account details from the server, and never more than once a minute, so it can't loop.
@@ -3823,12 +3836,12 @@ a.ax-btn { text-decoration: none; display: inline-block; }
     let last = 0; try { last = Number(sessionStorage.getItem('ax_pw_redirect') || 0); } catch (_) {}
     if ((m.needs_password || m.must_change_password) && Date.now() - last > 60000) {
       try { sessionStorage.setItem('ax_pw_redirect', String(Date.now())); } catch (_) {}
-      location.replace('index.html?setpw=1'); return;
+      hop('index.html?setpw=1'); return;
     }
   }
   const { data: r } = await sb.from('user_roles').select('role').eq('user_id', me.id).maybeSingle();
   const role = r?.role;
-  if (!role) { await sb.auth.signOut(); location.replace('index.html'); return; }
+  if (!role) { await sb.auth.signOut(); hop('index.html'); return; }
   // Pages each role may open (data itself is also restricted in the database)
   const ROLE_TABS = {
     creative: ['creative', 'plan', 'ads', 'campaigns', 'daily'],
@@ -3899,7 +3912,7 @@ a.ax-btn { text-decoration: none; display: inline-block; }
     dash._set('calls_daily', toObj(['date', 'owner', 'calls', 'connected', 'talk'], B.calls_daily));
     return [camps, ins, leads, B.integrations || [], B.programmes || [], B.targets || [], B.rules || [], adsRows];
   }
-  let lastLoad = 0, loading = false;
+  let lastLoad = 0, loading = false, haveData = false, retryTimer = null;
   async function load(cached) {
     if (loading) return; loading = true;
     try {
@@ -3947,11 +3960,23 @@ a.ax-btn { text-decoration: none; display: inline-block; }
         thresholds: th, programmes: progs.filter((p) => p.is_active && p.in_reports !== false).map((p) => { const t = monthRows.find((m) => m.programme_id === p.id) || {}; return { name: p.name, budget: num(t.budget, null), target_cpl: num(t.target_cpl, null), target_cpa: num(t.target_cpa, null), target_admissions: num(t.target_admissions, null) }; }) };
       AX._shared = cfg;
       if (AX.configSource !== 'session') AX.setConfig(cfg, 'saved');
+      haveData = true;
       dash._fire();
     } catch (e) {
-      ['campaigns', 'meta_daily', 'crm_leads', 'integration_status'].forEach((id) => dash._set(id, null, 'error'));
-      dash._fire();
       console.error(e);
+      const why = /timeout|canceling statement/i.test(String(e && e.message)) ? 'the database was busy' : /fetch|network|Failed/i.test(String(e && e.message)) ? 'the connection dropped' : (e && e.message) || 'unknown error';
+      const up = document.getElementById('ax-updated');
+      if (haveData) {
+        // keep what is on screen; say so and try again shortly
+        if (up) up.textContent = 'Couldn’t refresh (' + why + ') — showing saved data · retrying…';
+        clearTimeout(retryTimer); retryTimer = setTimeout(() => load(), 20000);
+      } else {
+        ['campaigns', 'meta_daily', 'crm_leads', 'integration_status'].forEach((id) => dash._set(id, null, 'error'));
+        AX._loadError = 'Couldn’t load the data: ' + why + '. Retrying in 20 seconds…';
+        if (up) up.textContent = AX._loadError;
+        dash._fire();
+        clearTimeout(retryTimer); retryTimer = setTimeout(() => load(), 20000);
+      }
     } finally { loading = false; }
   }
   dash._fire();
