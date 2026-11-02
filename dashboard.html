@@ -467,6 +467,21 @@ a.ax-btn { text-decoration: none; display: inline-block; }
 .ax-cbar { height: 16px; border-radius: 5px; position: relative; min-width: 2px; }
 .ax-cbar b { position: absolute; left: calc(100% + 4px); top: 0; font-size: 11px; line-height: 16px; font-weight: 600; color: #0d0f0e; white-space: nowrap; }
 @media (max-width: 600px) { .ax-chat.full { inset: 0; border-radius: 0; } .ax-chat.full .ax-chat-hist { display: none; } .ax-chat.full.showhist .ax-chat-hist { display: block; position: absolute; top: 58px; bottom: 0; left: 0; z-index: 2; } }
+
+.ax-drw-veil { position: fixed; inset: 0; background: rgba(13,15,14,.35); z-index: 80; }
+.ax-drw { position: fixed; top: 0; right: 0; bottom: 0; width: min(880px, 100vw); background: var(--color-bg, #f6f8f7); z-index: 81; display: flex; flex-direction: column; box-shadow: -18px 0 50px rgba(13,15,14,.18); font-family: var(--font-anthropic-sans, system-ui, sans-serif); }
+.ax-drw[hidden], .ax-drw-veil[hidden] { display: none; }
+.ax-drw-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; padding: 16px 20px 12px; padding-top: calc(16px + env(safe-area-inset-top, 0px)); background: #fff; border-bottom: 1px solid rgba(13,15,14,.08); }
+.ax-drw-t { margin: 0; font-size: 20px; overflow-wrap: anywhere; }
+.ax-drw-body { flex: 1; overflow-y: auto; padding: 16px 20px 40px; display: flex; flex-direction: column; gap: var(--cds-gap-md, 14px); }
+.ax-drw-body .ax-kpis { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.ax-kpi-sm .v { font-size: 22px; } .ax-kpi .v.ok { color: #0a7a4c; } .ax-kpi .v.bad { color: #b3261e; } .ax-kpi .v.warn { color: #9a6a00; }
+td.ax-link { cursor: pointer; color: #0a6b43; text-decoration: underline dotted; text-underline-offset: 3px; }
+td.ax-link:hover { background: #e3f7ee; text-decoration: underline; }
+.ax-kpi-link { cursor: pointer; transition: box-shadow .15s; } .ax-kpi-link:hover, .ax-kpi-link:focus-visible { box-shadow: 0 0 0 2px #12c784 inset; outline: none; }
+.ax-kpi-link::after { content: 'See leads →'; display: block; margin-top: 6px; font-size: 12px; color: #0a6b43; }
+body.ax-noscroll { overflow: hidden; }
+@media (max-width: 600px) { .ax-drw-body { padding: 12px; } }
 </style>
 </head>
 <body>
@@ -1627,8 +1642,11 @@ a.ax-btn { text-decoration: none; display: inline-block; }
     if (el.contains(document.activeElement) && document.activeElement.type === 'date') return;
     const opt = (v, t) => h('option', { value: v, text: t });
     const sel = (name, label, options, allLabel) => {
-      const s = h('select', { 'aria-label': label, onchange: (e) => dash.setParams({ [name]: e.target.value || null }) }, allLabel != null ? opt('', allLabel) : null, options.map(([v, t]) => opt(v, t)));
-      s.value = P[name] ?? ''; return h('label', null, label, s);
+      const isSrc = name === 'source', sl = isSrc ? AX.srcList(P) : null;
+      // sources: '' = all ("all" is stored so it doesn't fall back to Meta); several chips show as one combined option
+      const extra = isSrc && sl.length > 1 ? opt(P.source, sl.join(' + ')) : null;
+      const s = h('select', { 'aria-label': label, onchange: (e) => dash.setParams({ [name]: e.target.value || (isSrc ? 'all' : null) }) }, allLabel != null ? opt('', allLabel) : null, extra, options.map(([v, t]) => opt(v, t)));
+      s.value = isSrc ? (sl.length === 0 ? '' : sl.length === 1 ? sl[0] : P.source) : (P[name] ?? ''); return h('label', null, label, s);
     };
     const uniq = (arr) => [...new Set(arr.filter(Boolean))].sort();
     const progs = uniq([...AX.progNames(), ...D.camps.map((c) => c.programme)]);
@@ -3468,6 +3486,11 @@ a.ax-btn { text-decoration: none; display: inline-block; }
     const D = st.detail;
     if (st.dbusy) { AX.fill('lk-detail', h('div', { class: 'ax-empty', text: 'Opening the lead from LeadSquared…' })); return; }
     if (!D) { AX.fill('lk-detail'); return; }
+    AX.fill('lk-detail', ...leadNodes(D));
+  };
+  // Full lead record as nodes: used by the Lead lookup page and the slide-in detail panel
+  function leadNodes(D, rerender) {
+    rerender = rerender || AX.render;
     const f = D.fields || {}, L = D.local || {}, S = D.summary || {};
     const name = [f.FirstName, f.LastName].filter(Boolean).join(' ') || '(no name)';
     const phone = f.Phone || f.Mobile || '', email = f.EmailAddress || '';
@@ -3478,7 +3501,7 @@ a.ax-btn { text-decoration: none; display: inline-block; }
     const fieldRows = Object.entries(f).filter(([k, v]) => !st.fq || (label(k) + ' ' + v).toLowerCase().includes(st.fq.toLowerCase())).sort((a, b) => label(a[0]).localeCompare(label(b[0])));
     const fsearch = h('input', { type: 'search', placeholder: 'Filter fields…', value: st.fq, class: 'ax-colf', style: { maxWidth: '260px' } });
     fsearch.addEventListener('input', (e) => { st.fq = e.target.value; const box = AX.$('lk-fields'); if (box) box.replaceChildren(...Object.entries(f).filter(([k, v]) => !st.fq || (label(k) + ' ' + v).toLowerCase().includes(st.fq.toLowerCase())).sort((a, b) => label(a[0]).localeCompare(label(b[0]))).map(([k, v]) => kv(label(k), v))); });
-    AX.fill('lk-detail',
+    return [
       h('div', { class: 'ax-card' },
         h('div', { class: 'ax-chead' }, h('div', null, h('h2', { class: 'ax-ex-h', text: name }), h('p', { class: 'ax-note', style: { margin: 0 }, text: (f.ProspectStage || L.lead_status || '—') + ' · owner ' + (f.OwnerIdName || L.owner || '—') + ' · created ' + ist(L.created_at || f.CreatedOn) })),
           h('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '6px' } }, btn(phone ? 'tel:' + telDigits(phone) : null, '📞 Call'), btn(phone ? 'https://wa.me/' + waDigits(phone) : null, 'WhatsApp'), btn(email ? 'mailto:' + email : null, 'Email'), btn(D.lsq_url, 'Open in LeadSquared ↗'))),
@@ -3494,18 +3517,17 @@ a.ax-btn { text-decoration: none; display: inline-block; }
       (D.groups || []).length ? (() => {
         const adm = (D.groups || []).find((g) => g.title === 'Admission process');
         const tracker = adm ? h('div', { class: 'ax-steps' }, STEPS.map((s) => { const it = adm.items.find((i) => i.label === s); const done = it && yes(it.value); return h('div', { class: 'ax-step' + (done ? ' done' : '') }, h('span', { class: 'dot', text: done ? '✓' : '' }), h('span', { text: s }), it && it.value ? h('small', { text: it.value }) : null); })) : null;
-        const toggle = h('label', { class: 'ax-flabel', style: { display: 'inline-flex', gap: '6px', alignItems: 'center' } }, (() => { const c = h('input', { type: 'checkbox' }); c.checked = st.showEmpty; c.addEventListener('change', () => { st.showEmpty = c.checked; AX.render(); }); return c; })(), 'Show empty fields');
+        const toggle = h('label', { class: 'ax-flabel', style: { display: 'inline-flex', gap: '6px', alignItems: 'center' } }, (() => { const c = h('input', { type: 'checkbox' }); c.checked = st.showEmpty; c.addEventListener('change', () => { st.showEmpty = c.checked; rerender(); }); return c; })(), 'Show empty fields');
         return h('div', { style: { marginTop: 'var(--cds-gap-md)' } },
           tracker ? h('div', { class: 'ax-card' }, h('h3', { text: 'Admission process' }), tracker) : null,
           h('div', { class: 'ax-card', style: { marginTop: 'var(--cds-gap-md)' } }, h('div', { class: 'ax-chead' }, h('h3', { text: 'Lead details (as in LeadSquared)' }), toggle),
             (D.groups || []).map((g) => { const items = g.items.filter((i) => i.exists && (st.showEmpty || i.value)); return items.length ? h('div', { class: 'ax-lk-group' }, h('h4', { text: g.title }), h('div', { class: 'ax-lk-grid' }, items.map((i) => kv(i.label, i.value)))) : null; }),
             Object.keys(D.other || {}).length ? h('details', { style: { marginTop: '10px' } }, h('summary', { text: 'Other LeadSquared fields (' + Object.keys(D.other).length + ')' }), h('div', { class: 'ax-lk-grid' }, Object.entries(D.other).sort((a, b) => label(a[0]).localeCompare(label(b[0]))).map(([k, v]) => kv(label(k), v)))) : null));
       })() : h('div', { class: 'ax-card', style: { marginTop: 'var(--cds-gap-md)' } }, h('div', { class: 'ax-chead' }, h('h3', { text: 'All LeadSquared fields (' + Object.keys(f).length + ')' }), fsearch),
-        h('div', { class: 'ax-lk-grid', id: 'lk-fields' }, fieldRows.map(([k, v]) => kv(label(k), v)))));
-  };
-})();
-
-</script>
+        h('div', { class: 'ax-lk-grid', id: 'lk-fields' }, fieldRows.map(([k, v]) => kv(label(k), v))))];
+  }
+  AX.leadDetailNodes = leadNodes;
+})();</script>
 <script>
 // Sales manager: course-wise lead status for any range (or all data), live LeadSquared stages by course, team performance
 // by counsellor, counsellor x course, weekly trend and stage speed. Click any course/stage number to list those leads;
@@ -3805,7 +3827,198 @@ a.ax-btn { text-decoration: none; display: inline-block; }
 })();
 
 </script>
-<script>
+<script>// Detail panel: click any LeadSquared ID, counsellor name or campaign name in any table (or a Sales team number tile)
+// to open its full details in a panel that slides in from the right, without leaving the page.
+//   Lead      -> full LeadSquared record (admin, marketing, sales manager) or the dashboard's own data (other roles)
+//   Counsellor-> speed, effort and results for the period, leads by stage, course mix, loss reasons, daily calls, all leads
+//   Campaign  -> spend, leads, CPL, CRM funnel, its ads, daily trend and its leads
+// Panels stack: opening a lead from a counsellor keeps a Back button to return.
+(function () {
+  const AX = window.AX, h = AX.h, F = AX.fmt;
+  const n = (v) => { const x = Number(v); return isFinite(x) ? x : 0; };
+  const GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const OWNER_COLS = ['counsellor', 'owner', 'lead owner'], CAMP_COLS = ['campaign'];
+  const median = (a) => { a = a.filter((x) => x != null && isFinite(x)).sort((x, y) => x - y); return a.length ? a[Math.floor(a.length / 2)] : null; };
+  const wait = (m) => (m == null ? 'not called' : m < 60 ? Math.round(m) + ' min' : m < 48 * 60 ? (m / 60).toFixed(1) + ' h' : (m / 1440).toFixed(1) + ' days');
+  const ist = (ts) => (ts ? new Date(ts).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—');
+
+  // ---------- data for the current filters ----------
+  function ctx() {
+    const D = AX.parse({ campaigns: dash.data('campaigns').data, meta: dash.data('meta_daily').data, leads: dash.data('crm_leads').data });
+    const P = AX.p(), per = AX.period(P, D.asOf);
+    return { D, P, per };
+  }
+
+  // ---------- the panel ----------
+  const stack = [];
+  let panel = null, body = null, titleEl = null, subEl = null, backBtn = null;
+  function ensure() {
+    if (panel) return;
+    backBtn = h('button', { class: 'ax-btn', hidden: true, onclick: () => { stack.pop(); const prev = stack.pop(); if (prev) open(prev.title, prev.build, prev.sub); } }, '← Back');
+    titleEl = h('h2', { class: 'ax-drw-t' }); subEl = h('p', { class: 'ax-note', style: { margin: 0 } });
+    body = h('div', { class: 'ax-drw-body' });
+    panel = h('aside', { class: 'ax ax-drw', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Details', hidden: true },
+      h('div', { class: 'ax-drw-head' }, h('div', { style: { minWidth: 0 } }, titleEl, subEl), h('div', { style: { display: 'flex', gap: '6px', flex: 'none' } }, backBtn, h('button', { class: 'ax-btn', 'aria-label': 'Close', onclick: close }, '✕'))), body);
+    const veil = h('div', { class: 'ax-drw-veil', hidden: true, onclick: close });
+    panel._veil = veil;
+    document.body.append(veil, panel);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel.hidden) close(); });
+  }
+  function close() { if (!panel) return; panel.hidden = true; panel._veil.hidden = true; stack.length = 0; document.body.classList.remove('ax-noscroll'); }
+  function open(title, build, sub) {
+    ensure();
+    stack.push({ title, build, sub });
+    titleEl.textContent = title; subEl.textContent = sub || '';
+    backBtn.hidden = stack.length < 2;
+    panel.hidden = false; panel._veil.hidden = false; document.body.classList.add('ax-noscroll');
+    body.replaceChildren(h('div', { class: 'ax-empty', text: 'Loading…' }));
+    const rerender = () => { const r = build(rerender); Promise.resolve(r).then((nodes) => { body.replaceChildren(...[].concat(nodes).filter(Boolean)); markLinks(body); }); };
+    Promise.resolve(build(rerender)).then((nodes) => { body.replaceChildren(...[].concat(nodes).filter(Boolean)); body.scrollTop = 0; markLinks(body); })
+      .catch((e) => body.replaceChildren(h('p', { class: 'bad', text: e.message || String(e) })));
+  }
+  AX.drawer = { open, close };
+
+  const kpi = (label, value, sub, cls) => h('div', { class: 'ax-kpi ax-kpi-sm' }, h('div', { class: 'l', text: label }), h('div', { class: 'v ' + (cls || ''), text: value }), sub ? h('div', { class: 't', text: sub }) : null);
+  const leadTable = (ls, extra) => {
+    const box = h('div');
+    AX.table(box, [{ key: 'id', label: 'LeadSquared ID' }, { key: 'date', label: 'Created' }, { key: 'course', label: 'Course' }, { key: 'owner', label: 'Owner' }, { key: 'status', label: 'Stage now' },
+      { key: 'wait', label: 'First call after', num: true, fmt: wait, cls: (r) => (r.wait == null ? 'bad' : r.wait <= 60 ? 'ok' : r.wait <= 1440 ? 'warn' : 'bad') }, { key: 'calls', label: 'Calls', num: true, fmt: F.int },
+      { key: 'camp', label: 'Campaign', fmt: (v) => AX.shortName(v || '') }, { key: 'reason', label: 'Loss reason' }].concat(extra || []),
+      { rows: ls.map((l) => ({ id: l.id, date: l.date, course: l.programme || '', owner: l.owner || 'Unassigned', status: l.status || '', wait: l.firstCallTs != null && l.createdTs != null ? (l.firstCallTs - l.createdTs) / 60000 : null,
+          calls: l.calls || 0, camp: l.c ? l.c.name : l.campRaw || '', reason: l.lost ? l.reason || '' : '', talk: (l.talk || 0) / 60, last: l.lastActTs })),
+        rowKey: 'id', onRow: (r) => openLead(r.id), sort: { key: 'date', dir: 'desc' }, pageSize: 25, exportName: 'aimer-leads.csv' });
+    return box;
+  };
+  const bars = (title, pairs) => { const box = h('div'); AX.chart.hbars(box, pairs.slice(0, 10).map(([k, v]) => ({ label: k, value: v, color: '#12c784' })), { name: title, emptyText: 'Nothing to show.' }); return h('div', { class: 'ax-card' }, h('h3', { text: title }), box); };
+  const countBy = (arr, f) => [...AX.groupBy(arr, f)].map(([k, v]) => [k, v.length]).sort((a, b) => b[1] - a[1]);
+
+  // ---------- lead ----------
+  function openLead(id) {
+    const { D } = ctx(); const l = D.leads.find((x) => x.id === id);
+    open(l ? (l.programme || 'Lead') + ' lead' : 'Lead', async (rerender) => {
+      if (!AX.noLookup && AX.leadLookup && AX.leadDetailNodes) {
+        const data = await AX.leadLookup({ lead_id: id });
+        const f = data.fields || {}; titleEl.textContent = [f.FirstName, f.LastName].filter(Boolean).join(' ') || 'Lead';
+        return AX.leadDetailNodes(data, rerender);
+      }
+      if (!l) return h('p', { class: 'ax-note', text: 'This lead isn’t in the dashboard’s data (it may be a bulk-list contact or outside the last 6 months).' });
+      const kv = (k, v) => h('div', { class: 'ax-lk-kv' }, h('span', { text: k }), h('b', { text: v == null || v === '' ? '—' : String(v) }));
+      const st = [['Created', l.date], ['Contacted', l.contacted], ['Qualified', l.qualified], ['Counselling', l.booked], ['Applied', l.applied], ['Admitted', l.admitted], ['Lost', l.lost]].filter(([, v]) => v);
+      return [h('div', { class: 'ax-card' }, h('div', { class: 'ax-lk-grid' }, kv('LeadSquared ID', l.id), kv('Stage now', l.status), kv('Course', l.programme), kv('Owner', l.owner), kv('Source', l.source + (l.sourceRaw ? ' › ' + l.sourceRaw : '')),
+          kv('Campaign', l.c ? l.c.name : l.campRaw), kv('Location', l.location), kv('First call after', wait(l.firstCallTs != null && l.createdTs != null ? (l.firstCallTs - l.createdTs) / 60000 : null)), kv('Calls', l.calls), kv('Connected calls', l.connCalls),
+          kv('Talk time', Math.round((l.talk || 0) / 60) + ' min'), kv('Last activity', ist(l.lastActTs)), kv('Loss reason', l.lost ? l.reason : ''))),
+        h('div', { class: 'ax-card' }, h('h3', { text: 'Stage journey' }), h('ul', { class: 'ax-exlist' }, st.map(([k, v]) => h('li', null, h('b', { text: k }), ' — ' + v)))),
+        h('p', { class: 'ax-note', text: 'Names and phone numbers are visible to admin, marketing and sales-manager roles only.' })];
+    }, 'LeadSquared ID ' + id);
+  }
+  AX.openLeadPanel = openLead;
+  AX.openLead = openLead; // every existing "open this lead" now opens the panel instead of leaving the page
+
+  // ---------- counsellor ----------
+  function openOwner(owner) {
+    const { D, P, per } = ctx();
+    open(owner, () => {
+      const ls = AX.leadsIn(D, Object.assign({}, P, { owner: null }), per.start, per.end, { ignoreSource: !AX.srcList(P).length }).filter((l) => (l.owner || 'Unassigned') === owner);
+      const now = Date.now(), callable = ls.filter((l) => l.createdTs != null && now - l.createdTs > 2 * 3600e3);
+      const waits = callable.filter((l) => l.firstCallTs != null).map((l) => (l.firstCallTs - l.createdTs) / 60000);
+      const calls = d3.sum(ls, (l) => l.calls || 0), conn = d3.sum(ls, (l) => l.connCalls || 0);
+      const idle = ls.filter((l) => !l.lost && !l.admitted && now - Math.max(l.lastActTs || 0, l.firstCallTs || 0, l.createdTs || 0) > 3 * 864e5);
+      const notCalled = ls.filter((l) => l.firstCallTs == null && !l.lost && !l.admitted);
+      const q = ls.filter((l) => l.qualified).length, a = ls.filter((l) => l.admitted).length;
+      const w1 = callable.length ? (waits.filter((m) => m <= 60).length * 100) / callable.length : null;
+      const cd = (dash.data('calls_daily').data || []).filter((r) => r.owner === owner && r.date >= per.start && r.date <= per.end);
+      const chartBox = h('div', { style: { position: 'relative', minHeight: '180px' } });
+      const out = [
+        h('div', { class: 'ax-kpis' }, kpi('Leads', F.int(ls.length), per.label), kpi('Called within 1 h', w1 == null ? '—' : F.pct(w1, 0), callable.length + ' callable leads', w1 == null ? '' : w1 >= 60 ? 'ok' : w1 >= 30 ? 'warn' : 'bad'),
+          kpi('Median first call', wait(median(waits))), kpi('Not called yet', F.int(notCalled.length), null, notCalled.length ? 'bad' : 'ok'), kpi('Calls on these leads', F.int(calls), F.pct(calls ? (conn * 100) / calls : 0, 0) + ' connected'),
+          kpi('Talk time', F.int(d3.sum(ls, (l) => l.talk || 0) / 60) + ' min'), kpi('Qualified', F.int(q), F.pct(ls.length ? (q * 100) / ls.length : 0, 1) + ' of leads'), kpi('Admitted', F.int(a)),
+          kpi('Lost', F.pct(ls.length ? (ls.filter((l) => l.lost).length * 100) / ls.length : 0, 0)), kpi('Idle 3+ days', F.int(idle.length), 'open leads with no activity', idle.length ? 'warn' : '')),
+        cd.length ? h('div', { class: 'ax-card' }, h('h3', { text: 'Calls per day (all their leads)' }), chartBox) : null,
+        h('div', { class: 'ax-grid' }, bars('Leads by current stage', countBy(ls, (l) => l.status || 'Unknown')), bars('Course mix', countBy(ls, (l) => l.programme || 'Unmapped'))),
+        ls.some((l) => l.lost) ? bars('Loss reasons', countBy(ls.filter((l) => l.lost), (l) => l.reason || 'No reason recorded')) : null,
+        notCalled.length ? h('div', { class: 'ax-card' }, h('h3', { text: 'Not called yet (' + notCalled.length + ')' }), leadTable(notCalled)) : null,
+        idle.length ? h('div', { class: 'ax-card' }, h('h3', { text: 'Idle for 3+ days (' + idle.length + ')' }), leadTable(idle)) : null,
+        h('div', { class: 'ax-card' }, h('h3', { text: 'All their leads in this period (' + ls.length + ')' }), leadTable(ls))];
+      if (cd.length) setTimeout(() => { const keys = [...new Set(cd.map((r) => r.date))].sort(); AX.chart.time(chartBox, { keys, bars: { name: 'Calls', values: new Map(keys.map((k) => [k, d3.sum(cd.filter((r) => r.date === k), (r) => n(r.calls))])), color: '#12c784', fmt: F.int }, lines: [{ name: 'Connected', values: new Map(keys.map((k) => [k, d3.sum(cd.filter((r) => r.date === k), (r) => n(r.connected))])), color: '#1b1f1d' }], yFmt: F.int, label: 'Calls per day' }); }, 30);
+      return out;
+    }, 'Counsellor · ' + per.label);
+  }
+  AX.openOwnerPanel = openOwner;
+
+  // ---------- campaign ----------
+  function findCampaign(D, text) { const t = String(text || '').trim(); return D.camps.find((c) => c.id === t || c.name === t || AX.shortName(c.name) === t) || null; }
+  function openCampaign(c) {
+    const { D, P, per } = ctx();
+    open(c.name, () => {
+      const meta = D.meta.filter((m) => m.cid === c.id && m.date >= per.start && m.date <= per.end);
+      const spend = d3.sum(meta, (m) => m.spend), leads = d3.sum(meta, (m) => m.leads), imp = d3.sum(meta, (m) => m.imp), clk = d3.sum(meta, (m) => m.clicks);
+      const ls = D.leads.filter((l) => l.cid === c.id && l.date >= per.start && l.date <= per.end && !l.dup);
+      const q = ls.filter((l) => l.qualified).length, a = ls.filter((l) => l.admitted).length;
+      const ads = [...AX.groupBy((dash.data('meta_ads').data || []).filter((r) => r.campaign_id === c.id && r.date >= per.start && r.date <= per.end), (r) => r.ad_id)].map(([id, rs]) => {
+        const sp = d3.sum(rs, (r) => n(r.spend)), le = d3.sum(rs, (r) => n(r.leads)), im = d3.sum(rs, (r) => n(r.impressions)), lc = d3.sum(rs, (r) => n(r.link_clicks));
+        return { ad: rs[rs.length - 1].ad_name || id, adset: rs[rs.length - 1].adset_name || '', spend: sp, leads: le, cpl: le ? sp / le : null, ctr: im ? (lc * 100) / im : null }; });
+      const adBox = h('div'); AX.table(adBox, [{ key: 'ad', label: 'Ad' }, { key: 'adset', label: 'Ad set' }, { key: 'spend', label: 'Spend', num: true, fmt: F.inr }, { key: 'leads', label: 'Meta leads', num: true, fmt: F.int }, { key: 'cpl', label: 'CPL', num: true, fmt: F.inr }, { key: 'ctr', label: 'CTR', num: true, fmt: (v) => (v == null ? '—' : F.pct(v, 2)) }], { rows: ads, sort: { key: 'spend', dir: 'desc' }, search: false, colFilters: false });
+      const chartBox = h('div', { style: { position: 'relative', minHeight: '180px' } });
+      const keys = [...new Set(meta.map((m) => m.date))].sort();
+      if (keys.length > 1) setTimeout(() => AX.chart.time(chartBox, { keys, bars: { name: 'Spend', values: new Map(keys.map((k) => [k, d3.sum(meta.filter((m) => m.date === k), (m) => m.spend)])), color: '#12c784', fmt: F.inr }, lines: [{ name: 'Leads', values: new Map(keys.map((k) => [k, d3.sum(meta.filter((m) => m.date === k), (m) => m.leads)])), color: '#1b1f1d', right: true }], yFmt: F.inrShort, label: 'Daily spend and leads' }), 30);
+      return [
+        h('div', { class: 'ax-kpis' }, kpi('Spend', F.inr(spend), per.label), kpi('Meta leads', F.int(leads)), kpi('Cost per lead', leads ? F.inr(spend / leads) : '—'), kpi('CTR', imp ? F.pct((clk * 100) / imp, 2) : '—'),
+          kpi('Leads in CRM', F.int(ls.length)), kpi('Qualified', F.int(q), ls.length ? F.pct((q * 100) / ls.length, 1) : ''), kpi('Admitted', F.int(a)), kpi('Cost per qualified', q ? F.inr(spend / q) : '—')),
+        keys.length > 1 ? h('div', { class: 'ax-card' }, h('h3', { text: 'Daily spend and leads' }), chartBox) : null,
+        ads.length ? h('div', { class: 'ax-card' }, h('h3', { text: 'Ads (' + ads.length + ')' }), adBox) : null,
+        ls.length ? h('div', { class: 'ax-grid' }, bars('Leads by current stage', countBy(ls, (l) => l.status || 'Unknown')), bars('Leads by counsellor', countBy(ls, (l) => l.owner || 'Unassigned'))) : null,
+        h('div', { class: 'ax-card' }, h('h3', { text: 'Its leads in the CRM (' + ls.length + ')' }), ls.length ? leadTable(ls) : h('p', { class: 'ax-note', text: 'No CRM leads linked to this campaign in this period.' }))];
+    }, (c.programme || 'Campaign') + ' · ' + per.label);
+  }
+  AX.openCampaignPanel = (idOrName) => { const { D } = ctx(); const c = findCampaign(D, idOrName); if (c) openCampaign(c); };
+
+  // ---------- Sales team number tiles: the leads behind each number ----------
+  const TILE = {
+    'Called within 1 hour': (l) => l.firstCallTs != null && l.firstCallTs - l.createdTs <= 3600e3,
+    'Called within 24 hours': (l) => l.firstCallTs != null && l.firstCallTs - l.createdTs <= 864e5,
+    'Not called yet': (l) => l.firstCallTs == null && !l.lost && !l.admitted,
+    'Median time to first call': (l) => l.firstCallTs != null,
+    'Call attempts per lead': () => true, 'Connect rate': (l) => (l.calls || 0) > 0, 'Talk time per lead': (l) => (l.talk || 0) > 0,
+  };
+  function openTile(label) {
+    const { D, P, per } = ctx();
+    open(label, () => {
+      const ls = AX.leadsIn(D, P, per.start, per.end, { ignoreSource: !AX.srcList(P).length }).filter(TILE[label]);
+      return [h('p', { class: 'ax-note', text: F.int(ls.length) + ' leads · ' + per.label + ' · current filters. Click a lead for its full record, or a name for the counsellor.' }),
+        h('div', { class: 'ax-card' }, leadTable(ls, [{ key: 'talk', label: 'Talk (min)', num: true, fmt: (v) => (v ? v.toFixed(1) : '0') }]))];
+    }, 'Sales team · ' + per.label);
+  }
+
+  // ---------- make IDs, names and campaigns clickable in every table ----------
+  function headers(table) { return [...table.querySelectorAll('thead th')].map((th) => th.textContent.replace(/[▲▼↑↓]/g, '').trim().toLowerCase()); }
+  function markLinks(root) {
+    (root || document).querySelectorAll('table.ax-table').forEach((t) => {
+      const hs = headers(t);
+      t.querySelectorAll('tbody tr').forEach((tr) => [...tr.children].forEach((td, i) => {
+        const txt = td.textContent.trim(), hd = hs[i] || '';
+        if (td.dataset.axl) return;
+        if (GUID.test(txt)) { td.dataset.axl = 'lead'; td.classList.add('ax-link'); }
+        else if (OWNER_COLS.includes(hd) && txt && txt !== '—' && txt !== 'Unassigned' && txt !== 'System') { td.dataset.axl = 'owner'; td.classList.add('ax-link'); }
+        else if (CAMP_COLS.includes(hd) && txt && txt !== '—' && !/^\(no campaign\)$/.test(txt)) { td.dataset.axl = 'camp'; td.classList.add('ax-link'); }
+      }));
+    });
+    (root || document).querySelectorAll('#sales .ax-kpi').forEach((k) => { const l = (k.querySelector('.l') || {}).textContent; if (l && TILE[l.trim()] && !k.dataset.axl) { k.dataset.axl = 'tile'; k.classList.add('ax-kpi-link'); k.title = 'Click to see these leads'; k.tabIndex = 0; } });
+  }
+  AX.markLinks = markLinks;
+  const act = (el, e) => {
+    const kind = el.dataset.axl, txt = el.textContent.trim();
+    if (kind === 'tile') { openTile((el.querySelector('.l') || {}).textContent.trim()); return; }
+    e.preventDefault(); e.stopPropagation();
+    if (kind === 'lead') openLead(txt);
+    else if (kind === 'owner') openOwner(txt.replace(/^\d+\s+/, ''));
+    else if (kind === 'camp') { const { D } = ctx(); const c = findCampaign(D, txt); if (c) openCampaign(c); }
+  };
+  document.addEventListener('click', (e) => { const el = e.target.closest && e.target.closest('[data-axl]'); if (el) act(el, e); }, true);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const el = document.activeElement; if (el && el.dataset && el.dataset.axl === 'tile') act(el, e); } });
+  let tm = null;
+  new MutationObserver(() => { clearTimeout(tm); tm = setTimeout(() => markLinks(), 120); }).observe(document.body, { childList: true, subtree: true });
+})();
+</script><script>
 // ---- Supabase loader: sign-in check, data fetch, targets, AI analysis ----
 (async function () {
   const SUPABASE_URL = 'https://haytolhmfaghtebjbiuj.supabase.co';
