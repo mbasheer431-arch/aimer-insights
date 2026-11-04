@@ -482,6 +482,8 @@ td.ax-link:hover { background: #e3f7ee; text-decoration: underline; }
 .ax-kpi-link::after { content: 'See leads →'; display: block; margin-top: 6px; font-size: 12px; color: #0a6b43; }
 body.ax-noscroll { overflow: hidden; }
 @media (max-width: 600px) { .ax-drw-body { padding: 12px; } }
+.ax-xl-wrap { display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center; } .ax-xl { background: #0d0f0e; color: #fff; border-color: #0d0f0e; } .ax-xl + .ax-xl { background: #fff; color: #0d0f0e; } .ax-xl-card { margin-bottom: var(--cds-gap-md, 14px); }
+.ax-cw-card { margin-bottom: var(--cds-gap-md, 14px); } .ax-cw-custom { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 4px 0 10px; font-size: 13px; }
 </style>
 </head>
 <body>
@@ -3889,6 +3891,7 @@ body.ax-noscroll { overflow: hidden; }
         rowKey: 'id', onRow: (r) => openLead(r.id), sort: { key: 'date', dir: 'desc' }, pageSize: 25, exportName: 'aimer-leads.csv' });
     return box;
   };
+  AX.leadTable = leadTable;
   const bars = (title, pairs) => { const box = h('div'); AX.chart.hbars(box, pairs.slice(0, 10).map(([k, v]) => ({ label: k, value: v, color: '#12c784' })), { name: title, emptyText: 'Nothing to show.' }); return h('div', { class: 'ax-card' }, h('h3', { text: title }), box); };
   const countBy = (arr, f) => [...AX.groupBy(arr, f)].map(([k, v]) => [k, v.length]).sort((a, b) => b[1] - a[1]);
 
@@ -4018,12 +4021,91 @@ body.ax-noscroll { overflow: hidden; }
   let tm = null;
   new MutationObserver(() => { clearTimeout(tm); tm = setTimeout(() => markLinks(), 120); }).observe(document.body, { childList: true, subtree: true });
 })();
+
+// ---------- Stage-wise Excel download (Lead explorer, Sales manager, Reports & export) ----------
+(function () {
+  const AX = window.AX, h = AX.h;
+  const monthsBack = (d, m) => { const x = new Date(d + 'T00:00:00Z'); x.setUTCMonth(x.getUTCMonth() - m); return x.toISOString().slice(0, 10); };
+  async function download(btn, since, until) {
+    const label = btn.textContent; btn.disabled = true; btn.textContent = 'Preparing Excel… (about 20 seconds)';
+    try {
+      const { data, error } = await window.__aimerSb.functions.invoke('export-stages', { body: { since, until } });
+      if (error || !data?.base64) { let m = error?.message || 'Export failed'; try { m = (await error.context.json()).error || m; } catch (_) {} throw new Error(m); }
+      const bin = atob(data.base64), bytes = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      const url = URL.createObjectURL(new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+      const a = h('a', { href: url, download: data.filename }); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 5000);
+      btn.textContent = '✓ Downloaded ' + data.rows.toLocaleString('en-IN') + ' leads'; setTimeout(() => { btn.textContent = label; btn.disabled = false; }, 4000);
+    } catch (e) { btn.textContent = label; btn.disabled = false; alert('Couldn’t create the Excel file: ' + e.message); }
+  }
+  function buttons() {
+    const D = AX.parse({ campaigns: dash.data('campaigns').data, meta: dash.data('meta_daily').data, leads: dash.data('crm_leads').data });
+    const per = AX.period(AX.p(), D.asOf), today = D.asOf;
+    const b1 = h('button', { class: 'ax-btn ax-xl', title: 'Summary + one sheet per stage (incl. Lost), marketing leads, bulk excluded', onclick: (e) => download(e.currentTarget, monthsBack(today, 5), today) }, '⬇ Stage-wise Excel · last 5 months');
+    const b2 = h('button', { class: 'ax-btn ax-xl', title: 'Same file for the dashboard period: ' + per.label, onclick: (e) => download(e.currentTarget, per.start, per.end) }, '⬇ … this period');
+    return h('span', { class: 'ax-xl-wrap' }, b1, b2);
+  }
+  function place() {
+    if (AX.role === 'creative' || !dash.data('crm_leads').data) return;
+    for (const id of ['xp-controls', 'sm-controls']) { const el = document.getElementById(id); if (el && !el.querySelector('.ax-xl-wrap')) el.append(buttons()); }
+    const rep = document.getElementById('reports');
+    if (rep && !rep.querySelector('.ax-xl-card')) rep.prepend(h('div', { class: 'ax-card ax-xl-card' }, h('h3', { text: 'Lead stages workbook (Excel)' }),
+      h('p', { class: 'ax-note', text: 'Summary with live formulas (leads per stage, month × stage, lost-lead analysis by reason, course, source and counsellor) plus one sheet per LeadSquared stage. Marketing leads only; no names or phone numbers.' }), buttons()));
+  }
+  let t = null; new MutationObserver(() => { clearTimeout(t); t = setTimeout(place, 200); }).observe(document.body, { childList: true, subtree: true });
+})();
+
+
+// ---------- Course-wise lead counts: 7 / 14 / 28 / 90 / 180 days + custom range (Programmes, Sales manager) ----------
+(function () {
+  const AX = window.AX, h = AX.h, F = AX.fmt;
+  const st = { measure: 'n', from: null, to: null };
+  const WINS = [7, 14, 28, 90, 180];
+  const MEAS = [['n', 'Leads'], ['q', 'Qualified'], ['a', 'Admitted'], ['l', 'Lost']];
+  const keep = (l, m) => (m === 'n' ? true : m === 'q' ? !!l.qualified : m === 'a' ? !!l.admitted : !!l.lost);
+  function card() {
+    const D = AX.parse({ campaigns: dash.data('campaigns').data, meta: dash.data('meta_daily').data, leads: dash.data('crm_leads').data });
+    const P = AX.p(), today = D.asOf, oldest = D.leads.reduce((m, l) => (l.date && l.date < m ? l.date : m), today);
+    if (!st.from) { st.from = today.slice(0, 8) + '01'; st.to = today; }
+    const PP = Object.assign({}, P, { programme: null, campaign: null }); // rows are courses: show every course
+    const all = D.leads.filter((l) => AX.leadOk(l, PP, { ignoreSource: !AX.srcList(P).length }));
+    const cols = WINS.map((d) => ({ label: d + ' days', s: AX.d.add(today, -(d - 1)), e: today })).concat([{ label: 'Custom', s: st.from <= st.to ? st.from : st.to, e: st.from <= st.to ? st.to : st.from, custom: true }]);
+    const courses = [...new Set(all.map((l) => l.programme || 'Unmapped'))];
+    const count = (course, c) => all.filter((l) => (course === null || (l.programme || 'Unmapped') === course) && l.date >= c.s && l.date <= c.e && keep(l, st.measure));
+    courses.sort((a, b) => count(b, cols[4]).length - count(a, cols[4]).length);
+    const open = (course, c) => { const ls = count(course, c); AX.drawer.open((course || 'All courses') + ' · ' + MEAS.find((m) => m[0] === st.measure)[1], () => [h('p', { class: 'ax-note', text: F.int(ls.length) + ' leads created ' + AX.d.nice(c.s) + ' – ' + AX.d.nice(c.e) + ' · ' + AX.srcLabel(P) }), h('div', { class: 'ax-card' }, AX.leadTable(ls))], c.label); };
+    const cell = (course, c) => { const n = count(course, c).length; return h('td', { class: 'num' }, n ? h('button', { class: 'ax-cellbtn', title: 'Show these leads', onclick: () => open(course, c) }, F.int(n)) : '0'); };
+    const inp = (v, on) => { const i = h('input', { type: 'date', value: v, class: 'ax-date', min: oldest, max: today }); i.addEventListener('change', (e) => { on(e.target.value); refresh(); }); return i; };
+    const box = h('div', { class: 'ax-card ax-cw-card' },
+      h('div', { class: 'ax-chead' }, h('h3', { text: 'Course-wise leads: 7, 14, 28, 90, 180 days and custom' }),
+        h('div', { class: 'ax-seg', role: 'group' }, MEAS.map(([v, t]) => h('button', { 'aria-pressed': st.measure === v ? 'true' : 'false', onclick: () => { st.measure = v; refresh(); } }, t)))),
+      h('p', { class: 'ax-note', text: 'Leads created in each window up to today (' + AX.d.nice(today) + '), ' + AX.srcLabel(P) + '; bulk data and phone-call sources excluded. ' + (st.measure === 'n' ? '' : 'Showing leads from each window that are ' + MEAS.find((m) => m[0] === st.measure)[1].toLowerCase() + '. ') + 'Click a number to see the leads.' }),
+      h('div', { class: 'ax-cw-custom' }, 'Custom range: ', inp(st.from, (v) => (st.from = v)), ' to ', inp(st.to, (v) => (st.to = v)), st.from < oldest ? h('span', { class: 'ax-note warn', text: ' Data starts ' + AX.d.nice(oldest) + '.' }) : null),
+      h('div', { class: 'ax-tablewrap' }, h('table', { class: 'ax-table' },
+        h('thead', null, h('tr', null, h('th', { text: 'Course' }), cols.map((c) => h('th', { class: 'num', title: AX.d.nice(c.s) + ' – ' + AX.d.nice(c.e), text: c.custom ? 'Custom (' + AX.d.nice(c.s) + ' – ' + AX.d.nice(c.e) + ')' : c.label })))),
+        h('tbody', null, courses.map((co) => h('tr', null, h('td', { text: co }), cols.map((c) => cell(co, c)))), h('tr', { class: 'ax-totrow' }, h('td', null, h('b', { text: 'All courses' })), cols.map((c) => cell(null, c)))))));
+    return box;
+  }
+  function refresh() { document.querySelectorAll('.ax-cw-card').forEach((old) => old.replaceWith(card())); }
+  function place() {
+    if (AX.role === 'creative' || !dash.data('crm_leads').data) return;
+    for (const [pid, after] of [['programmes', null], ['salesmgr', 'sm-take']]) {
+      const pg = document.getElementById(pid); if (!pg || pg.querySelector('.ax-cw-card')) continue;
+      const anchor = after && document.getElementById(after);
+      try { const c = card(); if (anchor) anchor.after(c); else pg.prepend(c); } catch (e) { console.error(e); }
+    }
+  }
+  AX.courseWindows = { refresh };
+  let t = null; new MutationObserver(() => { clearTimeout(t); t = setTimeout(place, 200); }).observe(document.body, { childList: true, subtree: true });
+  // keep in sync when filters change
+  const r0 = AX.render; AX.render = function () { const out = r0.apply(this, arguments); setTimeout(refresh, 0); return out; };
+})();
 </script><script>
 // ---- Supabase loader: sign-in check, data fetch, targets, AI analysis ----
 (async function () {
   const SUPABASE_URL = 'https://haytolhmfaghtebjbiuj.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_ghBEPB17qbQDR06Mim4y4Q_C56Yykmc';
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  window.__aimerSb = sb;
   const AX = window.AX, h = AX.h;
   const STAFF = ['admin', 'marketing'];
 
