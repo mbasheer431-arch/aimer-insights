@@ -484,6 +484,17 @@ body.ax-noscroll { overflow: hidden; }
 @media (max-width: 600px) { .ax-drw-body { padding: 12px; } }
 .ax-xl-wrap { display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center; } .ax-xl { background: #0d0f0e; color: #fff; border-color: #0d0f0e; } .ax-xl + .ax-xl { background: #fff; color: #0d0f0e; } .ax-xl-card { margin-bottom: var(--cds-gap-md, 14px); }
 .ax-cw-card { margin-bottom: var(--cds-gap-md, 14px); } .ax-cw-custom { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 4px 0 10px; font-size: 13px; }
+.ax-cw-table { width: auto; min-width: min(100%, 760px); }
+.ax-cw-table th, .ax-cw-table td { padding-left: 16px; padding-right: 16px; white-space: nowrap; }
+.ax-cw-table th:first-child, .ax-cw-table td:first-child { min-width: 220px; padding-left: 12px; }
+.ax-cw-table th.num { vertical-align: bottom; } .ax-cw-sub { display: block; font-size: 11px; font-weight: 400; color: var(--color-fg-muted, #6c7470); margin-top: 2px; }
+.ax-cw-table td.num { font-size: 15px; font-variant-numeric: tabular-nums; }
+.ax-cw-card[data-cw="1"] .ax-cw-table td.num:last-child, .ax-cw-card[data-cw="1"] .ax-cw-table th.num:last-child { background: rgba(223,227,90,.18); }
+.ax-cw-card[data-cw="2"][data-mode="course"] .ax-cw-table td.num:nth-last-child(2), .ax-cw-card[data-cw="2"][data-mode="course"] .ax-cw-table th.num:nth-last-child(2) { background: rgba(223,227,90,.18); }
+.ax-cw-card select.ax-colf { max-width: none; min-width: 280px; }
+.ax-sortable { cursor: pointer; user-select: none; } .ax-sortable:hover { background: #eef6f2; }
+.ax-cw-table th.ax-left { text-align: left; }
+.ax-warnrow td:first-child { color: #9a6a00; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -3774,7 +3785,8 @@ body.ax-noscroll { overflow: hidden; }
     AX.fill('ax-badges', badge('Meta Ads', st.meta), badge('LeadSquared', st.crm), badge('Revenue', st.revenue));
     const sync = st.rows.map((r) => r.last_sync).filter(Boolean).sort().pop();
     AX.fill('ax-asof', D && D.asOf ? (AX._excludedNote ? AX._excludedNote + ' ' : '') + 'Data through ' + AX.d.nice(D.asOf) + (D.partialToday ? ' (today is a partial day)' : '') + (sync ? ' · last sync ' + sync.slice(0, 16).replace('T', ' ') + ' IST' : '') + ' · all dates IST' : 'No data loaded');
-    const notLive = ['meta', 'crm', 'revenue'].filter((k) => st[k] !== 'live');
+    // Revenue stays 'unavailable' until a fee field is mapped; that's expected, so only Meta and LeadSquared raise the banner
+    const notLive = ['meta', 'crm'].filter((k) => st[k] !== 'live');
     const ban = AX.$('ax-banner');
     ban.hidden = !notLive.length;
     if (notLive.length) {
@@ -4040,8 +4052,8 @@ body.ax-noscroll { overflow: hidden; }
   function buttons() {
     const D = AX.parse({ campaigns: dash.data('campaigns').data, meta: dash.data('meta_daily').data, leads: dash.data('crm_leads').data });
     const per = AX.period(AX.p(), D.asOf), today = D.asOf;
-    const b1 = h('button', { class: 'ax-btn ax-xl', title: 'Summary + one sheet per stage (incl. Lost), marketing leads, bulk excluded', onclick: (e) => download(e.currentTarget, monthsBack(today, 5), today) }, '⬇ Stage-wise Excel · last 5 months');
-    const b2 = h('button', { class: 'ax-btn ax-xl', title: 'Same file for the dashboard period: ' + per.label, onclick: (e) => download(e.currentTarget, per.start, per.end) }, '⬇ … this period');
+    const b1 = h('button', { class: 'ax-btn ax-xl', style: { background: '#0d0f0e', color: '#ffffff', borderColor: '#0d0f0e' }, title: 'Summary + one sheet per stage (incl. Lost), marketing leads, bulk excluded', onclick: (e) => download(e.currentTarget, monthsBack(today, 5), today) }, '⬇ Stage-wise Excel · last 5 months');
+    const b2 = h('button', { class: 'ax-btn ax-xl', style: { background: '#ffffff', color: '#0d0f0e', borderColor: 'rgba(13,15,14,.25)' }, title: 'Same file for the dashboard period: ' + per.label, onclick: (e) => download(e.currentTarget, per.start, per.end) }, '⬇ Excel · this period');
     return h('span', { class: 'ax-xl-wrap' }, b1, b2);
   }
   function place() {
@@ -4055,48 +4067,116 @@ body.ax-noscroll { overflow: hidden; }
 })();
 
 
-// ---------- Course-wise lead counts: 7 / 14 / 28 / 90 / 180 days + custom range (Programmes, Sales manager) ----------
+// ---------- Course-wise lead counts (sortable) + why leads are lost, by course (Programmes, Sales manager) ----------
 (function () {
   const AX = window.AX, h = AX.h, F = AX.fmt;
-  const st = { measure: 'n', from: null, to: null };
+  const st = { measure: 'n', from: null, to: null, sort: 5, dir: -1, lcCourse: null, lcMode: 'course', lcWin: 5, lcSort: 5, lcDir: -1 };
   const WINS = [7, 14, 28, 90, 180];
   const MEAS = [['n', 'Leads'], ['q', 'Qualified'], ['a', 'Admitted'], ['l', 'Lost']];
   const keep = (l, m) => (m === 'n' ? true : m === 'q' ? !!l.qualified : m === 'a' ? !!l.admitted : !!l.lost);
-  function card() {
+  const reasonOf = (l) => l.reason || 'No reason recorded';
+  function base() {
     const D = AX.parse({ campaigns: dash.data('campaigns').data, meta: dash.data('meta_daily').data, leads: dash.data('crm_leads').data });
     const P = AX.p(), today = D.asOf, oldest = D.leads.reduce((m, l) => (l.date && l.date < m ? l.date : m), today);
     if (!st.from) { st.from = today.slice(0, 8) + '01'; st.to = today; }
     const PP = Object.assign({}, P, { programme: null, campaign: null }); // rows are courses: show every course
     const all = D.leads.filter((l) => AX.leadOk(l, PP, { ignoreSource: !AX.srcList(P).length }));
     const cols = WINS.map((d) => ({ label: d + ' days', s: AX.d.add(today, -(d - 1)), e: today })).concat([{ label: 'Custom', s: st.from <= st.to ? st.from : st.to, e: st.from <= st.to ? st.to : st.from, custom: true }]);
-    const courses = [...new Set(all.map((l) => l.programme || 'Unmapped'))];
-    const count = (course, c) => all.filter((l) => (course === null || (l.programme || 'Unmapped') === course) && l.date >= c.s && l.date <= c.e && keep(l, st.measure));
-    courses.sort((a, b) => count(b, cols[4]).length - count(a, cols[4]).length);
-    const open = (course, c) => { const ls = count(course, c); AX.drawer.open((course || 'All courses') + ' · ' + MEAS.find((m) => m[0] === st.measure)[1], () => [h('p', { class: 'ax-note', text: F.int(ls.length) + ' leads created ' + AX.d.nice(c.s) + ' – ' + AX.d.nice(c.e) + ' · ' + AX.srcLabel(P) }), h('div', { class: 'ax-card' }, AX.leadTable(ls))], c.label); };
-    const cell = (course, c) => { const n = count(course, c).length; return h('td', { class: 'num' }, n ? h('button', { class: 'ax-cellbtn', title: 'Show these leads', onclick: () => open(course, c) }, F.int(n)) : '0'); };
-    const inp = (v, on) => { const i = h('input', { type: 'date', value: v, class: 'ax-date', min: oldest, max: today }); i.addEventListener('change', (e) => { on(e.target.value); refresh(); }); return i; };
-    const box = h('div', { class: 'ax-card ax-cw-card' },
-      h('div', { class: 'ax-chead' }, h('h3', { text: 'Course-wise leads: 7, 14, 28, 90, 180 days and custom' }),
-        h('div', { class: 'ax-seg', role: 'group' }, MEAS.map(([v, t]) => h('button', { 'aria-pressed': st.measure === v ? 'true' : 'false', onclick: () => { st.measure = v; refresh(); } }, t)))),
-      h('p', { class: 'ax-note', text: 'Leads created in each window up to today (' + AX.d.nice(today) + '), ' + AX.srcLabel(P) + '; bulk data and phone-call sources excluded. ' + (st.measure === 'n' ? '' : 'Showing leads from each window that are ' + MEAS.find((m) => m[0] === st.measure)[1].toLowerCase() + '. ') + 'Click a number to see the leads.' }),
-      h('div', { class: 'ax-cw-custom' }, 'Custom range: ', inp(st.from, (v) => (st.from = v)), ' to ', inp(st.to, (v) => (st.to = v)), st.from < oldest ? h('span', { class: 'ax-note warn', text: ' Data starts ' + AX.d.nice(oldest) + '.' }) : null),
-      h('div', { class: 'ax-tablewrap' }, h('table', { class: 'ax-table' },
-        h('thead', null, h('tr', null, h('th', { text: 'Course' }), cols.map((c) => h('th', { class: 'num', title: AX.d.nice(c.s) + ' – ' + AX.d.nice(c.e), text: c.custom ? 'Custom (' + AX.d.nice(c.s) + ' – ' + AX.d.nice(c.e) + ')' : c.label })))),
-        h('tbody', null, courses.map((co) => h('tr', null, h('td', { text: co }), cols.map((c) => cell(co, c)))), h('tr', { class: 'ax-totrow' }, h('td', null, h('b', { text: 'All courses' })), cols.map((c) => cell(null, c)))))));
-    return box;
+    return { D, P, today, oldest, all, cols };
   }
-  function refresh() { document.querySelectorAll('.ax-cw-card').forEach((old) => old.replaceWith(card())); }
+  const inWin = (l, c) => l.date >= c.s && l.date <= c.e;
+  const sortTh = (label, sub, idx, cur, dir, set, cls) => h('th', { class: (cls || 'num') + ' ax-sortable', title: 'Sort by ' + label, onclick: () => set(idx) },
+    h('span', null, label + (cur === idx ? (dir < 0 ? ' ▼' : ' ▲') : ''), sub ? h('small', { class: 'ax-cw-sub', text: sub }) : null));
+  const openList = (title, ls, sub) => AX.drawer.open(title, () => [h('p', { class: 'ax-note', text: F.int(ls.length) + ' leads · ' + sub }), h('div', { class: 'ax-card' }, AX.leadTable(ls))], sub);
+  const numBtn = (ls, title, sub) => (ls.length ? h('button', { class: 'ax-cellbtn', title: 'Show these leads', onclick: () => openList(title, ls, sub) }, F.int(ls.length)) : '0');
+  const dates = (c) => AX.d.nice(c.s) + ' – ' + AX.d.nice(c.e);
+  const customRow = (b) => { const inp = (v, on) => { const i = h('input', { type: 'date', value: v, class: 'ax-date', min: b.oldest, max: b.today }); i.addEventListener('change', (e) => { on(e.target.value); refresh(); }); return i; };
+    return h('div', { class: 'ax-cw-custom' }, 'Custom range: ', inp(st.from, (v) => (st.from = v)), ' to ', inp(st.to, (v) => (st.to = v)), st.from < b.oldest ? h('span', { class: 'ax-note warn', text: ' Data starts ' + AX.d.nice(b.oldest) + '.' }) : null); };
+  const seg = (cur, opts, set) => h('div', { class: 'ax-seg', role: 'group' }, opts.map(([v, t]) => h('button', { 'aria-pressed': cur === v ? 'true' : 'false', onclick: () => { set(v); refresh(); } }, t)));
+
+  // ----- card 1: course-wise counts, sortable by any column -----
+  function card() {
+    const b = base(), { cols, all, P } = b;
+    const courses = [...new Set(all.map((l) => l.programme || 'Unmapped'))];
+    const set = (course, c) => all.filter((l) => (course === null || (l.programme || 'Unmapped') === course) && inWin(l, c) && keep(l, st.measure));
+    const val = (co, i) => (i === 0 ? co : set(co, cols[i - 1]).length);
+    courses.sort((a, b2) => (st.sort === 0 ? a.localeCompare(b2) * st.dir : (val(a, st.sort) - val(b2, st.sort)) * st.dir));
+    const sortBy = (i) => { if (st.sort === i) st.dir = -st.dir; else { st.sort = i; st.dir = i === 0 ? 1 : -1; } refresh(); };
+    const mLabel = MEAS.find((m) => m[0] === st.measure)[1];
+    return h('div', { class: 'ax-card ax-cw-card', 'data-cw': '1' },
+      h('div', { class: 'ax-chead' }, h('h3', { text: 'Course-wise leads: 7, 14, 28, 90, 180 days and custom' }), seg(st.measure, MEAS, (v) => (st.measure = v))),
+      h('p', { class: 'ax-note', text: 'Leads created in each window up to today (' + AX.d.nice(b.today) + '), ' + AX.srcLabel(P) + '; bulk data and phone-call sources excluded. ' + (st.measure === 'n' ? '' : 'Showing those that are ' + mLabel.toLowerCase() + '. ') + 'Click a column title to sort, a number to see the leads.' }),
+      customRow(b),
+      h('div', { class: 'ax-tablewrap' }, h('table', { class: 'ax-table ax-cw-table' },
+        h('thead', null, h('tr', null, sortTh('Course', null, 0, st.sort, st.dir, sortBy, 'ax-left'), cols.map((c, i) => sortTh(c.label, c.custom ? dates(c) : 'from ' + AX.d.nice(c.s), i + 1, st.sort, st.dir, sortBy)))),
+        h('tbody', null, courses.map((co) => h('tr', null, h('td', { text: co }), cols.map((c) => h('td', { class: 'num' }, numBtn(set(co, c), co + ' · ' + mLabel, c.label + ' · ' + dates(c)))))),
+          h('tr', { class: 'ax-totrow' }, h('td', null, h('b', { text: 'All courses' })), cols.map((c) => h('td', { class: 'num' }, numBtn(set(null, c), 'All courses · ' + mLabel, c.label + ' · ' + dates(c)))))))));
+  }
+
+  // ----- card 2: why leads are lost, by course -----
+  function lostCard() {
+    const b = base(), { cols, all, P } = b;
+    const lost = all.filter((l) => l.lost);
+    const courses = [...new Set(lost.map((l) => l.programme || 'Unmapped'))].sort((a, c) => lost.filter((l) => (l.programme || 'Unmapped') === c).length - lost.filter((l) => (l.programme || 'Unmapped') === a).length);
+    if (!st.lcCourse || (st.lcCourse !== '__all' && !courses.includes(st.lcCourse))) st.lcCourse = courses.find((c) => /UGBIP/i.test(c)) || courses[0] || '__all';
+    const courseSel = h('select', { class: 'ax-colf', 'aria-label': 'Course', onchange: (e) => { st.lcCourse = e.target.value; refresh(); } },
+      h('option', { value: '__all', text: 'All courses' }), courses.map((c) => h('option', { value: c, text: c + ' (' + F.int(lost.filter((l) => (l.programme || 'Unmapped') === c).length) + ' lost)' })));
+    courseSel.value = st.lcCourse;
+    const head = h('div', { class: 'ax-chead' }, h('h3', { text: 'Why leads are lost, by course' }), seg(st.lcMode, [['course', 'One course'], ['compare', 'Compare courses']], (v) => (st.lcMode = v)));
+    const note = (t) => h('p', { class: 'ax-note', text: t });
+    if (st.lcMode === 'course') {
+      const pool = lost.filter((l) => st.lcCourse === '__all' || (l.programme || 'Unmapped') === st.lcCourse);
+      const allInCourse = all.filter((l) => st.lcCourse === '__all' || (l.programme || 'Unmapped') === st.lcCourse);
+      const reasons = [...new Set(pool.map(reasonOf))];
+      const cell = (r, c) => pool.filter((l) => reasonOf(l) === r && inWin(l, c));
+      const val = (r, i) => (i === 0 ? r : cell(r, cols[i - 1]).length);
+      reasons.sort((a, c) => (st.lcSort === 0 ? a.localeCompare(c) * st.lcDir : (val(a, st.lcSort) - val(c, st.lcSort)) * st.lcDir));
+      const sortBy = (i) => { if (st.lcSort === i) st.lcDir = -st.lcDir; else { st.lcSort = i; st.lcDir = i === 0 ? 1 : -1; } refresh(); };
+      const cname = st.lcCourse === '__all' ? 'All courses' : st.lcCourse;
+      const shareCol = cols[Math.max(0, st.lcSort - 1)] || cols[4];
+      const lostIn = (c) => pool.filter((l) => inWin(l, c)).length;
+      return h('div', { class: 'ax-card ax-cw-card', 'data-cw': '2', 'data-mode': 'course' }, head,
+        h('div', { class: 'ax-cw-custom' }, 'Course: ', courseSel),
+        note('Lost leads by loss reason, by when the lead came in (' + AX.srcLabel(P) + '). Share % is for the ' + shareCol.label + ' column. Click a column title to sort, a number to see the leads.'),
+        h('div', { class: 'ax-tablewrap' }, h('table', { class: 'ax-table ax-cw-table' },
+          h('thead', null, h('tr', null, sortTh('Loss reason', null, 0, st.lcSort, st.lcDir, sortBy, 'ax-left'), cols.map((c, i) => sortTh(c.label, c.custom ? dates(c) : 'from ' + AX.d.nice(c.s), i + 1, st.lcSort, st.lcDir, sortBy)), h('th', { class: 'num', text: 'Share' }))),
+          h('tbody', null, reasons.map((r) => h('tr', { class: r === 'No reason recorded' ? 'ax-warnrow' : '' }, h('td', { text: r }), cols.map((c) => h('td', { class: 'num' }, numBtn(cell(r, c), cname + ' · ' + r, c.label + ' · ' + dates(c)))),
+              h('td', { class: 'num', text: lostIn(shareCol) ? F.pct((cell(r, shareCol).length * 100) / lostIn(shareCol), 1) : '—' }))),
+            h('tr', { class: 'ax-totrow' }, h('td', null, h('b', { text: 'All lost' })), cols.map((c) => h('td', { class: 'num' }, numBtn(pool.filter((l) => inWin(l, c)), cname + ' · all lost', c.label + ' · ' + dates(c)))), h('td', { class: 'num', text: '100%' })),
+            h('tr', null, h('td', { class: 'ax-note', text: 'Lost % of all leads' }), cols.map((c) => { const n = allInCourse.filter((l) => inWin(l, c)).length; return h('td', { class: 'num ax-note', text: n ? F.pct((lostIn(c) * 100) / n, 0) : '—' }); }), h('td'))))));
+    }
+    // compare: reasons x courses for one window
+    const c = cols[st.lcWin - 1];
+    const pool = lost.filter((l) => inWin(l, c));
+    const reasons = [...new Set(pool.map(reasonOf))].sort((a, d) => pool.filter((l) => reasonOf(l) === d).length - pool.filter((l) => reasonOf(l) === a).length);
+    const crs = courses.filter((co) => pool.some((l) => (l.programme || 'Unmapped') === co));
+    const per = (co) => pool.filter((l) => (l.programme || 'Unmapped') === co).length;
+    const winSeg = seg(st.lcWin, cols.map((x, i) => [i + 1, x.custom ? 'Custom' : x.label]), (v) => (st.lcWin = v));
+    return h('div', { class: 'ax-card ax-cw-card', 'data-cw': '2' }, head,
+      h('div', { class: 'ax-cw-custom' }, 'Leads that came in: ', winSeg),
+      note('Each cell: lost leads with that reason, and its share of that course’s lost leads (' + dates(c) + ', ' + AX.srcLabel(P) + '). Darker = bigger share. Click a number to see the leads.'),
+      h('div', { class: 'ax-tablewrap' }, h('table', { class: 'ax-table ax-cw-table' },
+        h('thead', null, h('tr', null, h('th', { text: 'Loss reason' }), crs.map((co) => h('th', { class: 'num' }, h('span', null, co, h('small', { class: 'ax-cw-sub', text: F.int(per(co)) + ' lost' })))))),
+        h('tbody', null, reasons.map((r) => h('tr', { class: r === 'No reason recorded' ? 'ax-warnrow' : '' }, h('td', { text: r }), crs.map((co) => {
+          const ls = pool.filter((l) => reasonOf(l) === r && (l.programme || 'Unmapped') === co), share = per(co) ? ls.length / per(co) : 0;
+          return h('td', { class: 'num', style: ls.length ? { background: 'rgba(229,83,75,' + Math.min(0.45, 0.05 + share * 0.9).toFixed(2) + ')' } : null }, ls.length ? h('span', null, numBtn(ls, co + ' · ' + r, c.label + ' · ' + dates(c)), h('small', { class: 'ax-cw-sub', text: F.pct(share * 100, 0) })) : '');
+        })))))));
+  }
+
+  function refresh() {
+    document.querySelectorAll('.ax-cw-card[data-cw="1"]').forEach((old) => old.replaceWith(card()));
+    document.querySelectorAll('.ax-cw-card[data-cw="2"]').forEach((old) => old.replaceWith(lostCard()));
+  }
   function place() {
     if (AX.role === 'creative' || !dash.data('crm_leads').data) return;
     for (const [pid, after] of [['programmes', null], ['salesmgr', 'sm-take']]) {
       const pg = document.getElementById(pid); if (!pg || pg.querySelector('.ax-cw-card')) continue;
       const anchor = after && document.getElementById(after);
-      try { const c = card(); if (anchor) anchor.after(c); else pg.prepend(c); } catch (e) { console.error(e); }
+      try { const c1 = card(), c2 = lostCard(); if (anchor) { anchor.after(c1); c1.after(c2); } else { pg.prepend(c2); pg.prepend(c1); } } catch (e) { console.error(e); }
     }
   }
   AX.courseWindows = { refresh };
   let t = null; new MutationObserver(() => { clearTimeout(t); t = setTimeout(place, 200); }).observe(document.body, { childList: true, subtree: true });
-  // keep in sync when filters change
   const r0 = AX.render; AX.render = function () { const out = r0.apply(this, arguments); setTimeout(refresh, 0); return out; };
 })();
 </script><script>
