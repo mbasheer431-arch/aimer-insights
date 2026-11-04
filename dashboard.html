@@ -332,7 +332,7 @@ body { margin: 0; background: #e3f3f0; }
 .ax-aihist { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
 .ax-aihist button { border: 1px solid #2a312e; background: transparent; color: #cfd8d3; border-radius: 999px; padding: 5px 11px; cursor: pointer; font-size: var(--cds-font-size-caption); }
 .ax-aihist button[aria-pressed="true"] { background: #2a312e; color: #fff; }
-.ax-userbar { display: flex; gap: 8px; align-items: center; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.ax-userbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
 .ax-userbar a, .ax-userbar button { color: var(--color-fg); border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 6px 12px; text-decoration: none; cursor: pointer; font: inherit; font-size: var(--cds-font-size-caption); }
 
 .ax-table td.ax-namecell { max-width: 22rem; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
@@ -495,6 +495,9 @@ body.ax-noscroll { overflow: hidden; }
 .ax-sortable { cursor: pointer; user-select: none; } .ax-sortable:hover { background: #eef6f2; }
 .ax-cw-table th.ax-left { text-align: left; }
 .ax-warnrow td:first-child { color: #9a6a00; font-weight: 600; }
+.ax-filterbtn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line, rgba(13,15,14,.15)); background: #fff; color: var(--color-fg, #0d0f0e); border-radius: 999px; padding: 8px 14px; font: inherit; font-size: 13px; cursor: pointer; }
+.ax-filterbtn[aria-expanded="true"] { background: #0d0f0e; color: #fff; border-color: #0d0f0e; } .ax-filterbtn b { background: #12c784; color: #0d0f0e; border-radius: 999px; padding: 0 7px; font-size: 11px; }
+@media (max-width: 600px) { .ax-userbar { font-size: 12px; } .ax-userbar > span:first-child { flex-basis: 100%; } }
 </style>
 </head>
 <body>
@@ -1699,7 +1702,9 @@ body.ax-noscroll { overflow: hidden; }
         return h('button', { class: 'ax-chip2', 'aria-pressed': on ? 'true' : 'false', title: on ? 'Remove ' + s0 : 'Add ' + s0 + ' (select several to combine)',
           onclick: () => { const next = on ? sel.filter((x) => x !== s0) : sel.concat([s0]); dash.setParams({ source: next.length ? next.join('|') : 'all' }); } }, on ? '✓ ' + s0 : s0, h('b', { text: F.int(n0) })); }),
       !AX.adsOn(P) ? h('span', { class: 'ax-note', style: { margin: '0 6px' }, text: 'Ad spend, CPL, campaigns and creatives are hidden: ' + AX.srcLabel(P) + ' has no Meta ad data.' }) : null,
-      h('button', { class: 'ax-iconbtn', 'aria-label': 'More filters', 'aria-expanded': AX.ui.moreFilters ? 'true' : 'false', 'aria-controls': 'ax-frow2', onclick: () => { AX.ui.moreFilters = !AX.ui.moreFilters; AX.render(); } }, '⚲'));
+      (() => { const nOn = ['programme', 'campaign', 'cstatus', 'objective', 'location', 'owner', 'lstatus'].filter((k) => P[k]).length;
+        return h('button', { class: 'ax-filterbtn', title: 'Programme, campaign, status, objective, location, owner and lead status filters', 'aria-expanded': AX.ui.moreFilters ? 'true' : 'false', 'aria-controls': 'ax-frow2', onclick: () => { AX.ui.moreFilters = !AX.ui.moreFilters; AX.render(); } },
+          (AX.ui.moreFilters ? '▴ Hide filters' : '▾ More filters'), nOn ? h('b', { text: String(nOn) }) : null); })());
   };
 
   // ---------- Alerts ----------
@@ -4031,7 +4036,8 @@ body.ax-noscroll { overflow: hidden; }
   document.addEventListener('click', (e) => { const el = e.target.closest && e.target.closest('[data-axl]'); if (el) act(el, e); }, true);
   document.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const el = document.activeElement; if (el && el.dataset && el.dataset.axl === 'tile') act(el, e); } });
   let tm = null;
-  new MutationObserver(() => { clearTimeout(tm); tm = setTimeout(() => markLinks(), 120); }).observe(document.body, { childList: true, subtree: true });
+  const markVisible = () => { const pg = document.getElementById(AX.tab); if (pg) markLinks(pg); if (panel && !panel.hidden) markLinks(body); };
+  new MutationObserver(() => { clearTimeout(tm); tm = setTimeout(markVisible, 120); }).observe(document.body, { childList: true, subtree: true });
 })();
 
 // ---------- Stage-wise Excel download (Lead explorer, Sales manager, Reports & export) ----------
@@ -4164,8 +4170,10 @@ body.ax-noscroll { overflow: hidden; }
   }
 
   function refresh() {
-    document.querySelectorAll('.ax-cw-card[data-cw="1"]').forEach((old) => old.replaceWith(card()));
-    document.querySelectorAll('.ax-cw-card[data-cw="2"]').forEach((old) => old.replaceWith(lostCard()));
+    // only the page on screen: hidden pages refresh when you open them
+    const pg = document.getElementById(AX.tab); if (!pg) return;
+    pg.querySelectorAll('.ax-cw-card[data-cw="1"]').forEach((old) => old.replaceWith(card()));
+    pg.querySelectorAll('.ax-cw-card[data-cw="2"]').forEach((old) => old.replaceWith(lostCard()));
   }
   function place() {
     if (AX.role === 'creative' || !dash.data('crm_leads').data) return;
@@ -4177,7 +4185,8 @@ body.ax-noscroll { overflow: hidden; }
   }
   AX.courseWindows = { refresh };
   let t = null; new MutationObserver(() => { clearTimeout(t); t = setTimeout(place, 200); }).observe(document.body, { childList: true, subtree: true });
-  const r0 = AX.render; AX.render = function () { const out = r0.apply(this, arguments); setTimeout(refresh, 0); return out; };
+  // insert/refresh in the same frame as the page draws, so nothing jumps
+  const r0 = AX.render; AX.render = function () { const out = r0.apply(this, arguments); try { place(); refresh(); } catch (e) { console.error(e); } return out; };
 })();
 </script><script>
 // ---- Supabase loader: sign-in check, data fetch, targets, AI analysis ----
@@ -4303,7 +4312,7 @@ body.ax-noscroll { overflow: hidden; }
       const excluded = new Set(camps.filter((c) => c.programmes && c.programmes.in_reports === false).map((c) => c.campaign_id));
       const lastSpend = new Map(); ins.forEach((i) => { if (+i.spend > 0) lastSpend.set(i.campaign_id, i.date); });
       const today = new Date(Date.now() + 5.5 * 3600e3).toISOString().slice(0, 10), y2 = new Date(Date.now() + 5.5 * 3600e3 - 2 * 864e5).toISOString().slice(0, 10);
-      AX._excludedNote = (excluded.size ? excluded.size + ' campaign' + (excluded.size > 1 ? 's' : '') + ' outside admissions (e.g. hiring) and ' : '') + 'bulk-imported contact lists are left out of these figures.';
+      AX._excludedNote = 'Left out of these figures: bulk-data lists, phone-call sources (Inbound/Outbound Phone call)' + (excluded.size ? ' and ' + excluded.size + ' campaign' + (excluded.size > 1 ? 's' : '') + ' outside admissions (e.g. hiring)' : '') + '.';
       camps = camps.filter((c) => !excluded.has(c.campaign_id));
       ins = ins.filter((i) => !excluded.has(i.campaign_id));
       leads = leads.filter((x) => !excluded.has(x.campaign_id));
