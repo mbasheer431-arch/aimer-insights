@@ -309,6 +309,7 @@
         <option value="leadsquared">LeadSquared API keys</option>
         <option value="groq">AI analysis key (Groq)</option>
         <option value="openai">AI analysis key (OpenAI)</option>
+        <option value="gemini">AI analysis key (Google Gemini)</option>
       </select></label>
     <label class="f">Name <small>So you can tell connections apart, e.g. "Supermetrics – account 2"</small><input type="text" id="cLabel" required maxlength="80"></label>
     <label class="f" id="fAccounts">Meta ad account IDs <small>One or more, separated by commas. Find them in Ads Manager (act=…).</small><input type="text" id="cAccounts" placeholder="act_1234567890"></label>
@@ -323,7 +324,7 @@
     <details id="fAdvanced"><summary>Advanced settings</summary>
       <div class="stack" style="margin-top:12px">
         <label class="f" id="fGraph">Graph API version<input type="text" id="cGraph" placeholder="v23.0"></label>
-        <label class="f" id="fModel">AI model <small>Groq: openai/gpt-oss-120b · OpenAI: gpt-4o-mini</small><input type="text" id="cModel" placeholder="openai/gpt-oss-120b"></label>
+        <label class="f" id="fModel">AI model <small>Groq: openai/gpt-oss-120b · OpenAI: gpt-4o-mini · Gemini: gemini-3.8-flash (key from aistudio.google.com)</small><input type="text" id="cModel" placeholder="openai/gpt-oss-120b"></label>
         <label class="f" id="fMap">Supermetrics field mapping <small>Only change if a test shows the wrong columns. Keys stay the same; values are Supermetrics field IDs.</small><textarea id="cMap"></textarea></label>
       </div>
     </details>
@@ -360,8 +361,9 @@
   };
   const say = (el, text, kind) => { el.replaceChildren(text ? h('div', { class: 'msg ' + (kind || 'info'), text }) : ''); };
   const ist = (ts) => ts ? new Date(ts).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
-  const PROVIDER = { supermetrics: ['Supermetrics', 'sm'], meta_direct: ['Meta token', 'md'], leadsquared: ['LeadSquared', 'lsq'], groq: ['AI · Groq', 'md'], openai: ['AI · OpenAI', 'md'] };
-  const isAI = (p) => p === 'groq' || p === 'openai';
+  const PROVIDER = { supermetrics: ['Supermetrics', 'sm'], meta_direct: ['Meta token', 'md'], leadsquared: ['LeadSquared', 'lsq'], groq: ['AI · Groq', 'md'], openai: ['AI · OpenAI', 'md'], gemini: ['AI · Gemini', 'md'] };
+  const isAI = (p) => p === 'groq' || p === 'openai' || p === 'gemini';
+  const AI_DEFAULT = { groq: 'openai/gpt-oss-120b', openai: 'gpt-4o-mini', gemini: 'gemini-3.8-flash' };
   const STAFF = ['admin', 'marketing'];
   const SM_MAP = { date: 'Date', campaign_id: 'adcampaign_id', campaign_name: 'adcampaign_name', spend: 'cost', impressions: 'impressions', reach: 'reach', link_clicks: 'link_clicks', leads: 'onsite_conversion.lead_grouped' };
   let me = null, role = null, conns = [], editing = null, programmes = [];
@@ -515,6 +517,7 @@
   function syncDlgFields() {
     const p = $('cProvider').value;
     const lsq = p === 'leadsquared', ai = isAI(p);
+    if (ai && $('cModel')) $('cModel').placeholder = AI_DEFAULT[p] || '';
     $('fAccounts').hidden = lsq || ai; $('fKeySingle').hidden = lsq; $('fKeyLsq').hidden = !lsq;
     $('fAdvanced').hidden = lsq; $('fGraph').hidden = p !== 'meta_direct'; $('fMap').hidden = p !== 'supermetrics'; $('fModel').hidden = !ai;
     if (ai) $('fAdvanced').open = true;
@@ -552,7 +555,7 @@
       if (a || s) { if (!a || !s) return say($('dlgMsg'), 'Enter both the access key and the secret key.', 'bad'); secret = JSON.stringify({ access_key: a, secret_key: s }); }
     } else if (ai) {
       secret = $('cKey').value.trim() || null;
-      settings.model = $('cModel').value.trim() || (p === 'openai' ? 'gpt-4o-mini' : 'openai/gpt-oss-120b');
+      settings.model = $('cModel').value.trim() || AI_DEFAULT[p] || 'openai/gpt-oss-120b';
     } else {
       if (!accounts.length) return say($('dlgMsg'), 'Add at least one Meta ad account ID.', 'bad');
       secret = $('cKey').value.trim() || null;
