@@ -498,6 +498,70 @@ body.ax-noscroll { overflow: hidden; }
 .ax-filterbtn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line, rgba(13,15,14,.15)); background: #fff; color: var(--color-fg, #0d0f0e); border-radius: 999px; padding: 8px 14px; font: inherit; font-size: 13px; cursor: pointer; }
 .ax-filterbtn[aria-expanded="true"] { background: #0d0f0e; color: #fff; border-color: #0d0f0e; } .ax-filterbtn b { background: #12c784; color: #0d0f0e; border-radius: 999px; padding: 0 7px; font-size: 11px; }
 @media (max-width: 600px) { .ax-userbar { font-size: 12px; } .ax-userbar > span:first-child { flex-basis: 100%; } }
+.ax-mg-nav { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 14px; position: sticky; top: 0; z-index: 5; padding: 8px 0; background: var(--color-bg, #f6f8f7); }
+.ax-mg-sec { margin-bottom: 28px; scroll-margin-top: 60px; } .ax-mg-sec > * + * { margin-top: var(--cds-gap-md, 14px); }
+.ax-mg-h { display: flex; gap: 14px; align-items: flex-start; } .ax-mg-h h2 { margin: 0; font-size: 22px; } .ax-mg-h .ax-note { margin: 2px 0 0; }
+.ax-mg-letter { flex: none; width: 40px; height: 40px; border-radius: 12px; background: #0d0f0e; color: #dfe35a; display: grid; place-items: center; font-weight: 700; font-size: 20px; }
+.ax-mg-kpi { border-left: 4px solid transparent; } .ax-mg-kpi.is-ok { border-left-color: #12c784; } .ax-mg-kpi.is-bad { border-left-color: #e5534b; }
+.ax-mg-kpi .t .ok { color: #0a7a4c; font-weight: 600; } .ax-mg-kpi .t .bad { color: #b3261e; font-weight: 600; }
+.ax-mg-issues { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; margin-top: 8px; }
+.ax-mg-issue { border: 1px solid rgba(13,15,14,.1); border-left: 5px solid #e8b322; border-radius: 14px; padding: 12px 14px; background: #fff; font-size: 13.5px; }
+.ax-mg-issue.sev3 { border-left-color: #e5534b; } .ax-mg-issue.sev1 { border-left-color: #9aa31a; }
+.ax-mg-issue h4 { margin: 8px 0 6px; font-size: 15px; } .ax-mg-issue p { margin: 4px 0; line-height: 1.45; }
+.ax-mg-issue-top { display: flex; gap: 6px; flex-wrap: wrap; } .ax-mg-issue .ax-btn { margin-top: 8px; }
+.ax-mg-form { display: grid; gap: 10px; } .ax-mg-f { display: grid; gap: 4px; font-size: 13px; } .ax-mg-f > span { font-weight: 600; }
+.ax-mg-f textarea, .ax-mg-f input, .ax-mg-f select { font: inherit; font-size: 14px; border: 1px solid rgba(13,15,14,.18); border-radius: 10px; padding: 8px 10px; background: #fff; }
+.ax-pill.ax-live { background: #dff7ea; color: #0a6b43; font-weight: 600; }
+#cg-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+.ax-cg-group { grid-column: 1 / -1; margin-bottom: 10px; } .ax-cg-ghead { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; padding: 10px 2px 8px; border-bottom: 1px solid rgba(13,15,14,.1); margin-bottom: 10px; } .ax-cg-ghead b { font-size: 15px; }
+
+/* ---- grouped sidebar navigation ---- */
+.ax.ax-has-side #ax-nav { display: none !important; }
+.ax.ax-has-side .ax-canvas { display: grid; grid-template-columns: 228px minmax(0, 1fr); column-gap: 28px; align-items: start; }
+.ax.ax-has-side .ax-canvas > :not(.ax-side) { grid-column: 2; min-width: 0; }
+.ax-side { grid-column: 1; grid-row: 1 / span 60; position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow-y: auto; background: #0d0f0e; color: #fff; border-radius: 20px; padding: 18px 12px 22px; display: flex; flex-direction: column; gap: 18px; }
+.ax-side-brand { display: flex; align-items: center; gap: 10px; padding: 0 8px; font-size: 16px; } .ax-side-brand .ax-logo { flex: none; }
+.ax-side-group { display: flex; flex-direction: column; gap: 2px; }
+.ax-side-gl { font-size: 11px; letter-spacing: .08em; color: #a9b3ae; padding: 0 10px 6px; font-weight: 600; }
+.ax-side-item { color: #e8ece9; text-decoration: none; padding: 10px 12px; border-radius: 10px; font-size: 14px; line-height: 1.2; }
+.ax-side-item:hover { background: rgba(255,255,255,.08); color: #fff; }
+.ax-side-item.on { background: #dfe35a; color: #0d0f0e; font-weight: 600; }
+.ax-side-item:focus-visible { outline: 2px solid #12c784; outline-offset: 2px; }
+.ax.ax-has-side .ax-top .ax-logo, .ax.ax-has-side .ax-top .ax-bname1 { display: none; }
+.ax-subtabs { display: flex; flex-wrap: wrap; gap: 4px; background: #fff; border-radius: 999px; padding: 4px; width: max-content; max-width: 100%; margin: 0 0 12px; }
+.ax-subtabs[hidden] { display: none; }
+.ax-subtabs button { border: 0; background: transparent; border-radius: 999px; padding: 8px 14px; font: inherit; font-size: 13px; cursor: pointer; color: var(--color-fg-muted, #4a524e); }
+.ax-subtabs button.on { background: #0d0f0e; color: #fff; font-weight: 600; }
+@media (max-width: 900px) {
+  .ax.ax-has-side .ax-canvas { grid-template-columns: minmax(0, 1fr); }
+  .ax.ax-has-side .ax-canvas > :not(.ax-side) { grid-column: 1; }
+  .ax-side { grid-row: auto; position: static; max-height: none; flex-direction: row; overflow-x: auto; gap: 14px; padding: 10px; border-radius: 16px; margin-bottom: 12px; }
+  .ax-side-brand { display: none; } .ax-side-group { flex-direction: row; align-items: center; gap: 2px; flex: none; } .ax-side-gl { padding: 0 6px 0 4px; }
+  .ax-side-item { white-space: nowrap; padding: 8px 10px; }
+}
+@media print { .ax-side, .ax-subtabs { display: none !important; } .ax.ax-has-side .ax-canvas { display: block; } }
+.ax-mg-answer { margin: 4px 0 16px; } .ax-mg-answer-t { font-size: 28px; line-height: 1.25; font-weight: 700; margin: 6px 0 0; max-width: 980px; letter-spacing: -0.01em; }
+.ax-mg-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 22px; }
+@media (max-width: 760px) { .ax-mg-cards { grid-template-columns: minmax(0, 1fr); } .ax-mg-answer-t { font-size: 22px; } }
+.ax-mg-card { background: #fff; border-radius: 20px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+.ax-mg-card.v-bad { box-shadow: inset 0 0 0 2px #e5534b; }
+.ax-mg-card-h { display: flex; align-items: center; gap: 10px; } .ax-mg-card-h b { font-size: 17px; flex: 1; }
+.ax-mg-letter.sm { width: 30px; height: 30px; border-radius: 9px; font-size: 15px; }
+.ax-mg-verdict { font-size: 12px; font-weight: 600; border-radius: 999px; padding: 5px 10px; white-space: nowrap; }
+.ax-mg-verdict.ok { background: #dff7ea; color: #0a5a38; } .ax-mg-verdict.watch { background: #fff1d6; color: #7a4b00; } .ax-mg-verdict.bad { background: #fde4e2; color: #8f1f19; }
+.ax-mg-nums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.ax-mg-num .l { font-size: 12px; color: var(--color-fg-muted, #4a524e); } .ax-mg-num .v { font-size: 24px; font-weight: 700; line-height: 1.2; margin: 2px 0; }
+.ax-mg-num .t { font-size: 12px; color: var(--color-fg-muted, #4a524e); } .ax-mg-num .t.ok { color: #0a5a38; } .ax-mg-num .t.bad { color: #9a2a22; }
+.ax-mg-more { align-self: flex-start; background: none; border: 0; padding: 4px 0; font: inherit; font-size: 13px; font-weight: 600; color: #0a6b43; cursor: pointer; }
+.ax-mg-more:hover { text-decoration: underline; }
+.ax-ans { margin: 0 0 18px; display: flex; flex-direction: column; gap: 12px; }
+.ax-ans-t { font-size: 28px; line-height: 1.25; font-weight: 700; margin: 0; max-width: 980px; letter-spacing: -0.01em; }
+.ax-ans-tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; } .ax-ans-tiles.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 900px) { .ax-ans-tiles, .ax-ans-tiles.four { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ax-ans-t { font-size: 22px; } }
+.ax-ans-tile { background: #fff; border-radius: 18px; padding: 14px 16px; } .ax-ans-tile.is-bad { box-shadow: inset 0 0 0 2px #e5534b; } .ax-ans-tile.is-warn { box-shadow: inset 0 0 0 2px #e8b322; }
+.ax-ans-tile .l { font-size: 12px; color: var(--color-fg-muted, #4a524e); } .ax-ans-tile .v { font-size: 26px; font-weight: 700; line-height: 1.2; margin: 2px 0; }
+.ax-ans-tile .v.ok { color: #0a5a38; } .ax-ans-tile .v.bad { color: #9a2a22; } .ax-ans-tile .v.warn { color: #7a4b00; } .ax-ans-tile .t { font-size: 12px; color: var(--color-fg-muted, #4a524e); }
+.ax-mg-card, .ax-ans-tile { background: #f2f5f3; } .ax-subtabs { background: #f2f5f3; }
 </style>
 </head>
 <body>
@@ -508,6 +572,7 @@ body.ax-noscroll { overflow: hidden; }
     <div class="ax-brand"><span class="ax-logo" aria-hidden="true"><i></i></span><div><div class="ax-bname1">AIMER Insights</div><div class="ax-bsub" id="ax-asof" data-source="meta_daily">&nbsp;</div></div></div>
     <nav class="ax-tabs" id="ax-nav" aria-label="Dashboard sections">
       <button data-tab="overview"><span aria-hidden="true">◎</span> Overview</button>
+      <button data-tab="mgmt"><span aria-hidden="true">▣</span> Management review</button>
       <button data-tab="exec" hidden><span aria-hidden="true">★</span> My summary</button>
       <button data-tab="salesmgr"><span aria-hidden="true">◎</span> Sales manager</button>
       <button data-tab="explore"><span aria-hidden="true">⊞</span> Lead explorer</button>
@@ -588,6 +653,11 @@ body.ax-noscroll { overflow: hidden; }
           <p class="ax-note">Checked against the thresholds in Integrations &amp; settings.</p>
           <div class="ax-alerts" id="ov-alerts" data-source="meta_daily crm_leads campaigns"></div>
         </div>
+      </section>
+
+      <!-- Management review (A–E) -->
+      <section class="ax-page" id="mgmt" data-page="mgmt" hidden>
+        <div id="mgmt-body" data-source="meta_daily crm_leads"></div>
       </section>
 
       <!-- My summary (marketing head only) -->
@@ -3048,12 +3118,24 @@ body.ax-noscroll { overflow: hidden; }
       { rows: hrows, sort: { key: 'spend', dir: 'desc' }, pageSize: 50, exportName: 'aimer-creative-health-' + HW + 'd.csv' });
 
     // ---- Gallery ----
-    const G = (AX.ui.gal = AX.ui.gal || { sort: 'spend', fmt: 'all' });
-    const fmts = [...new Set(byAd.map((a) => a.fmt))];
-    AX.fill('cg-controls', seg('Sort', G.sort, [['spend', 'Spend'], ['leads', 'Leads'], ['cpl', 'Lowest CPL'], ['ctr', 'CTR']], (v) => (G.sort = v)),
-      seg('Format', G.fmt, [['all', 'All']].concat(fmts.map((f) => [f, f])), (v) => (G.fmt = v)));
-    const sorter = { spend: (a, b) => b.spend - a.spend, leads: (a, b) => b.leads - a.leads, cpl: (a, b) => (a.cpl ?? 1e12) - (b.cpl ?? 1e12), ctr: (a, b) => (b.ctr || 0) - (a.ctr || 0) }[G.sort];
-    const list = byAd.filter((a) => G.fmt === 'all' || a.fmt === G.fmt).sort(sorter).slice(0, 24);
+    const G = (AX.ui.gal = AX.ui.gal || { sort: 'action', fmt: 'all', run: 'running' });
+    if (!G.run) G.run = 'running';
+    // running now = spent today or yesterday, in a campaign that is still active
+    const live = new Set((dash.data('meta_ads').data || []).filter((r) => (r.date === D.asOf || r.date === AX.d.add(D.asOf, -1)) && Number(r.spend) > 0
+      && !/PAUSED|ARCHIVED|DELETED|COMPLETED|NOT_DELIVERING/i.test(String((D.cById.get(r.campaign_id) || {}).status || ''))).map((r) => r.ad_id));
+    byAd.forEach((a) => (a.live = live.has(a.id)));
+    const pool = G.run === 'running' ? byAd.filter((a) => a.live) : byAd;
+    const fmts = [...new Set(pool.map((a) => a.fmt))];
+    if (G.fmt !== 'all' && !fmts.includes(G.fmt)) G.fmt = 'all';
+    const liveCamps = new Set(byAd.filter((a) => a.live).map((a) => a.campaign));
+    AX.fill('cg-controls', seg('Show', G.run, [['running', '● Running now (' + byAd.filter((a) => a.live).length + ')'], ['all', 'All in period (' + byAd.length + ')']], (v) => (G.run = v)),
+      seg('Sort', G.sort, [['action', 'Needs action first'], ['spend', 'Spend'], ['leads', 'Leads'], ['cpl', 'Lowest CPL'], ['ctr', 'CTR']], (v) => (G.sort = v)),
+      seg('Format', G.fmt, [['all', 'All']].concat(fmts.map((f) => [f, f])), (v) => (G.fmt = v)),
+      h('p', { class: 'ax-note', style: { flexBasis: '100%', margin: '4px 0 0' }, text: G.run === 'running' ? byAd.filter((a) => a.live).length + ' ads running now in ' + liveCamps.size + ' campaign' + (liveCamps.size === 1 ? '' : 's') + ' (spent today or yesterday). Numbers on each card are for ' + per.label.toLowerCase() + '.' : 'Every ad that spent in ' + per.label.toLowerCase() + ', running or not.' }));
+    const RANK = { Poor: 0, Declining: 1, Watch: 2, Strong: 3, 'New · weak': 4, Good: 5, 'New · promising': 6, New: 7, 'Too early': 8, Stopped: 9 };
+    const rk = (a) => { const s = (health.get(a.id) || {}).status; return s in RANK ? RANK[s] : 10; };
+    const sorter = { action: (a, b) => rk(a) - rk(b) || b.spend - a.spend, spend: (a, b) => b.spend - a.spend, leads: (a, b) => b.leads - a.leads, cpl: (a, b) => (a.cpl ?? 1e12) - (b.cpl ?? 1e12), ctr: (a, b) => (b.ctr || 0) - (a.ctr || 0) }[G.sort];
+    const list = pool.filter((a) => G.fmt === 'all' || a.fmt === G.fmt).sort(sorter).slice(0, G.run === 'running' ? 60 : 24);
     const verdict = (a) => (a.objective !== 'Leads' ? ['Awareness/traffic', ''] : a.leads === 0 && a.spend >= 1500 ? ['No leads', 'bad'] : a.cpl != null && a.cpl <= tCpl * 0.8 && a.leads >= 5 ? ['Winner', 'ok'] : a.cpl != null && a.cpl > tCpl * 1.25 ? ['Over target', 'warn'] : ['On track', '']);
     const link = (href, text) => (href ? h('a', { class: 'ax-btn', href, target: '_blank', rel: 'noopener', text }) : null);
     AX.fill('cg-grid', list.length ? list.map((a) => {
@@ -3069,11 +3151,22 @@ body.ax-noscroll { overflow: hidden; }
           h('span', { class: 'ax-pill', style: { position: 'absolute', top: '8px', left: '8px' }, text: a.fmt }), h('span', { class: 'ax-pill ' + vc, style: { position: 'absolute', top: '8px', right: '8px' }, text: vt })),
         h('div', { class: 'ax-gname', title: a.name, text: a.name }), h('div', { class: 'ax-note', style: { margin: '0 0 6px' }, title: a.campaign, text: AX.shortName(a.campaign) }),
         a.c.title ? h('div', { class: 'ax-gcopy', text: '“' + String(a.c.title).slice(0, 80) + '”' }) : null,
-        h('div', { class: 'ax-gtags' }, (() => { const hh = health.get(a.id); return hh ? h('span', { class: 'ax-pill ' + (HCLS[hh.status] || ''), title: (hh.score != null ? 'Health ' + hh.score + '/100 · ' : '') + hh.outlook + ' · ' + hh.why.join(' · '), text: (hh.status === 'Strong' || hh.status === 'Good' ? '▲ ' : hh.status === 'Declining' || hh.status === 'Poor' ? '▼ ' : '') + hh.status + (hh.score != null ? ' ' + hh.score : '') }) : null; })(), h('span', { class: 'ax-pill', text: lang }), h('span', { class: 'ax-pill', text: a.days.size + ' days live' }), tired ? h('span', { class: 'ax-pill bad', title: 'CTR last 7 days vs the 7 before', text: 'Fatiguing ' + ctrCh.toFixed(0) + '% CTR' }) : null),
+        h('div', { class: 'ax-gtags' }, a.live ? h('span', { class: 'ax-pill ax-live', title: 'Spent today or yesterday', text: '● Live' }) : null, (() => { const hh = health.get(a.id); return hh ? h('span', { class: 'ax-pill ' + (HCLS[hh.status] || ''), title: (hh.score != null ? 'Health ' + hh.score + '/100 · ' : '') + hh.outlook + ' · ' + hh.why.join(' · '), text: (AX.creativeVerb ? AX.creativeVerb(hh.status) : hh.status) + (hh.score != null ? ' · ' + hh.score : '') }) : null; })(), h('span', { class: 'ax-pill', text: lang }), h('span', { class: 'ax-pill', text: a.days.size + ' days live' }), tired ? h('span', { class: 'ax-pill bad', title: 'CTR last 7 days vs the 7 before', text: 'Fatiguing ' + ctrCh.toFixed(0) + '% CTR' }) : null),
         h('div', { class: 'ax-gstats' }, kpis),
         h('button', { class: 'ax-btn ax-gtrend', onclick: () => openTrend(a, D), text: '📈 Daily trend' }),
         h('div', { class: 'ax-gbtns' }, link(a.c.preview_mobile_url, 'Preview'), link(a.c.preview_instagram_url, 'Instagram'), link(a.c.post_url_ig || a.c.post_url, 'Post'), link(a.c.link_url, 'Landing page')));
     }) : h('div', { class: 'ax-empty', text: cr.size ? 'No ads delivered in this period for these filters.' : 'Creative previews load with the next nightly sync.' }));
+
+    // Running now: group the cards by campaign (biggest spend first), each with its own summary line
+    if (G.run === 'running' && list.length) {
+      const grid = AX.$('cg-grid'), cards = [...grid.children], byCamp = new Map();
+      list.forEach((a, i) => { const k = a.campaign || 'Other'; if (!byCamp.has(k)) byCamp.set(k, []); if (cards[i]) byCamp.get(k).push([a, cards[i]]); });
+      const groups = [...byCamp].map(([k, xs]) => ({ k, xs, spend: d3.sum(xs, ([a]) => a.spend), leads: d3.sum(xs, ([a]) => a.leads), obj: xs[0][0].objective })).sort((x, y) => y.spend - x.spend);
+      grid.replaceChildren(...groups.map((g) => h('div', { class: 'ax-cg-group' },
+        h('div', { class: 'ax-cg-ghead' }, h('b', { text: g.k }), h('span', { class: 'ax-note', style: { margin: 0 }, text: g.xs.length + ' running ad' + (g.xs.length === 1 ? '' : 's') + ' · ' + F.inr(g.spend) + ' · ' + (g.obj === 'Leads' ? F.int(g.leads) + ' leads · CPL ' + F.inr(g.leads ? g.spend / g.leads : null) : g.obj.toLowerCase()) })),
+        h('div', { class: 'ax-ggrid' }, g.xs.map(([, el]) => el)))));
+      if (pool.length > list.length) grid.append(h('p', { class: 'ax-note', text: 'Showing the top ' + list.length + ' of ' + pool.length + ' running ads by ' + G.sort + '. Use Format or Sort to see others.' }));
+    }
 
     // ---- Format comparison ----
     const fr = [...AX.groupBy(byAd, (a) => a.fmt)].map(([f, rs]) => { const s = { fmt: f, ads: rs.length, spend: d3.sum(rs, (r) => r.spend), imp: d3.sum(rs, (r) => r.imp), lc: d3.sum(rs, (r) => r.lc), leads: d3.sum(rs, (r) => r.leads), vp: d3.sum(rs, (r) => r.vp), tp: d3.sum(rs, (r) => r.tp), lpv: d3.sum(rs, (r) => r.lpv) };
@@ -3739,7 +3832,7 @@ body.ax-noscroll { overflow: hidden; }
 // Main: navigation, data-state header, settings persistence, and the render loop.
 (function () {
   const AX = window.AX, h = AX.h;
-  const TABS = ['overview', 'exec', 'salesmgr', 'explore', 'lookup', 'plan', 'daily', 'campaigns', 'ads', 'creative', 'sales', 'cohorts', 'crm', 'programmes', 'budget', 'reports', 'settings'];
+  const TABS = ['overview', 'mgmt', 'exec', 'salesmgr', 'explore', 'lookup', 'plan', 'daily', 'campaigns', 'ads', 'creative', 'sales', 'cohorts', 'crm', 'programmes', 'budget', 'reports', 'settings'];
   const fromHash = location.hash.slice(1);
   AX.tab = TABS.includes(fromHash) ? fromHash : 'overview';
   AX.renderRev = 0;
@@ -3749,7 +3842,7 @@ body.ax-noscroll { overflow: hidden; }
   document.querySelectorAll('#ax [data-source]').forEach((el) => el.classList.add('dash-skeleton'));
 
   const nav = AX.$('ax-nav');
-  const TITLES = { overview: 'Overview', exec: 'My summary', lookup: 'Lead lookup', salesmgr: 'Sales manager', explore: 'Lead explorer', plan: 'Action plan', daily: 'Daily performance', campaigns: 'Campaign performance', ads: 'Ads Manager', creative: 'Creative & audience', sales: 'Sales team', cohorts: 'Cohorts & forecast', crm: 'Lead quality & CRM', programmes: 'Programme performance', budget: 'Budget & ROI', reports: 'Reports & export', settings: 'Integrations & settings' };
+  const TITLES = { overview: 'Overview', mgmt: 'Management review', exec: 'My summary', lookup: 'Lead lookup', salesmgr: 'Sales manager', explore: 'Lead explorer', plan: 'Action plan', daily: 'Daily performance', campaigns: 'Campaign performance', ads: 'Ads Manager', creative: 'Creative & audience', sales: 'Sales team', cohorts: 'Cohorts & forecast', crm: 'Lead quality & CRM', programmes: 'Programme performance', budget: 'Budget & ROI', reports: 'Reports & export', settings: 'Integrations & settings' };
   AX.TITLES = TITLES;
   nav.addEventListener('click', (e) => {
     const b = e.target.closest('button[data-tab]'); if (!b) return;
@@ -4188,6 +4281,410 @@ body.ax-noscroll { overflow: hidden; }
   // insert/refresh in the same frame as the page draws, so nothing jumps
   const r0 = AX.render; AX.render = function () { const out = r0.apply(this, arguments); try { place(); refresh(); } catch (e) { console.error(e); } return out; };
 })();
+</script><script>// Management review: five questions for leadership.
+//   A. Are we generating enough demand?   B. Are we generating the right leads?
+//   C. Is the admissions team converting? D. Are we spending the budget effectively?
+//   E. What action should management take? -> detected issues (what happened, likely reason, evidence, recommended
+//      action, owner, due date) that can be tracked as actions; each action re-measures its metric to show whether
+//      performance improved. Uses the dashboard period (vs the previous equal period), source chips and filters.
+(function () {
+  const AX = window.AX, h = AX.h, F = AX.fmt;
+  const st = { actions: null, loading: false, err: '', showClosed: false };
+  const pct = (v, d = 0) => (v == null || !isFinite(v) ? '—' : F.pct(v, d));
+  const div = (a, b) => (b ? a / b : null);
+  const median = (a) => { a = a.filter((x) => x != null && isFinite(x)).sort((x, y) => x - y); return a.length ? a[Math.floor(a.length / 2)] : null; };
+  const hrs = (v) => (v == null ? '—' : v < 1 ? Math.round(v * 60) + ' min' : v < 48 ? v.toFixed(1) + ' h' : (v / 24).toFixed(1) + ' days');
+  const INVALID = /invalid|wrong (no|num)|irrelevant|fake|not enquired|did ?n.?t enquire|test lead|spam|junk/i;
+  const canWrite = () => ['admin', 'marketing', 'counselling_lead'].includes(AX.role);
+  const sb = () => window.__aimerSb;
+
+  // ---------- one set of metrics for a window and scope ----------
+  function metrics(D, P, s, e, scope) {
+    const PP = Object.assign({}, P, scope && scope.programme ? { programme: scope.programme } : {});
+    const opts = { ignoreSource: !AX.srcList(PP).length };
+    const L = AX.leadsIn(D, PP, s, e, opts), Lall = AX.leadsIn(D, PP, s, e, Object.assign({ keepDup: true }, opts));
+    const meta = D.meta.filter((m) => m.date >= s && m.date <= e && AX.campOk(m.c, PP));
+    const spend = d3.sum(meta, (m) => m.spend), metaLeads = d3.sum(meta, (m) => m.leads);
+    const LM = L.filter((l) => l.source === 'Meta Ads'), now = Date.now();
+    const callable = L.filter((l) => l.createdTs != null && now - l.createdTs > 2 * 3600e3);
+    const waits = callable.filter((l) => l.firstCallTs != null).map((l) => (l.firstCallTs - l.createdTs) / 3600e3);
+    const cnt = (f, arr = L) => arr.filter(f).length;
+    const q = cnt((l) => l.qualified), booked = cnt((l) => l.booked), done = cnt((l) => l.done), applied = cnt((l) => l.applied), adm = cnt((l) => l.admitted), lost = L.filter((l) => l.lost);
+    const qM = cnt((l) => l.qualified, LM), admM = cnt((l) => l.admitted, LM);
+    return {
+      s, e, spend, metaLeads, crm: L.length, crmAll: Lall.length, crmMeta: LM.length, q, booked, done, applied, adm, lost: lost.length, L,
+      cpl: div(spend, metaLeads), cpql: div(spend, qM), cpa: div(spend, admM),
+      qRate: div(q * 100, L.length), invalidPct: div(cnt((l) => l.lost && INVALID.test(l.reason || '')) * 100, L.length), dupPct: div((Lall.length - L.length) * 100, Lall.length),
+      contactRate: div(cnt((l) => l.contacted || l.firstCallTs != null) * 100, L.length), connRate: div(cnt((l) => l.connected || (l.connCalls || 0) > 0) * 100, L.length),
+      bookRate: div(booked * 100, L.length), attendRate: div(done * 100, booked), applyRate: div(applied * 100, L.length), admRate: div(adm * 100, L.length),
+      lostPct: div(lost.length * 100, L.length), noReasonPct: div(lost.filter((l) => !l.reason).length * 100, lost.length),
+      w1: div(waits.filter((w) => w <= 1).length * 100, callable.length), avgResp: waits.length ? d3.mean(waits) : null, medResp: median(waits),
+      awaiting: cnt((l) => l.firstCallTs == null && !l.contacted && !l.lost && !l.admitted), awaitingOld: cnt((l) => l.firstCallTs == null && !l.contacted && !l.lost && !l.admitted && l.createdTs != null && now - l.createdTs > 864e5),
+      gapPct: metaLeads ? Math.max(0, ((metaLeads - LM.length) * 100) / metaLeads) : null, reasons: [...AX.groupBy(lost, (l) => l.reason || 'No reason recorded')].map(([k, v]) => [k, v.length]).sort((a, b) => b[1] - a[1]),
+    };
+  }
+
+  // metrics an action can track (better: 'up' or 'down')
+  const MET = {
+    cpl: ['Cost per lead', 'down', (m) => m.cpl, F.inr], cpql: ['Cost per qualified lead', 'down', (m) => m.cpql, F.inr], cpa: ['Cost per admission', 'down', (m) => m.cpa, F.inr],
+    qual_rate: ['Qualified-lead rate', 'up', (m) => m.qRate, (v) => pct(v, 1)], called_1h: ['Called within 1 hour', 'up', (m) => m.w1, (v) => pct(v)],
+    contact_rate: ['Contact rate', 'up', (m) => m.contactRate, (v) => pct(v)], conn_rate: ['Connected-lead rate', 'up', (m) => m.connRate, (v) => pct(v)],
+    attend_rate: ['Counselling attendance', 'up', (m) => m.attendRate, (v) => pct(v)], adm_rate: ['Admission conversion', 'up', (m) => m.admRate, (v) => pct(v, 2)],
+    invalid_pct: ['Invalid leads', 'down', (m) => m.invalidPct, (v) => pct(v, 1)], dup_pct: ['Duplicate leads', 'down', (m) => m.dupPct, (v) => pct(v, 1)],
+    no_reason: ['Lost leads without a reason', 'down', (m) => m.noReasonPct, (v) => pct(v)], awaiting: ['Leads awaiting first contact (24 h+)', 'down', (m) => m.awaitingOld, F.int],
+    meta_gap: ['Meta leads missing in CRM', 'down', (m) => m.gapPct, (v) => pct(v)], lost_pct: ['Lost leads', 'down', (m) => m.lostPct, (v) => pct(v)],
+    spend_pace: ['Budget pace (100% = on budget)', 'to100', () => null, (v) => pct(v)],
+  };
+
+  // ---------- issue detection: what happened, likely reason, evidence, action, owner, due ----------
+  function detect(D, P, cur, prev, per) {
+    const C = AX.config, T = C.thresholds || {}, out = [], due = (d) => AX.d.add(D.asOf, d), win = AX.d.nice(per.start) + ' – ' + AX.d.nice(per.end);
+    const add = (o) => out.push(Object.assign({ scope: {}, baseline: MET[o.key] ? MET[o.key][2](o.m || cur) : null }, o));
+    if (cur.w1 != null && cur.w1 < 60) add({ area: 'C', key: 'called_1h', sev: cur.w1 < 30 ? 3 : 2, title: 'Only ' + pct(cur.w1) + ' of new leads were called within 1 hour', reason: 'Leads wait in the queue: assignment or calling capacity can’t keep up with inflow (median first call ' + hrs(cur.medResp) + ').',
+      evidence: win + ': ' + pct(cur.w1) + ' within 1 h (target 60%); median first call ' + hrs(cur.medResp) + '; ' + F.int(cur.awaitingOld) + ' leads have waited over 24 h.', action: 'Auto-assign new leads within 15 minutes, start a WhatsApp auto-reply, and review the uncalled queue at 11 am and 4 pm daily.', owner: 'Sales manager', due: due(7) });
+    if (cur.awaitingOld >= 10) add({ area: 'C', key: 'awaiting', sev: cur.awaitingOld >= 30 ? 3 : 2, title: F.int(cur.awaitingOld) + ' leads have waited more than 24 hours without a first call', reason: 'Backlog not cleared; follow-up rules not enforced.', evidence: win + ': ' + F.int(cur.awaiting) + ' open leads never called, ' + F.int(cur.awaitingOld) + ' older than 24 h.', action: 'Clear the backlog today; redistribute these leads across counsellors with a same-day deadline.', owner: 'Sales manager', due: due(2) });
+    const tCpl = C.target_cpl; if (cur.cpl != null && cur.cpl > tCpl * 1.2 && cur.metaLeads >= 20) add({ area: 'D', key: 'cpl', sev: 2, title: 'Cost per lead ' + F.inr(cur.cpl) + ' is ' + Math.round((cur.cpl / tCpl - 1) * 100) + '% above target', reason: prev.cpl && cur.cpl > prev.cpl * 1.15 ? 'CPL rose ' + Math.round((cur.cpl / prev.cpl - 1) * 100) + '% vs the previous period: likely creative fatigue or audience saturation.' : 'Some campaigns run well above target CPL.',
+      evidence: win + ': ' + F.inr(cur.spend) + ' spent for ' + F.int(cur.metaLeads) + ' Meta leads (target ' + F.inr(tCpl) + '); previous period ' + F.inr(prev.cpl) + '.', action: 'Pause or refresh the most expensive campaigns (see Winners & flops), move budget to campaigns under target, and launch 2 new creatives.', owner: 'Marketing head', due: due(7) });
+    for (const p of C.programmes.filter((x) => x.target_cpl)) {
+      const m = metrics(D, P, per.start, per.end, { programme: p.name });
+      if (m.cpl != null && m.metaLeads >= 15 && m.cpl > p.target_cpl * 1.3) add({ area: 'D', key: 'cpl', scope: { programme: p.name }, m, sev: 2, title: p.name + ': cost per lead ' + F.inr(m.cpl) + ' vs target ' + F.inr(p.target_cpl), reason: 'Campaigns for this course are under-performing on cost.', evidence: win + ': ' + F.inr(m.spend) + ' for ' + F.int(m.metaLeads) + ' leads.', action: 'Review this course’s campaigns and creatives; shift budget to the best ad sets.', owner: 'Marketing head', due: due(7) });
+      if (m.crm >= 30 && m.qRate != null && m.qRate < (T.min_ql_rate || 22) / 2) add({ area: 'B', key: 'qual_rate', scope: { programme: p.name }, m, sev: 2, title: p.name + ': only ' + pct(m.qRate, 1) + ' of leads qualify', reason: 'Audience or form attracts people who aren’t a fit (age, qualification, location or budget).', evidence: win + ': ' + F.int(m.q) + ' qualified of ' + F.int(m.crm) + ' CRM leads.', action: 'Add a qualifying question to the lead form, tighten the audience, and compare loss reasons for this course.', owner: 'Marketing head', due: due(10) });
+    }
+    if (cur.crm >= 30 && cur.qRate != null && prev.qRate && cur.qRate < prev.qRate * 0.75) add({ area: 'B', key: 'qual_rate', sev: 2, title: 'Qualified-lead rate fell to ' + pct(cur.qRate, 1) + ' (from ' + pct(prev.qRate, 1) + ')', reason: 'Lead quality dropped: new campaigns or audiences may be attracting the wrong people, or leads are still being worked.', evidence: win + ': ' + F.int(cur.q) + ' qualified of ' + F.int(cur.crm) + '.', action: 'Check which campaigns changed (Lead quality page) and pause the ones with the lowest qualified rate.', owner: 'Marketing head', due: due(7) });
+    if (cur.lost >= 20 && cur.noReasonPct != null && cur.noReasonPct > 20) add({ area: 'C', key: 'no_reason', sev: 1, title: pct(cur.noReasonPct) + ' of lost leads have no loss reason', reason: 'The loss reason isn’t mandatory in LeadSquared, so it’s often skipped.', evidence: win + ': ' + F.int(Math.round((cur.noReasonPct * cur.lost) / 100)) + ' of ' + F.int(cur.lost) + ' lost leads without a reason.', action: 'Make “Loss reason” mandatory when a lead is marked Lost in LeadSquared.', owner: 'CRM admin', due: due(5) });
+    if (cur.gapPct != null && cur.metaLeads >= 20 && cur.gapPct > 10) add({ area: 'A', key: 'meta_gap', sev: 2, title: pct(cur.gapPct) + ' of Meta leads didn’t reach LeadSquared as Meta leads', reason: 'Website form not posting to LeadSquared, or leads saved without the campaign/source.', evidence: win + ': Meta reports ' + F.int(cur.metaLeads) + ' leads; LeadSquared has ' + F.int(cur.crmMeta) + ' Meta-source leads.', action: 'Check the website form → LeadSquared integration and the Meta Lead Ads connector; ask the AI analyst “which campaigns are missing leads?”.', owner: 'Marketing head', due: due(3) });
+    if (cur.booked >= 5 && cur.attendRate != null && cur.attendRate < (T.min_show_rate || 65)) add({ area: 'C', key: 'attend_rate', sev: 1, title: 'Only ' + pct(cur.attendRate) + ' of booked counselling sessions happened', reason: 'No-shows: reminders missing or slots booked too far ahead.', evidence: win + ': ' + F.int(cur.done) + ' completed of ' + F.int(cur.booked) + ' booked (target ' + (T.min_show_rate || 65) + '%).', action: 'Send WhatsApp reminders 24 h and 1 h before each session; book within 48 hours.', owner: 'Sales manager', due: due(7) });
+    if (cur.crmAll >= 30 && cur.dupPct != null && cur.dupPct > 15) add({ area: 'B', key: 'dup_pct', sev: 1, title: pct(cur.dupPct, 1) + ' of leads are duplicates', reason: 'The same people submit several forms, or several sources create the same lead.', evidence: win + ': ' + F.int(cur.crmAll - cur.crm) + ' duplicates of ' + F.int(cur.crmAll) + '.', action: 'Turn on duplicate detection by phone in LeadSquared and exclude existing leads from ad audiences.', owner: 'CRM admin', due: due(10) });
+    if (cur.crm >= 30 && cur.invalidPct != null && cur.invalidPct > 10) add({ area: 'B', key: 'invalid_pct', sev: 1, title: pct(cur.invalidPct, 1) + ' of leads are invalid', reason: 'Instant forms collect wrong numbers or people who didn’t mean to enquire.', evidence: win + ': loss reasons Invalid / Wrong number / Irrelevant.', action: 'Switch lead forms to “Higher intent” with a review step and phone verification.', owner: 'Marketing head', due: due(7) });
+    const pc = AX.pacing(D, P);
+    for (const r of pc.rows.filter((x) => x.budget && x.pace != null && (x.pace < 85 || x.pace > 115))) add({ area: 'D', key: 'spend_pace', scope: r.name === 'All programmes' ? {} : { programme: r.name }, sev: 1, baseline: r.pace,
+      title: r.name + ': spending ' + (r.pace > 100 ? 'ahead of' : 'behind') + ' budget (' + pct(r.pace) + ' pace)', reason: r.pace > 100 ? 'Daily budgets are set higher than the monthly plan.' : 'Campaigns paused or limited; budget not being used.', evidence: 'Month to date: ' + F.inr(r.spent) + ' of ' + F.inr(r.budget) + '; projected month-end ' + F.inr(r.proj) + '.', action: 'Adjust daily budgets to about ' + F.inr(r.need) + '/day to land on the monthly budget.', owner: 'Marketing head', due: due(3) });
+    return out.sort((a, b) => b.sev - a.sev);
+  }
+
+  // ---------- did it improve? ----------
+  function measure(D, P, a) {
+    const k = MET[a.metric_key]; if (!k) return { now: null, verdict: '—' };
+    if (a.metric_key === 'spend_pace') {  // budget pace is a month-to-date reading: improved = closer to 100%
+      const pc = AX.pacing(D, Object.assign({}, P, { programme: (a.scope && a.scope.programme) || null }));
+      const row = pc.rows.find((r) => r.name === ((a.scope && a.scope.programme) || 'All programmes')) || pc.rows[0];
+      const now = row ? row.pace : null, base = a.baseline_value == null ? null : Number(a.baseline_value);
+      if (now == null || base == null) return { now, verdict: 'No data yet', cls: '' };
+      const better = Math.abs(now - 100) < Math.abs(base - 100) - 5, worse = Math.abs(now - 100) > Math.abs(base - 100) + 5;
+      return { now, verdict: Math.abs(now - 100) <= 10 ? '✓ On pace now' : better ? '✓ Closer to budget' : worse ? '✗ Further from budget' : 'No clear change', cls: Math.abs(now - 100) <= 10 || better ? 'ok' : worse ? 'bad' : 'warn' };
+    }
+    const start = String(a.started_on).slice(0, 10), days = AX.d.diff(start, D.asOf) + 1;
+    if (days < 7) return { now: null, verdict: 'Measuring (' + days + ' of 7 days)', cls: '' };
+    const m = metrics(D, Object.assign({}, P, { programme: null, owner: null, lstatus: null, campaign: null }), start, D.asOf, a.scope || {});
+    const now = k[2](m), base = a.baseline_value == null ? null : Number(a.baseline_value);
+    if (now == null || base == null) return { now, verdict: now == null ? 'No data yet' : 'No baseline', cls: '' };
+    const ch = base ? ((now - base) / Math.abs(base)) * 100 : 0, good = k[1] === 'up' ? ch > 5 : ch < -5, bad = k[1] === 'up' ? ch < -5 : ch > 5;
+    return { now, ch, verdict: good ? '✓ Improved ' + Math.abs(ch).toFixed(0) + '%' : bad ? '✗ Worse ' + Math.abs(ch).toFixed(0) + '%' : 'No clear change', cls: good ? 'ok' : bad ? 'bad' : 'warn' };
+  }
+
+  // ---------- data access ----------
+  async function load() {
+    if (st.loading) return; st.loading = true;
+    const { data, error } = await sb().from('mgmt_actions').select('*').order('created_at', { ascending: false }).limit(300);
+    st.loading = false; st.err = error ? error.message : ''; st.actions = data || []; st.loadedAt = Date.now();
+    if (AX.tab === 'mgmt') AX.render();
+  }
+  async function save(row, id) {
+    const q = id ? sb().from('mgmt_actions').update(row).eq('id', id) : sb().from('mgmt_actions').insert(Object.assign({ created_by: window.__aimerUserId, created_by_email: window.__aimerUserEmail }, row));
+    const { error } = await q; if (error) throw new Error(error.message);
+    st.actions = null; await load();
+  }
+
+  // ---------- action form (in the side panel) ----------
+  function openForm(src, id) {
+    const D = AX.parse({ campaigns: dash.data('campaigns').data, meta: dash.data('meta_daily').data, leads: dash.data('crm_leads').data });
+    const owners = [...new Set(['Marketing head', 'Sales manager', 'CRM admin', 'Creative team', 'CEO'].concat(D.leads.map((l) => l.owner).filter((o) => o && o !== 'Unassigned')))];
+    const v = Object.assign({ area: 'C', metric_key: 'called_1h', title: '', reason: '', evidence: '', action: '', owner: 'Sales manager', due_date: AX.d.add(D.asOf, 7), status: 'open', scope: {}, result_note: '' }, src || {});
+    AX.drawer.open(id ? 'Edit action' : 'Track as an action', () => {
+      const f = {}; const fld = (k, label, el) => { f[k] = el; return h('label', { class: 'ax-mg-f' }, h('span', { text: label }), el); };
+      const ta = (k, rows) => { const t = h('textarea', { rows: rows || 3 }); t.value = v[k] || ''; return t; };
+      const inp = (k, type, attrs) => { const i = h('input', Object.assign({ type: type || 'text' }, attrs || {})); i.value = v[k] || ''; return i; };
+      const sel = (k, opts) => { const s = h('select', null, opts.map(([a, b]) => h('option', { value: a, text: b }))); s.value = v[k]; return s; };
+      const dl = h('datalist', { id: 'mg-owners' }, owners.map((o) => h('option', { value: o })));
+      const msg = h('p', { class: 'ax-note' });
+      const ro = !canWrite();
+      const form = h('div', { class: 'ax-card ax-mg-form' },
+        fld('area', 'Area', sel('area', [['A', 'A. Demand'], ['B', 'B. Lead quality'], ['C', 'C. Conversion'], ['D', 'D. Budget']])),
+        fld('metric_key', 'Metric to track', sel('metric_key', Object.entries(MET).map(([k, x]) => [k, x[0]]))),
+        fld('title', '1. What happened?', ta('title', 2)), fld('reason', '2. Likely reason', ta('reason', 2)), fld('evidence', '3. Evidence', ta('evidence', 3)),
+        fld('action', '4. Recommended action', ta('action', 3)), fld('owner', '5. Who is responsible?', inp('owner', 'text', { list: 'mg-owners' })), dl,
+        fld('due_date', '6. Complete by', inp('due_date', 'date')),
+        id ? fld('status', 'Status', sel('status', [['open', 'Open'], ['in_progress', 'In progress'], ['done', 'Done'], ['dropped', 'Dropped']])) : null,
+        id ? fld('result_note', '7. What changed? (notes)', ta('result_note', 2)) : null,
+        h('p', { class: 'ax-note', text: '7. “Did it improve?” is measured automatically: the same metric from the start date to today, compared with the baseline' + (v.baseline_value != null ? ' (' + (MET[v.metric_key] ? MET[v.metric_key][3](Number(v.baseline_value)) : v.baseline_value) + ')' : '') + '. Results show after 7 days.' }),
+        ro ? h('p', { class: 'ax-note', text: 'Your role can view actions but not change them.' }) : h('button', { class: 'ax-btn ax-xl', style: { background: '#0d0f0e', color: '#fff' }, onclick: async (e) => {
+          const row = { area: f.area.value, metric_key: f.metric_key.value, title: f.title.value.trim(), reason: f.reason.value.trim() || null, evidence: f.evidence.value.trim() || null, action: f.action.value.trim(), owner: f.owner.value.trim(), due_date: f.due_date.value };
+          if (f.status) row.status = f.status.value; if (f.result_note) row.result_note = f.result_note.value.trim() || null;
+          if (!id) Object.assign(row, { scope: v.scope || {}, baseline_value: v.baseline_value ?? null, baseline_from: v.baseline_from || null, baseline_to: v.baseline_to || null });
+          if (row.title.length < 3 || row.action.length < 3 || row.owner.length < 2 || !row.due_date) { msg.textContent = 'Fill in what happened, the action, the owner and the date.'; msg.className = 'bad'; return; }
+          e.currentTarget.disabled = true; msg.textContent = 'Saving…';
+          try { await save(row, id); AX.drawer.close(); } catch (err) { msg.textContent = 'Couldn’t save: ' + err.message; msg.className = 'bad'; e.currentTarget.disabled = false; }
+        } }, id ? 'Save changes' : 'Save action'), msg);
+      return [form];
+    }, id ? 'Action #' + id : 'Management review');
+  }
+
+  // ---------- page ----------
+  AX.mgmtReload = () => { st.actions = null; st.loadedAt = 0; return load(); };
+  AX.pages.mgmt = function (D) {
+    const P = AX.p(), per = AX.period(P, D.asOf), len = AX.d.diff(per.start, per.end) + 1, ps = AX.d.add(per.start, -len), pe = AX.d.add(per.start, -1);
+    const cur = metrics(D, P, per.start, per.end), prev = metrics(D, P, ps, pe), C = AX.config, T = C.thresholds || {};
+    // reload when opened again (at most once a minute), so colleagues' new actions appear
+    if (!st.loading && (st.actions === null || Date.now() - (st.loadedAt || 0) > 60000)) load();
+    const delta = (a, b, better) => { if (a == null || b == null || !b) return null; const c = ((a - b) / Math.abs(b)) * 100; return { c, good: better === 'up' ? c >= 0 : c <= 0 }; };
+    const tile = (label, val, fmt, prevVal, better, target, targetFmt, okFn) => {
+      const d = delta(val, prevVal, better), status = okFn ? okFn(val) : null;
+      return h('div', { class: 'ax-kpi ax-mg-kpi ' + (status === true ? 'is-ok' : status === false ? 'is-bad' : '') },
+        h('div', { class: 'l', text: label }), h('div', { class: 'v', text: val == null ? '—' : fmt(val) }),
+        h('div', { class: 't' }, d ? h('span', { class: d.good ? 'ok' : 'bad', text: (d.c >= 0 ? '▲ ' : '▼ ') + Math.abs(d.c).toFixed(0) + '% ' }) : null, d ? 'vs previous' : prevVal == null ? '' : 'prev ' + fmt(prevVal)),
+        target != null ? h('div', { class: 't', text: 'Target ' + (targetFmt || fmt)(target) }) : null);
+    };
+    const sec = (letter, q, sub, ...kids) => h('section', { class: 'ax-mg-sec', id: 'mg-' + letter }, h('div', { class: 'ax-mg-h' }, h('span', { class: 'ax-mg-letter', text: letter }), h('div', null, h('h2', { text: q }), h('p', { class: 'ax-note', text: sub }))), ...kids);
+    const tbl = (cols, rows, sort) => { const b = h('div'); AX.table(b, cols, { rows, sort: sort || null, search: false, colFilters: false, pageSize: 12 }); return b; };
+    const card = (title, ...kids) => h('div', { class: 'ax-card' }, h('h3', { text: title }), ...kids);
+    // every programme that has spend or leads in the period, plus any with a budget (so none silently disappears)
+    const progs = [...new Set(C.programmes.filter((x) => x.budget || x.target_cpl).map((x) => x.name)
+      .concat(D.meta.filter((m) => m.date >= per.start && m.date <= per.end && m.c && m.c.programme && m.c.inReports !== false).map((m) => m.c.programme))
+      .concat(cur.L.map((l) => l.programme).filter(Boolean)))].filter((x) => !P.programme || x === P.programme);
+    const byProg = progs.map((name) => { const m = metrics(D, P, per.start, per.end, { programme: name }); const cfg = AX.progCfg(name) || {}; return { name, ...m, tCpl: cfg.target_cpl, tCpa: cfg.target_cpa }; });
+
+    // A — demand
+    const ms = AX.d.monthStart(D.asOf), mtd = metrics(D, P, ms, D.asOf), dim = AX.d.diff(ms, AX.d.monthEnd(D.asOf)) + 1, done = AX.d.diff(ms, D.asOf) + 1;
+    const leadTarget = d3.sum(C.programmes.filter((p) => p.budget && p.target_cpl && (!P.programme || p.name === P.programme)), (p) => p.budget / p.target_cpl);
+    const expected = leadTarget ? (leadTarget * done) / dim : null;
+    const campRows = AX.campaignRows(D, P, per.start, per.end).filter((r) => r.spend > 0).map((r) => ({ name: r.name, programme: r.programme || 'Unmapped', spend: r.spend, leads: r.leads, cpl: r.cpl, crm: r.crm, q: r.qualified, cpq: r.qualified ? r.spend / r.qualified : null }));
+    const locRows = [...AX.groupBy(D.meta.filter((m) => m.date >= per.start && m.date <= per.end && AX.campOk(m.c, P)), (m) => (m.c && m.c.location) || 'Unknown')].map(([k, rs]) => {
+      const sp = d3.sum(rs, (m) => m.spend), le = d3.sum(rs, (m) => m.leads), ls = cur.L.filter((l) => (l.c ? l.c.location : l.location) === k);
+      return { k, spend: sp, leads: le, cpl: div(sp, le), crm: ls.length, q: ls.filter((l) => l.qualified).length, qRate: div(ls.filter((l) => l.qualified).length * 100, ls.length) }; });
+    const A = sec('A', 'Are we generating enough demand?', per.label + ' vs the previous ' + len + ' days · ' + AX.srcLabel(P),
+      h('div', { class: 'ax-kpis' }, tile('Marketing spend (Meta)', cur.spend, F.inr, prev.spend, 'up'), tile('Meta leads', cur.metaLeads, F.int, prev.metaLeads, 'up'), tile('Unique CRM leads', cur.crm, F.int, prev.crm, 'up'),
+        tile('Cost per lead', cur.cpl, F.inr, prev.cpl, 'down', C.target_cpl, null, (v) => v == null ? null : v <= C.target_cpl), tile('Cost per qualified lead', cur.cpql, F.inr, prev.cpql, 'down', C.target_cpql, null, (v) => v == null ? null : v <= C.target_cpql),
+        h('div', { class: 'ax-kpi ax-mg-kpi ' + (expected && mtd.crm >= expected * 0.9 ? 'is-ok' : expected ? 'is-bad' : '') }, h('div', { class: 'l', text: 'Leads this month vs target' }), h('div', { class: 'v', text: F.int(mtd.crm) + (leadTarget ? ' / ' + F.int(leadTarget) : '') }),
+          h('div', { class: 't', text: expected ? 'Expected by today: ' + F.int(expected) + ' (' + pct((mtd.crm * 100) / expected) + ')' : 'Set budgets and target CPL to get a lead target' }), h('div', { class: 't', text: 'Target = budget ÷ target CPL, per programme' }))),
+      h('div', { class: 'ax-grid' },
+        card('By programme', tbl([{ key: 'name', label: 'Programme' }, { key: 'spend', label: 'Spend', num: true, fmt: F.inr }, { key: 'metaLeads', label: 'Meta leads', num: true, fmt: F.int }, { key: 'crm', label: 'CRM leads', num: true, fmt: F.int },
+          { key: 'cpl', label: 'CPL', num: true, fmt: F.inr, cls: (r) => (r.cpl == null || !r.tCpl ? '' : r.cpl <= r.tCpl ? 'ok' : 'bad') }, { key: 'cpql', label: 'Cost / qualified', num: true, fmt: F.inr }], byProg, { key: 'spend', dir: 'desc' })),
+        card('By location', tbl([{ key: 'k', label: 'Location' }, { key: 'spend', label: 'Spend', num: true, fmt: F.inr }, { key: 'leads', label: 'Meta leads', num: true, fmt: F.int }, { key: 'cpl', label: 'CPL', num: true, fmt: F.inr }, { key: 'crm', label: 'CRM leads', num: true, fmt: F.int }, { key: 'qRate', label: 'Qualified %', num: true, fmt: (v) => pct(v, 1) }], locRows, { key: 'spend', dir: 'desc' }))),
+      card('By campaign (top 12 by spend)', tbl([{ key: 'name', label: 'Campaign' }, { key: 'programme', label: 'Programme' }, { key: 'spend', label: 'Spend', num: true, fmt: F.inr }, { key: 'leads', label: 'Meta leads', num: true, fmt: F.int }, { key: 'cpl', label: 'CPL', num: true, fmt: F.inr },
+        { key: 'crm', label: 'CRM leads', num: true, fmt: F.int }, { key: 'q', label: 'Qualified', num: true, fmt: F.int }, { key: 'cpq', label: 'Cost / qualified', num: true, fmt: F.inr }], campRows, { key: 'spend', dir: 'desc' })));
+
+    // B — right leads
+    const qualCamp = campRows.filter((r) => r.crm >= 5).map((r) => { const ls = cur.L.filter((l) => l.c && l.c.name === r.name); return Object.assign({}, r, { qRate: div(r.q * 100, r.crm), invalid: div(ls.filter((l) => l.lost && INVALID.test(l.reason || '')).length * 100, ls.length), conn: div(ls.filter((l) => l.connected || (l.connCalls || 0) > 0).length * 100, ls.length) }); });
+    const B = sec('B', 'Are we generating the right leads?', 'Quality of the ' + F.int(cur.crm) + ' unique CRM leads created in the period',
+      h('div', { class: 'ax-kpis' }, tile('Qualified-lead rate', cur.qRate, (v) => pct(v, 1), prev.qRate, 'up', C.target_ql_rate, (v) => v + '%', (v) => v == null ? null : v >= (T.min_ql_rate || 22)),
+        tile('Invalid leads', cur.invalidPct, (v) => pct(v, 1), prev.invalidPct, 'down', null, null, (v) => v == null ? null : v <= 10), tile('Duplicate leads', cur.dupPct, (v) => pct(v, 1), prev.dupPct, 'down', null, null, (v) => v == null ? null : v <= 15),
+        tile('Connected leads', cur.connRate, (v) => pct(v), prev.connRate, 'up'), tile('Counselling booking rate', cur.bookRate, (v) => pct(v, 1), prev.bookRate, 'up'),
+        tile('Counselling attendance', cur.attendRate, (v) => pct(v), prev.attendRate, 'up', T.min_show_rate || 65, (v) => v + '%', (v) => v == null ? null : v >= (T.min_show_rate || 65)), tile('Cost per qualified lead', cur.cpql, F.inr, prev.cpql, 'down', C.target_cpql)),
+      card('Lead quality by campaign (5+ CRM leads)', tbl([{ key: 'name', label: 'Campaign' }, { key: 'crm', label: 'CRM leads', num: true, fmt: F.int }, { key: 'qRate', label: 'Qualified %', num: true, fmt: (v) => pct(v, 1), cls: (r) => (r.qRate == null ? '' : r.qRate >= 10 ? 'ok' : r.qRate < 3 ? 'bad' : 'warn') },
+        { key: 'conn', label: 'Connected %', num: true, fmt: (v) => pct(v) }, { key: 'invalid', label: 'Invalid %', num: true, fmt: (v) => pct(v, 1) }, { key: 'cpq', label: 'Cost / qualified', num: true, fmt: F.inr }], qualCamp, { key: 'crm', dir: 'desc' })),
+      h('p', { class: 'ax-note', text: 'Invalid = lost with reasons like Invalid, Wrong number or Irrelevant. Quality by location is in section A. Quality by creative needs the lead’s ad or ad set stored in the CRM (LeadSquared has “Ad Set Name”; syncing it is the next step).' }));
+
+    // C — conversion
+    const team = [...AX.groupBy(cur.L, (l) => l.owner || 'Unassigned')].map(([o, ls]) => { const now = Date.now(), c = ls.filter((l) => l.createdTs != null && now - l.createdTs > 2 * 3600e3), w = c.filter((l) => l.firstCallTs != null).map((l) => (l.firstCallTs - l.createdTs) / 3600e3);
+      return { o, n: ls.length, w1: div(w.filter((x) => x <= 1).length * 100, c.length), avg: w.length ? d3.mean(w) : null, contact: div(ls.filter((l) => l.contacted || l.firstCallTs != null).length * 100, ls.length), q: ls.filter((l) => l.qualified).length, b: ls.filter((l) => l.booked).length, d: ls.filter((l) => l.done).length, a: ls.filter((l) => l.admitted).length, lost: div(ls.filter((l) => l.lost).length * 100, ls.length) }; }).filter((r) => r.n >= 3);
+    const Cs = sec('C', 'Is the admissions team converting leads?', 'Follow-up and conversion of leads created in the period',
+      h('div', { class: 'ax-kpis' }, tile('New leads awaiting contact', cur.awaiting, F.int, null, 'down', null, null, (v) => v <= 10), tile('Average first response', cur.avgResp, hrs, prev.avgResp, 'down', 1, () => '1 h', (v) => v == null ? null : v <= 1),
+        tile('Called within 1 hour', cur.w1, (v) => pct(v), prev.w1, 'up', 60, (v) => v + '%', (v) => v == null ? null : v >= 60), tile('Contact rate', cur.contactRate, (v) => pct(v), prev.contactRate, 'up'),
+        h('div', { class: 'ax-kpi ax-mg-kpi' }, h('div', { class: 'l', text: 'Counselling booked → completed' }), h('div', { class: 'v', text: F.int(cur.booked) + ' → ' + F.int(cur.done) }), h('div', { class: 't', text: cur.booked ? pct((cur.done * 100) / cur.booked) + ' attended' : '' })),
+        tile('Application rate', cur.applyRate, (v) => pct(v, 1), prev.applyRate, 'up'), tile('Admission conversion', cur.admRate, (v) => pct(v, 2), prev.admRate, 'up', C.target_adm_conv, (v) => v + '%', (v) => v == null ? null : v >= C.target_adm_conv),
+        tile('Lost leads', cur.lostPct, (v) => pct(v), prev.lostPct, 'down')),
+      h('div', { class: 'ax-grid' },
+        card('Top loss reasons', tbl([{ key: 'k', label: 'Reason' }, { key: 'n', label: 'Lost leads', num: true, fmt: F.int }, { key: 'sh', label: 'Share', num: true, fmt: (v) => pct(v) }], cur.reasons.slice(0, 8).map(([k, n]) => ({ k, n, sh: (n * 100) / Math.max(1, cur.lost) })))),
+        card('Counsellor-wise performance', tbl([{ key: 'o', label: 'Counsellor' }, { key: 'n', label: 'Leads', num: true, fmt: F.int }, { key: 'w1', label: 'Called <1 h', num: true, fmt: (v) => pct(v), cls: (r) => (r.w1 == null ? '' : r.w1 >= 60 ? 'ok' : r.w1 >= 30 ? 'warn' : 'bad') },
+          { key: 'avg', label: 'Avg first response', num: true, fmt: hrs }, { key: 'q', label: 'Qualified', num: true, fmt: F.int }, { key: 'b', label: 'Booked', num: true, fmt: F.int }, { key: 'd', label: 'Attended', num: true, fmt: F.int }, { key: 'a', label: 'Admitted', num: true, fmt: F.int }, { key: 'lost', label: 'Lost %', num: true, fmt: (v) => pct(v) }], team, { key: 'n', dir: 'desc' }))));
+
+    // D — budget
+    const pc = AX.pacing(D, P), tot = pc.rows.find((r) => r.name === 'All programmes') || null;
+    const Dsec = sec('D', 'Are we spending the budget effectively?', 'This month: day ' + pc.done + ' of ' + pc.dim + ' · costs for the selected period',
+      h('div', { class: 'ax-kpis' }, tot ? tile('Budget vs actual (month to date)', tot.spent, F.inr, null, null, tot.budget, F.inr, () => tot.pace >= 90 && tot.pace <= 110) : null,
+        tot ? tile('Forecast month-end spend', tot.proj, F.inr, null, null, tot.budget, F.inr, () => tot.pace >= 90 && tot.pace <= 110) : null,
+        tile('Cost per lead', cur.cpl, F.inr, prev.cpl, 'down', C.target_cpl, null, (v) => v == null ? null : v <= C.target_cpl), tile('Cost per qualified lead', cur.cpql, F.inr, prev.cpql, 'down', C.target_cpql, null, (v) => v == null ? null : v <= C.target_cpql),
+        tile('Cost per admission', cur.cpa, F.inr, prev.cpa, 'down', C.target_cpa, null, (v) => v == null ? null : v <= C.target_cpa),
+        h('div', { class: 'ax-kpi ax-mg-kpi' }, h('div', { class: 'l', text: 'Collected revenue and ROAS' }), h('div', { class: 'v', text: '—' }), h('div', { class: 't', text: 'Unavailable: LeadSquared “Fees Paid” isn’t synced yet' }))),
+      card('Budget pacing and cost by programme', tbl([{ key: 'name', label: 'Programme' }, { key: 'budget', label: 'Monthly budget', num: true, fmt: F.inr }, { key: 'spent', label: 'Spent (MTD)', num: true, fmt: F.inr }, { key: 'proj', label: 'Forecast month-end', num: true, fmt: F.inr },
+        { key: 'status', label: 'Pace', cls: (r) => (r.status === 'On pace' ? 'ok' : r.status === 'Over pace' ? 'bad' : 'warn') }, { key: 'cpl', label: 'CPL (period)', num: true, fmt: F.inr, cls: (r) => (r.cpl == null || !r.tCpl ? '' : r.cpl <= r.tCpl ? 'ok' : 'bad') }, { key: 'tCpl', label: 'Target CPL', num: true, fmt: F.inr },
+        { key: 'cpa', label: 'Cost / admission', num: true, fmt: F.inr }], pc.rows.map((r) => { const b = byProg.find((x) => x.name === r.name) || (r.name === 'All programmes' ? Object.assign({ tCpl: C.target_cpl }, cur) : {}); return Object.assign({}, r, { cpl: b.cpl, tCpl: b.tCpl, cpa: b.cpa }); }))));
+
+    // E — actions
+    const issues = detect(D, P, cur, prev, per);
+    const tracked = new Set((st.actions || []).filter((a) => a.status === 'open' || a.status === 'in_progress').map((a) => a.metric_key + '|' + JSON.stringify(a.scope || {})));
+    const issueCard = (it) => h('div', { class: 'ax-mg-issue sev' + it.sev },
+      h('div', { class: 'ax-mg-issue-top' }, h('span', { class: 'ax-pill', text: it.area + ' · ' + (MET[it.key] ? MET[it.key][0] : it.key) }), tracked.has(it.key + '|' + JSON.stringify(it.scope)) ? h('span', { class: 'ax-pill ok', text: 'Being tracked' }) : null),
+      h('h4', { text: '1. ' + it.title }), h('p', null, h('b', { text: '2. Likely reason: ' }), it.reason), h('p', null, h('b', { text: '3. Evidence: ' }), it.evidence), h('p', null, h('b', { text: '4. Recommended action: ' }), it.action),
+      h('p', { class: 'ax-note', text: '5. Suggested owner: ' + it.owner + ' · 6. Suggested deadline: ' + AX.d.nice(it.due) }),
+      canWrite() && !tracked.has(it.key + '|' + JSON.stringify(it.scope)) ? h('button', { class: 'ax-btn', onclick: () => openForm({ area: it.area, metric_key: it.key, title: it.title, reason: it.reason, evidence: it.evidence, action: it.action, owner: it.owner, due_date: it.due, scope: it.scope, baseline_value: it.baseline, baseline_from: per.start, baseline_to: per.end }) }, '＋ Track as action') : null);
+    const acts = (st.actions || []).filter((a) => st.showClosed || a.status === 'open' || a.status === 'in_progress');
+    const actRows = acts.map((a) => { const m = measure(D, P, a), k = MET[a.metric_key]; return { id: a.id, area: a.area, title: a.title, action: a.action, owner: a.owner, due: a.due_date, status: a.status, base: a.baseline_value == null ? null : Number(a.baseline_value), now: m.now, verdict: m.verdict, vcls: m.cls, fmt: k ? k[3] : String, overdue: (a.status === 'open' || a.status === 'in_progress') && a.due_date < D.asOf, raw: a }; });
+    const STL = { open: 'Open', in_progress: 'In progress', done: 'Done', dropped: 'Dropped' };
+    const actBox = h('div');
+    AX.table(actBox, [{ key: 'area', label: 'Area' }, { key: 'title', label: 'What happened' }, { key: 'action', label: 'Action' }, { key: 'owner', label: 'Owner' },
+      { key: 'due', label: 'Due', fmt: (v) => AX.d.nice(v), cls: (r) => (r.overdue ? 'bad' : '') }, { key: 'status', label: 'Status', fmt: (v) => STL[v] || v, cls: (r) => (r.status === 'done' ? 'ok' : r.status === 'dropped' ? '' : r.overdue ? 'bad' : 'warn') },
+      { key: 'base', label: 'Baseline', num: true, fmt: (v, r) => (v == null ? '—' : r.fmt(v)) }, { key: 'now', label: 'Since start', num: true, fmt: (v, r) => (v == null ? '—' : r.fmt(v)) }, { key: 'verdict', label: '7. Did it improve?', cls: (r) => r.vcls || '' }],
+      { rows: actRows, rowKey: 'id', onRow: (r) => openForm(r.raw, r.id), sort: { key: 'due', dir: 'asc' }, search: false, pageSize: 20 });
+    const open = (st.actions || []).filter((a) => a.status === 'open' || a.status === 'in_progress'), overdue = open.filter((a) => a.due_date < D.asOf).length;
+    const E = sec('E', 'What action should management take?', 'Issues found in this period, and the actions being tracked',
+      h('div', { class: 'ax-card' }, h('div', { class: 'ax-chead' }, h('h3', { text: 'Issues needing a decision (' + issues.length + ')' }), canWrite() ? h('button', { class: 'ax-btn', onclick: () => openForm({ due_date: AX.d.add(D.asOf, 7) }) }, '＋ New action') : null),
+        issues.length ? h('div', { class: 'ax-mg-issues' }, issues.map(issueCard)) : h('p', { class: 'ax-note', text: 'No significant issues detected for this period and filters.' })),
+      h('div', { class: 'ax-card' }, h('div', { class: 'ax-chead' }, h('h3', { text: 'Action tracker · ' + open.length + ' open' + (overdue ? ', ' + overdue + ' overdue' : '') }),
+          h('label', { class: 'ax-flabel', style: { display: 'inline-flex', gap: '6px', alignItems: 'center' } }, (() => { const c = h('input', { type: 'checkbox' }); c.checked = st.showClosed; c.addEventListener('change', () => { st.showClosed = c.checked; AX.render(); }); return c; })(), 'Show done and dropped')),
+        st.err ? h('p', { class: 'bad', text: 'Couldn’t load actions: ' + st.err }) : st.actions === null ? h('p', { class: 'ax-note', text: 'Loading actions…' }) : acts.length ? actBox : h('p', { class: 'ax-note', text: 'No actions yet. Use “Track as action” on an issue above, or “New action”.' }),
+        h('p', { class: 'ax-note', text: '“Did it improve?” compares the same metric from the action’s start date to today with its baseline (results after 7 days; ±5% counts as no clear change). Click a row to update status or add notes.' })));
+
+    // ---------- answer first: verdict cards for A–D, details one click away ----------
+    st.open = st.open || {};
+    const ratio = expected ? mtd.crm / expected : null, minQ = T.min_ql_rate || 22;
+    const V = { ok: ['On track', 'ok'], watch: ['Watch', 'watch'], bad: ['Needs action', 'bad'] };
+    const vA = (ratio != null && ratio < 0.7) ? 'bad' : ((ratio == null || ratio >= 0.9) && (cur.cpl == null || cur.cpl <= C.target_cpl)) ? 'ok' : 'watch';
+    const vB = (cur.qRate != null && cur.qRate < minQ / 2) ? 'bad' : ((cur.qRate == null || cur.qRate >= minQ) && (cur.cpql == null || cur.cpql <= C.target_cpql)) ? 'ok' : 'watch';
+    const vC = ((cur.w1 != null && cur.w1 < 30) || cur.awaitingOld > 20) ? 'bad' : ((cur.w1 == null || cur.w1 >= 60) && cur.awaitingOld <= 10) ? 'ok' : 'watch';
+    const vD = tot && tot.pace != null ? ((tot.pace < 70 || tot.pace > 130) ? 'bad' : (tot.pace >= 90 && tot.pace <= 110 && (cur.cpa == null || cur.cpa <= C.target_cpa)) ? 'ok' : 'watch') : 'watch';
+    const num = (label, value, sub, cls) => h('div', { class: 'ax-mg-num' }, h('div', { class: 'l', text: label }), h('div', { class: 'v', text: value }), h('div', { class: 't ' + (cls || ''), text: sub }));
+    const ok = (c) => (c ? 'ok' : 'bad');
+    const cardsDef = [
+      ['A', 'Enough demand?', vA, [num('Leads vs plan', F.int(mtd.crm), expected ? pct((mtd.crm * 100) / expected) + ' of expected by today' : 'this month', expected ? ok(mtd.crm >= expected * 0.9) : ''), num('Spend', F.inr(cur.spend), tot ? 'month: ' + F.inr(tot.spent) + ' of ' + F.inr(tot.budget) : per.label), num('Cost per lead', cur.cpl == null ? '—' : F.inr(cur.cpl), 'target ' + F.inr(C.target_cpl), cur.cpl == null ? '' : ok(cur.cpl <= C.target_cpl))], A],
+      ['B', 'Right leads?', vB, [num('Qualified rate', pct(cur.qRate, 1), 'minimum ' + minQ + '%', cur.qRate == null ? '' : ok(cur.qRate >= minQ)), num('Cost per qualified', cur.cpql == null ? '—' : F.inr(cur.cpql), 'target ' + F.inr(C.target_cpql), cur.cpql == null ? '' : ok(cur.cpql <= C.target_cpql)), num('Duplicates', pct(cur.dupPct, 1), 'under 15%', cur.dupPct == null ? '' : ok(cur.dupPct <= 15))], B],
+      ['C', 'Team converting?', vC, [num('Called within 1 h', pct(cur.w1), 'target 60%', cur.w1 == null ? '' : ok(cur.w1 >= 60)), num('Awaiting first call', F.int(cur.awaiting), F.int(cur.awaitingOld) + ' over 24 h', ok(cur.awaitingOld <= 10)), num('Admissions', F.int(mtd.adm), 'this month · target ' + F.int(C.monthly_admission_target || 0))], Cs],
+      ['D', 'Budget effective?', vD, [num('Forecast month-end', tot ? F.inr(tot.proj) : '—', tot ? pct(tot.pace) + ' pace · budget ' + F.inr(tot.budget) : 'no budget set', tot ? ok(tot.pace >= 90 && tot.pace <= 110) : ''), num('Cost per admission', cur.cpa == null ? '—' : F.inr(cur.cpa), 'target ' + F.inr(C.target_cpa), cur.cpa == null ? '' : ok(cur.cpa <= C.target_cpa)), num('ROAS', '—', 'needs Fees Paid synced')], Dsec]];
+    // the one-sentence answer
+    const bad = cardsDef.filter((c) => c[2] === 'bad').map((c) => c[0]), watch = cardsDef.filter((c) => c[2] === 'watch').map((c) => c[0]);
+    const demand = (vA === 'ok' ? 'Demand is on plan' : vA === 'bad' ? 'Demand is behind plan' : 'Demand needs watching') + (cur.cpl != null ? ' and leads cost ' + F.inr(cur.cpl) + ' (target ' + F.inr(C.target_cpl) + ')' : '');
+    const why = { B: 'lead quality is the concern: only ' + pct(cur.qRate, 1) + ' of leads qualify', C: 'conversion is the bottleneck: only ' + pct(cur.w1) + ' of new leads are called within an hour', D: 'the budget is off pace (' + (tot ? pct(tot.pace) : '—') + ' of plan by today)', A: 'lead volume is below plan' };
+    const focus = bad.filter((x) => x !== 'A')[0] || watch.filter((x) => x !== 'A')[0];
+    const answer = bad.length + watch.length === 0 ? 'All four areas are on track for ' + per.label.toLowerCase() + '.' : demand + (focus ? (bad.includes(focus) ? ' — but ' : '; watch ') + why[focus] + '.' : '.');
+    const cards = h('div', { class: 'ax-mg-cards' }, cardsDef.map(([L, q, v, nums]) => h('div', { class: 'ax-mg-card v-' + V[v][1] },
+      h('div', { class: 'ax-mg-card-h' }, h('span', { class: 'ax-mg-letter sm', text: L }), h('b', { text: q }), h('span', { class: 'ax-mg-verdict ' + V[v][1], text: V[v][0] })),
+      h('div', { class: 'ax-mg-nums' }, nums),
+      h('button', { class: 'ax-mg-more', 'aria-expanded': st.open[L] ? 'true' : 'false', onclick: () => { st.open[L] = !st.open[L]; AX.render(); setTimeout(() => { const el = document.getElementById('mg-' + L); if (st.open[L] && el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 30); } }, st.open[L] ? 'Hide details' : 'Show details'))));
+    cardsDef.forEach(([L, , , , node]) => { node.hidden = !st.open[L]; });
+    const head = h('div', { class: 'ax-mg-answer' }, h('div', { class: 'ax-eyebrow', text: 'MANAGEMENT REVIEW · ' + per.label.toUpperCase() + ' · ' + AX.srcLabel(P).toUpperCase() }), h('p', { class: 'ax-mg-answer-t', text: answer }));
+    AX.fill('mgmt-body', head, cards, E, A, B, Cs, Dsec);
+  };
+})();
+</script><script>// Grouped navigation: a left sidebar with 4 groups and 10 pages. Pages that were merged appear as sub-tabs inside
+// their new parent (e.g. Campaigns · Daily · Ads Manager). The original tab buttons (#ax-nav) stay in the page,
+// hidden, as the engine: role rules still remove them, and the sidebar only shows what a role is allowed to open.
+(function () {
+  const AX = window.AX, h = AX.h;
+  const GROUPS = [
+    ['Results', [['Management review', [['mgmt', 'Review'], ['overview', 'Detailed overview'], ['plan', 'Action plan']]], ['My summary', [['exec', 'My summary']]]]],
+    ['Marketing', [['Campaigns', [['campaigns', 'Campaigns'], ['daily', 'Daily'], ['ads', 'Ads Manager']]], ['Creatives', [['creative', 'Creatives']]], ['Budget', [['budget', 'Budget'], ['programmes', 'Programmes']]]]],
+    ['Admissions', [['Sales manager', [['salesmgr', 'Overview'], ['sales', 'Live queue and team']]], ['Lead explorer', [['explore', 'Explorer'], ['crm', 'Lead quality'], ['cohorts', 'Cohorts and forecast']]], ['Lead lookup', [['lookup', 'Lead lookup']]]]],
+    ['Tools', [['Reports and export', [['reports', 'Reports and export']]], ['Settings', [['settings', 'Settings']]]]],
+  ];
+  // the sales manager sees Admissions first
+  const orderFor = (role) => (role === 'counselling_lead' ? [2, 0, 1, 3] : [0, 1, 2, 3]);
+  const avail = (tab) => { const b = document.querySelector('#ax-nav button[data-tab="' + tab + '"]'); return !!b && !b.hidden; };
+  const go = (tab) => { const b = document.querySelector('#ax-nav button[data-tab="' + tab + '"]'); if (b) b.click(); };
+  const itemOf = (tab) => { for (const [, items] of GROUPS) for (const it of items) if (it[1].some(([t]) => t === tab)) return it; return null; };
+
+  let side = null, sub = null, sig = '';
+  function build() {
+    const canvas = document.querySelector('#ax .ax-canvas'); if (!canvas) return;
+    if (!side) {
+      side = h('nav', { class: 'ax-side', id: 'ax-side', 'aria-label': 'Main' });
+      canvas.prepend(side);
+      document.getElementById('ax').classList.add('ax-has-side');
+      sub = h('div', { class: 'ax-subtabs', id: 'ax-subtabs', role: 'tablist', 'aria-label': 'Sections of this page' });
+      const tb = document.querySelector('.ax-titlebar'); if (tb) tb.after(sub);
+    }
+    const s = orderFor(AX.role).join() + '|' + GROUPS.flatMap(([, it]) => it.flatMap(([, ts]) => ts.map(([t]) => t + (avail(t) ? 1 : 0)))).join();
+    if (s !== sig) {
+      sig = s;
+      side.replaceChildren(h('div', { class: 'ax-side-brand' }, h('span', { class: 'ax-logo', 'aria-hidden': 'true' }, h('i')), h('b', { text: 'AIMER Insights' })),
+        ...orderFor(AX.role).map((gi) => { const [g, items] = GROUPS[gi]; const vis = items.filter(([, ts]) => ts.some(([t]) => avail(t)));
+          return vis.length ? h('div', { class: 'ax-side-group' }, h('div', { class: 'ax-side-gl', text: g.toUpperCase() }),
+            vis.map(([label, ts]) => { const first = ts.find(([t]) => avail(t))[0];
+              return h('a', { href: '#' + first, class: 'ax-side-item', 'data-tabs': ts.map(([t]) => t).join(' '), onclick: (e) => { e.preventDefault(); go(first); } }, label); })) : null; }));
+    }
+    // highlight + sub-tabs for the current page
+    side.querySelectorAll('.ax-side-item').forEach((a) => { const on = a.dataset.tabs.split(' ').includes(AX.tab); a.classList.toggle('on', on); if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+    const it = itemOf(AX.tab), tabs = it ? it[1].filter(([t]) => avail(t)) : [];
+    sub.hidden = tabs.length < 2;
+    if (tabs.length >= 2) sub.replaceChildren(...tabs.map(([t, l]) => h('button', { role: 'tab', 'aria-selected': t === AX.tab ? 'true' : 'false', class: t === AX.tab ? 'on' : '', onclick: () => go(t) }, l)));
+    // page title: parent name, with the sub-section when not on the main one
+    const pt = document.getElementById('ax-ptitle');
+    if (pt && it) { const cur = it[1].find(([t]) => t === AX.tab); pt.textContent = it[0] + (cur && cur[0] !== it[1][0][0] ? ' · ' + cur[1] : ''); }
+  }
+  // follow the address: old links (#crm, #daily…) and the browser's Back button open the right page
+  window.addEventListener('hashchange', () => { const t = location.hash.slice(1); if (t && t !== AX.tab && avail(t)) go(t); });
+  AX.nav2 = { build, GROUPS };
+  const r0 = AX.render; AX.render = function () { const out = r0.apply(this, arguments); try { build(); } catch (e) { console.error(e); } return out; };
+})();
+</script><script>// Answer-first headers: one sentence, 4–5 key numbers and the most urgent list, at the top of
+//   Sales manager -> leads waiting for a first call ("Call these now"), call speed, qualified, admissions
+//   Creatives     -> running ads, which to scale / refresh / pause, best format
+(function () {
+  const AX = window.AX, h = AX.h, F = AX.fmt;
+  const pct = (v) => (v == null || !isFinite(v) ? '—' : F.pct(v, 0));
+  const hrs = (v) => (v == null ? '—' : v < 1 ? Math.round(v * 60) + ' min' : v < 48 ? v.toFixed(1) + ' h' : (v / 24).toFixed(1) + ' days');
+  const median = (a) => { a = a.filter((x) => x != null && isFinite(x)).sort((x, y) => x - y); return a.length ? a[Math.floor(a.length / 2)] : null; };
+  const tile = (label, value, sub, cls, strong) => h('div', { class: 'ax-ans-tile' + (strong ? ' ' + strong : '') }, h('div', { class: 'l', text: label }), h('div', { class: 'v ' + (cls || ''), text: value }), sub ? h('div', { class: 't', text: sub }) : null);
+  const parse = () => AX.parse({ campaigns: dash.data('campaigns').data, meta: dash.data('meta_daily').data, leads: dash.data('crm_leads').data });
+
+  // ---------- Sales manager ----------
+  function salesBlock() {
+    const D = parse(), P = AX.p(), today = D.asOf, now = Date.now(), opts = { ignoreSource: !AX.srcList(P).length };
+    const recent = AX.leadsIn(D, P, AX.d.add(today, -29), today, opts);
+    const waiting = recent.filter((l) => l.firstCallTs == null && !l.contacted && !l.lost && !l.admitted).sort((a, b) => (a.createdTs || 0) - (b.createdTs || 0));
+    const over24 = waiting.filter((l) => l.createdTs != null && now - l.createdTs > 864e5);
+    const wk = AX.leadsIn(D, P, AX.d.add(today, -6), today, opts), callable = wk.filter((l) => l.createdTs != null && now - l.createdTs > 2 * 3600e3);
+    const waits = callable.filter((l) => l.firstCallTs != null).map((l) => (l.firstCallTs - l.createdTs) / 3600e3);
+    const w1 = callable.length ? (waits.filter((x) => x <= 1).length * 100) / callable.length : null;
+    const q7 = D.leads.filter((l) => l.qualified && l.qualified >= AX.d.add(today, -6) && AX.leadOk(l, P, opts)).length, q7p = D.leads.filter((l) => l.qualified && l.qualified >= AX.d.add(today, -13) && l.qualified <= AX.d.add(today, -7) && AX.leadOk(l, P, opts)).length;
+    const adm = D.leads.filter((l) => l.admitted && l.admitted >= AX.d.monthStart(today) && AX.leadOk(l, P, opts)).length, admT = AX.config.monthly_admission_target || 0;
+    const answer = waiting.length ? F.int(waiting.length) + ' lead' + (waiting.length === 1 ? ' is' : 's are') + ' waiting for a first call' + (over24.length ? ' — ' + F.int(over24.length) + ' of them for over a day' : '') + '. Clear these before anything else.'
+      : 'No leads are waiting for a first call. ' + (w1 != null ? pct(w1) + ' of this week’s leads were called within an hour.' : '');
+    const rows = waiting.slice(0, 8).map((l) => ({ id: l.id, wait: (now - l.createdTs) / 3600e3, course: l.programme || '—', source: l.source, owner: l.owner || 'Unassigned' }));
+    const box = h('div');
+    AX.table(box, [{ key: 'id', label: 'LeadSquared ID' }, { key: 'wait', label: 'Waiting', num: true, fmt: hrs, cls: (r) => (r.wait > 24 ? 'bad' : r.wait > 1 ? 'warn' : 'ok') }, { key: 'course', label: 'Course' }, { key: 'source', label: 'Source' }, { key: 'owner', label: 'Owner' }],
+      { rows, rowKey: 'id', onRow: (r) => AX.openLeadPanel && AX.openLeadPanel(r.id), sort: null, search: false, colFilters: false, pageSize: 8 });
+    return h('div', { class: 'ax-ans', id: 'sm-answer' },
+      h('div', { class: 'ax-eyebrow', text: 'SALES MANAGER · TODAY · ' + AX.srcLabel(P).toUpperCase() }), h('p', { class: 'ax-ans-t', text: answer }),
+      h('div', { class: 'ax-ans-tiles' }, tile('Awaiting first call', F.int(waiting.length), F.int(over24.length) + ' over 24 h', waiting.length > 10 ? 'bad' : '', over24.length > 10 ? 'is-bad' : ''),
+        tile('Called within 1 h', pct(w1), 'last 7 days · target 60%', w1 == null ? '' : w1 >= 60 ? 'ok' : 'bad'), tile('Median first call', hrs(median(waits)), 'last 7 days'),
+        tile('Qualified this week', F.int(q7), (q7 >= q7p ? 'up ' : 'down ') + Math.abs(q7 - q7p) + ' vs last week', q7 >= q7p ? 'ok' : 'bad'), tile('Admissions this month', F.int(adm), admT ? 'target ' + F.int(admT) : '')),
+      waiting.length ? h('div', { class: 'ax-card' }, h('div', { class: 'ax-chead' }, h('h3', { text: 'Call these now · oldest first' }),
+          waiting.length > 8 ? h('button', { class: 'ax-btn', onclick: () => AX.drawer.open('Waiting for a first call (' + waiting.length + ')', () => [h('div', { class: 'ax-card' }, AX.leadTable(waiting))], 'Last 30 days · ' + AX.srcLabel(P)) }, 'See all ' + F.int(waiting.length)) : null), box) : null);
+  }
+
+  // ---------- Creatives ----------
+  const VERB = { Strong: 'Scale', Good: 'Keep', Watch: 'Refresh soon', Declining: 'Refresh', Poor: 'Pause', 'New · promising': 'New · promising', New: 'New', 'New · weak': 'New · weak', 'Too early': 'Too early', Stopped: 'Stopped' };
+  AX.creativeVerb = (status) => VERB[status] || status;
+  const fmtOf = (t) => (/VIDEO/i.test(t || '') ? 'Video' : /PHOTO|IMAGE/i.test(t || '') ? 'Image' : /CAROUSEL|MULTI/i.test(t || '') ? 'Carousel' : 'Link / dynamic');
+  function creativeBlock() {
+    const D = parse(), P = AX.p(), today = D.asOf, yest = AX.d.add(today, -1);
+    const ads = (dash.data('meta_ads').data || []).filter((r) => AX.campOk(D.cById.get(r.campaign_id), P));
+    const live = new Set(ads.filter((r) => (r.date === today || r.date === yest) && Number(r.spend) > 0 && !/PAUSED|ARCHIVED|DELETED|COMPLETED|NOT_DELIVERING/i.test(String((D.cById.get(r.campaign_id) || {}).status || ''))).map((r) => r.ad_id));
+    const liveCamps = new Set(ads.filter((r) => live.has(r.ad_id)).map((r) => r.campaign_id));
+    let health = new Map(); try { health = AX.creativeHealth(D, P, AX.ui.healthW || 14); } catch (_) {}
+    const st = (id) => (health.get(id) || {}).status;
+    const ids = [...live];
+    const scale = ids.filter((id) => st(id) === 'Strong'), refresh = ids.filter((id) => ['Declining', 'Watch'].includes(st(id))), pause = ids.filter((id) => st(id) === 'Poor');
+    const cr = new Map((dash.data('creatives').data || []).map((c) => [c.ad_id, c]));
+    const since = AX.d.add(today, -13), byFmt = new Map();
+    for (const r of ads) { if (!live.has(r.ad_id) || r.date < since) continue; const camp = D.cById.get(r.campaign_id); if (camp && camp.objective !== 'Leads') continue; const f = fmtOf((cr.get(r.ad_id) || {}).object_type); const x = byFmt.get(f) || { s: 0, l: 0 }; x.s += Number(r.spend) || 0; x.l += Number(r.leads) || 0; byFmt.set(f, x); }
+    const fm = [...byFmt].filter(([, x]) => x.l >= 5).map(([f, x]) => [f, x.s / x.l]).sort((a, b) => a[1] - b[1]);
+    const best = fm.length >= 2 ? fm[0][0] + ' · CPL ' + Math.round((1 - fm[0][1] / fm[1][1]) * 100) + '% lower than ' + fm[1][0].toLowerCase() : fm.length === 1 ? fm[0][0] : '—';
+    const parts = []; if (refresh.length) parts.push(refresh.length + ' need' + (refresh.length === 1 ? 's' : '') + ' a refresh'); if (pause.length) parts.push(pause.length + ' should be paused'); if (scale.length) parts.push(scale.length + ' should get more budget');
+    const answer = live.size ? F.int(live.size) + ' ad' + (live.size === 1 ? ' is' : 's are') + ' running in ' + liveCamps.size + ' campaign' + (liveCamps.size === 1 ? '' : 's') + '. ' + (parts.length ? parts.join(', ').replace(/, ([^,]*)$/, ' and $1') + '.' : 'None needs action right now.') : 'No ads spent money today or yesterday.';
+    return h('div', { class: 'ax-ans', id: 'cr-answer' },
+      h('div', { class: 'ax-eyebrow', text: 'CREATIVES · RUNNING NOW · HEALTH OVER ' + (AX.ui.healthW || 14) + ' DAYS' }), h('p', { class: 'ax-ans-t', text: answer }),
+      h('div', { class: 'ax-ans-tiles four' }, tile('Running now', F.int(live.size) + ' ads', liveCamps.size + ' campaigns'), tile('Scale these', F.int(scale.length), 'cheap leads, holding up', scale.length ? 'ok' : ''),
+        tile('Refresh this week', F.int(refresh.length + pause.length), refresh.length + ' tiring' + (pause.length ? ', ' + pause.length + ' to pause' : ''), refresh.length + pause.length ? 'warn' : '', refresh.length + pause.length ? 'is-warn' : ''), tile('Best format', best.split(' · ')[0], best.split(' · ')[1] || 'last 14 days, running lead ads')));
+  }
+
+  function place() {
+    const t = AX.tab;
+    if (t === 'salesmgr' && AX.role !== 'creative') { const pg = document.getElementById('salesmgr'); if (pg && dash.data('crm_leads').data) { const old = pg.querySelector('#sm-answer'), nb = salesBlock(); if (old) old.replaceWith(nb); else pg.prepend(nb); } }
+    if (t === 'creative') { const pg = document.getElementById('creative'); if (pg && dash.data('meta_ads').data) { const old = pg.querySelector('#cr-answer'), nb = creativeBlock(); if (old) old.replaceWith(nb); else pg.prepend(nb); } }
+  }
+  const r0 = AX.render; AX.render = function () { const out = r0.apply(this, arguments); try { place(); } catch (e) { console.error(e); } return out; };
+})();
 </script><script>
 // ---- Supabase loader: sign-in check, data fetch, targets, AI analysis ----
 (async function () {
@@ -4212,6 +4709,7 @@ body.ax-noscroll { overflow: hidden; }
   const { data: sess } = await sb.auth.getSession();
   if (!sess.session) { hop('index.html?next=dashboard'); return; }
   const me = sess.session.user;
+  window.__aimerUserId = me.id; window.__aimerUserEmail = me.email;
   // finish account setup first (invite opened but password never saved, or a temporary password).
   // Checked against FRESH account details from the server, and never more than once a minute, so it can't loop.
   if (me.user_metadata?.needs_password || me.user_metadata?.must_change_password) {
@@ -4228,11 +4726,13 @@ body.ax-noscroll { overflow: hidden; }
   if (!role) { await sb.auth.signOut(); hop('index.html'); return; }
   // Pages each role may open (data itself is also restricted in the database)
   const ROLE_TABS = {
-    creative: ['creative', 'plan', 'ads', 'campaigns', 'daily'],
+    creative: ['creative', 'ads', 'campaigns', 'daily'],
     product_manager: ['overview', 'plan', 'explore', 'daily', 'campaigns', 'ads', 'creative', 'cohorts', 'crm', 'programmes', 'budget', 'reports'],
   };
   AX.role = role;
-  if (role === 'counselling_lead' && !location.hash) AX.tab = 'salesmgr';
+  // each role opens on its own home page (a link with #page still opens that page)
+  const HOME = { admin: 'mgmt', marketing: 'mgmt', viewer: 'mgmt', counselling_lead: 'salesmgr', creative: 'creative', product_manager: 'explore' };
+  if (!location.hash && HOME[role]) AX.tab = HOME[role];
   // Lead lookup (live contact details): admin, marketing and counselling lead only
   if (!['admin', 'marketing', 'counselling_lead'].includes(role)) { const lb = document.querySelector('#ax-nav [data-tab="lookup"]'); if (lb) lb.remove(); AX.noLookup = true; }
   AX.leadLookup = async (body) => { const { data, error } = await sb.functions.invoke('lead-lookup', { body }); if (error) { let m = error.message; try { m = (await error.context.json()).error || m; } catch (_) {} throw new Error(m); } return data; };
