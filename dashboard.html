@@ -612,6 +612,7 @@ body.ax-noscroll { overflow: hidden; }
 .dk-journey { display: grid; grid-template-columns: auto repeat(5, minmax(0, 1fr)) auto; gap: 10px; align-items: stretch; } .dk-jt { font-weight: 800; font-size: 16px; align-self: center; max-width: 90px; line-height: 1.2; }
 .dk-jstep { background: #eef3ff; border-radius: 14px; padding: 10px 12px; position: relative; } .dk-jv { font-size: clamp(22px, 2.3vw, 32px); font-weight: 800; } .dk-jk { font-size: 13px; font-weight: 600; color: #34405a; } .dk-jp { font-size: 12px; color: #5b6576; }
 .dk-jcost { align-self: center; font-size: 15px; font-weight: 700; background: #0b1220; color: #fff; border-radius: 14px; padding: 12px 14px; max-width: 150px; }
+.dk-table tr.dk-total td { font-weight: 800; border-top: 2px solid #d5dbe3; }
 .dk-course { margin-top: 14px; } .dk-ctitle { font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #5b6576; margin-bottom: 4px; } .dk-course .dk-table { font-size: 14px; } .dk-course .dk-table td, .dk-course .dk-table th { padding: 6px 10px; }
 .dk-table { width: 100%; border-collapse: collapse; font-size: 15px; } .dk-table th { text-align: left; font-size: 12.5px; color: #5b6576; font-weight: 700; padding: 8px 10px; border-bottom: 2px solid #e3e8ee; }
 .dk-table td { padding: 9px 10px; border-bottom: 1px solid #eef1f4; } .dk-table .num { text-align: right; font-variant-numeric: tabular-nums; }
@@ -4941,6 +4942,31 @@ body.ax-noscroll { overflow: hidden; }
     const byOwner = [...AX.groupBy(cur.L, (l) => l.owner || 'Unassigned')].map(([k, ls]) => ({ k, n: ls.length, hot: ls.filter(isHot).length })).filter((x) => x.n >= 10 && x.k !== 'Unassigned' && x.k !== 'System');
     const bestOwner = byOwner.filter((x) => x.hot >= 2).sort((a, b) => b.hot / b.n - a.hot / a.n)[0];
     if (bestOwner) wins.push({ head: bestOwner.k + ' converts best', body: F.int(bestOwner.hot) + ' hot from ' + F.int(bestOwner.n) + ' leads (' + pct((bestOwner.hot * 100) / bestOwner.n, 0) + ')', tag: 'Team' });
+    // Admissions: which course and which lead source each confirmed admission came from
+    {
+      const adm = D.leads.filter((l) => l.admitted && l.admitted >= per.start && l.admitted <= per.end && AX.leadOk(l, P, { ignoreSource: true }));
+      const admPrev = D.leads.filter((l) => l.admitted && l.admitted >= per.prevStart && l.admitted <= per.prevEnd && AX.leadOk(l, P, { ignoreSource: true })).length;
+      const courseOf = (l) => l.programme || 'Course not set';
+      const srcOf = (l) => (l.source === 'Unknown' || !l.source ? 'Source not set' : l.source);
+      const srcs = [...AX.groupBy(adm, srcOf)].map(([k, v]) => [k, v.length]).sort((a, b) => b[1] - a[1]).map((x) => x[0]);
+      const courses = [...AX.groupBy(adm, courseOf)].map(([k, v]) => [k, v.length]).sort((a, b) => b[1] - a[1]).map((x) => x[0]);
+      const cnt = (f) => adm.filter(f).length;
+      const old = cnt((l) => l.createdTs != null && l.createdTs < Date.parse(per.start + 'T00:00:00+05:30'));
+      const dAdm = chg(adm.length, admPrev);
+      const sayA = adm.length
+        ? F.int(adm.length) + ' admission' + (adm.length === 1 ? '' : 's') + ' confirmed' + (dAdm == null ? '' : Math.abs(dAdm) < 1 ? ', the same as the ' + prevTxt : ', ' + (dAdm >= 0 ? 'up ' : 'down ') + Math.abs(dAdm).toFixed(0) + '% on the ' + prevTxt) + '. Most came from ' + courses[0] + ' (' + cnt((l) => courseOf(l) === courses[0]) + ') and ' + srcs[0] + ' (' + cnt((l) => srcOf(l) === srcs[0]) + ').'
+        : 'No admissions were confirmed in this period.';
+      const td = (t, cls) => h('td', { class: cls || '', text: t });
+      const matrix = adm.length ? h('table', { class: 'dk-table' }, h('thead', null, h('tr', null, [h('th', { text: 'Course' })].concat(srcs.map((x) => h('th', { class: 'num', text: x })), [h('th', { class: 'num', text: 'Total' })]))),
+        h('tbody', null, courses.map((c) => h('tr', null, [td(c)].concat(srcs.map((x) => td(cnt((l) => courseOf(l) === c && srcOf(l) === x) || '–', 'num')), [td(String(cnt((l) => courseOf(l) === c)), 'num')]))),
+          h('tr', { class: 'dk-total' }, [td('Total')].concat(srcs.map((x) => td(String(cnt((l) => srcOf(l) === x)), 'num')), [td(String(adm.length), 'num')])))) : null;
+      const list = adm.length ? h('div', { class: 'dk-course' }, h('div', { class: 'dk-ctitle', text: 'Each admission' }),
+        h('table', { class: 'dk-table' }, h('thead', null, h('tr', null, ['Admitted', 'Course', 'Source', 'Campaign', 'Counsellor', 'Lead created'].map((t) => h('th', { text: t })))),
+          h('tbody', null, adm.slice().sort((a, b) => (a.admitted < b.admitted ? 1 : -1)).slice(0, 12).map((l) => h('tr', null, td(AX.d.short(l.admitted)), td(courseOf(l)), td(srcOf(l) + (l.sourceRaw && l.sourceRaw !== l.source ? ' · ' + l.sourceRaw : '')), td(l.c ? AX.shortName(l.c.name) : l.campRaw ? AX.shortName(l.campRaw) : '—'), td(l.owner || 'Unassigned'), td(l.date ? AX.d.short(l.date) : '—')))))) : null;
+      out.push({ title: 'Admissions', kicker: per.label + ' · ' + team + ' · by course and lead source', body: [h('p', { class: 'dk-say', text: sayA }), matrix, list,
+        adm.length > 12 ? h('p', { class: 'dk-note', text: 'Showing the latest 12 of ' + adm.length + ' admissions.' }) : null], foot: 'Admissions are counted on the day the admission was confirmed, whenever the lead was created' + (old ? ' (' + old + ' of these leads were created before ' + AX.d.short(per.start) + ')' : '') + '. Course and source are as recorded in LeadSquared; WhatsApp leads with no course are counted as UGBIP.' });
+    }
+
     out.push({ title: 'What went well', kicker: per.label + ' · ' + team, body: [wins.length ? h('div', { class: 'dk-points' }, wins.slice(0, 3).map((x) => point('good', x.head, x.body, x.tag))) : h('p', { class: 'dk-empty', text: 'No clear wins in this period compared with the ' + prevTxt + '.' })] });
 
     let issues = []; try { issues = AX.mgmt.detect(D, P, cur, prev, { start: per.start, end: per.end, label: per.label }); } catch (e) { console.error(e); }
