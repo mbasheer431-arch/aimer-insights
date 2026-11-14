@@ -612,6 +612,7 @@ body.ax-noscroll { overflow: hidden; }
 .dk-journey { display: grid; grid-template-columns: auto repeat(5, minmax(0, 1fr)) auto; gap: 10px; align-items: stretch; } .dk-jt { font-weight: 800; font-size: 16px; align-self: center; max-width: 90px; line-height: 1.2; }
 .dk-jstep { background: #eef3ff; border-radius: 14px; padding: 10px 12px; position: relative; } .dk-jv { font-size: clamp(22px, 2.3vw, 32px); font-weight: 800; } .dk-jk { font-size: 13px; font-weight: 600; color: #34405a; } .dk-jp { font-size: 12px; color: #5b6576; }
 .dk-jcost { align-self: center; font-size: 15px; font-weight: 700; background: #0b1220; color: #fff; border-radius: 14px; padding: 12px 14px; max-width: 150px; }
+.dk-course { margin-top: 14px; } .dk-ctitle { font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #5b6576; margin-bottom: 4px; } .dk-course .dk-table { font-size: 14px; } .dk-course .dk-table td, .dk-course .dk-table th { padding: 6px 10px; }
 .dk-table { width: 100%; border-collapse: collapse; font-size: 15px; } .dk-table th { text-align: left; font-size: 12.5px; color: #5b6576; font-weight: 700; padding: 8px 10px; border-bottom: 2px solid #e3e8ee; }
 .dk-table td { padding: 9px 10px; border-bottom: 1px solid #eef1f4; } .dk-table .num { text-align: right; font-variant-numeric: tabular-nums; }
 .dk-v { font-size: 12.5px; font-weight: 700; border-radius: 999px; padding: 4px 9px; white-space: nowrap; } .dk-v.good { background: #d9f5e6; color: #0a5a38; } .dk-v.warn { background: #fff1d6; color: #7a4b00; } .dk-v.bad { background: #fde2df; color: #8f1f19; }
@@ -1149,6 +1150,7 @@ body.ax-noscroll { overflow: hidden; }
       for (const [k, col] of STAGES) if (col) o[k] = r[col] ? String(r[col]).slice(0, 10) : '';
       o.c = o.cid ? cById.get(o.cid) || null : null;
       o.programme = r.programme || (o.c ? o.c.programme : '');
+      if (!o.programme && o.source === 'WhatsApp') { const ug = ((AX.config && AX.config.programmes) || []).find((p) => /^UGBIP/i.test(p.name)); if (ug) { o.programme = ug.name; o.progAssumed = true; } } // WhatsApp (WATI) leads arrive without a course: counted as UGBIP until WATI sends it
       // contact data (from LeadSquared activities)
       const ts = (v) => { const t = Date.parse(v || ''); return isFinite(t) ? t : null; };
       o.createdTs = ts(r.created_iso) ?? ts(String(r.created_at || '').replace(' ', 'T') + 'Z');
@@ -1215,6 +1217,7 @@ body.ax-noscroll { overflow: hidden; }
   AX.adsOn = (P) => { const l = AX.srcList(P); return !l.length || l.includes('Meta Ads'); };
   AX.campOk = function (c, P) {
     if (!c) return !(P.campaign || P.cstatus || P.programme || P.location || P.objective) && (!P.unit || P.unit === 'all' || P.unit === 'sales');
+    if (c.objective === 'Hiring') return false; // recruitment ads are not marketing spend
     if (P.unit && P.unit !== 'all' && AX.unitOf(c.programme) !== P.unit) return false;
     if (P.campaign && c.id !== P.campaign) return false;
     if (P.cstatus && c.status !== P.cstatus) return false;
@@ -1225,6 +1228,7 @@ body.ax-noscroll { overflow: hidden; }
   };
   AX.leadOk = function (l, P, opts = {}) {
     if (AX.config.dedupe_by_phone && l.dup && !opts.keepDup) return false;
+    if (l.c && l.c.objective === 'Hiring') return false;
     if (P.unit && P.unit !== 'all' && AX.unitOf(l.programme) !== P.unit) return false;
     if (!opts.ignoreSource) { const sl = AX.srcList(P); if (sl.length && !sl.includes(l.source)) return false; }
     if (P.campaign && l.cid !== P.campaign) return false;
@@ -1239,11 +1243,13 @@ body.ax-noscroll { overflow: hidden; }
   AX.leadsIn = (D, P, s, e, opts) => D.leads.filter((l) => l.date >= s && l.date <= e && AX.leadOk(l, P, opts));
 
   // ---------- Aggregation ----------
+  // Cost per lead is judged on lead campaigns only: WhatsApp, traffic, webinar and awareness campaigns never report Meta leads
+  AX.isLeadCamp = (c) => !c || c.objective === 'Leads';
   AX.aggMeta = function (rows) {
-    const a = { spend: 0, imp: 0, reach: 0, clicks: 0, leads: 0, days: new Set() };
-    for (const m of rows) { a.spend += m.spend; a.imp += m.imp; a.reach += m.reach; a.clicks += m.clicks; a.leads += m.leads; a.days.add(m.date); }
+    const a = { spendL: 0, spend: 0, imp: 0, reach: 0, clicks: 0, leads: 0, days: new Set() };
+    for (const m of rows) { if (AX.isLeadCamp(m.c)) a.spendL += m.spend; a.spend += m.spend; a.imp += m.imp; a.reach += m.reach; a.clicks += m.clicks; a.leads += m.leads; a.days.add(m.date); }
     a.ctr = AX.div(a.clicks * 100, a.imp); a.cpc = AX.div(a.spend, a.clicks); a.cpm = AX.div(a.spend * 1000, a.imp);
-    a.cpl = AX.div(a.spend, a.leads); a.freq = AX.div(a.imp, a.reach); a.n = rows.length;
+    a.cpl = AX.div(a.spendL, a.leads); a.freq = AX.div(a.imp, a.reach); a.n = rows.length;
     return a;
   };
   AX.aggLeads = function (rows) {
@@ -1839,7 +1845,7 @@ body.ax-noscroll { overflow: hidden; }
         sel('programme', 'Programme', progs.map((p) => [p, p]), 'All programmes'),
         sel('campaign', 'Campaign', camps, 'All campaigns'),
         sel('cstatus', 'Campaign status', uniq(D.camps.map((c) => c.status)).map((s) => [s, s]), 'Any status'),
-        sel('objective', 'Objective', [['Leads', 'Leads'], ['Awareness', 'Awareness'], ['Traffic & engagement', 'Website traffic']], 'Any objective'),
+        sel('objective', 'Objective', [['Leads', 'Leads'], ['WhatsApp', 'WhatsApp'], ['Events & webinars', 'Events & webinars'], ['Awareness', 'Awareness'], ['Traffic & engagement', 'Website traffic']], 'Any objective'),
         sel('location', 'Audience location', uniq(D.camps.map((c) => c.location).concat(D.leads.map((l) => l.location))).map((s) => [s, s]), 'All locations'),
         sel('source', 'Lead source', uniq(D.leads.map((l) => l.source)).map((s) => [s, s]), 'All sources'),
         sel('owner', 'Lead owner', uniq(D.leads.map((l) => l.owner)).map((s) => [s, s]), 'All owners'),
@@ -2159,9 +2165,9 @@ body.ax-noscroll { overflow: hidden; }
     const mby = AX.groupBy(D.meta.filter((m) => m.date >= s0 && m.date <= e0 && AX.campOk(m.c, P)), (m) => AX.bucket(m.date, g));
     const ev = new Map(bk.map((d) => [d, { qualified: 0, booked: 0, applied: 0, admitted: 0 }]));
     for (const l of D.leads) { if (!AX.leadOk(l, P)) continue; for (const kk of ['qualified', 'booked', 'applied', 'admitted']) { if (l[kk] && l[kk] >= s0 && l[kk] <= e0) { const e = ev.get(AX.bucket(l[kk], g)); if (e) e[kk]++; } } }
-    const trows = bk.slice().reverse().map((d) => { const m = AX.aggMeta(mby.get(d) || []); const e = ev.get(d); return { date: d, partial: (g === 'day' ? d === A : AX.bucket(A, g) === d) && D.partialToday, has: mby.has(d), spend: m.spend, imp: m.imp, clicks: m.clicks, ctr: m.ctr, leads: m.leads, cpl: m.cpl, q: e.qualified, b: e.booked, ap: e.applied, ad: e.admitted, cpa: AX.div(m.spend, e.admitted) }; });
+    const trows = bk.slice().reverse().map((d) => { const m = AX.aggMeta(mby.get(d) || []); const e = ev.get(d); return { spendL: m.spendL, date: d, partial: (g === 'day' ? d === A : AX.bucket(A, g) === d) && D.partialToday, has: mby.has(d), spend: m.spend, imp: m.imp, clicks: m.clicks, ctr: m.ctr, leads: m.leads, cpl: m.cpl, q: e.qualified, b: e.booked, ap: e.applied, ad: e.admitted, cpa: AX.div(m.spend, e.admitted) }; });
     const tot = { date: 'Total', spend: d3.sum(trows, (r) => r.spend), imp: d3.sum(trows, (r) => r.imp), clicks: d3.sum(trows, (r) => r.clicks), leads: d3.sum(trows, (r) => r.leads), q: d3.sum(trows, (r) => r.q), b: d3.sum(trows, (r) => r.b), ap: d3.sum(trows, (r) => r.ap), ad: d3.sum(trows, (r) => r.ad) };
-    tot.cpl = AX.div(tot.spend, tot.leads); tot.cpa = AX.div(tot.spend, tot.ad); tot.ctr = AX.div(tot.clicks * 100, tot.imp);
+    tot.cpl = AX.div(d3.sum(trows, (r) => r.spendL), tot.leads); tot.cpa = AX.div(tot.spend, tot.ad); tot.ctr = AX.div(tot.clicks * 100, tot.imp);
     const tCplD = tCpl;
     const dash0 = (f) => (v, r) => (r && r.has === false ? 'No data' : f(v));
     AX.table('dy-table', [
@@ -2233,10 +2239,10 @@ body.ax-noscroll { overflow: hidden; }
     AX.fill(fbox,
       seg('Show', 'act', [['active', 'Active in period (' + nAct + ')'], ['all', 'All campaigns (' + allRows.length + ')']]),
       seg('Delivery', 'status', [['all', 'Any'], ['on', 'Delivering'], ['off', 'Not delivering']]),
-      seg('Objective', 'obj', [['all', 'Any'], ['Leads', 'Leads'], ['Awareness', 'Awareness'], ['Traffic & engagement', 'Traffic']]));
+      seg('Objective', 'obj', [['all', 'Any'], ['Leads', 'Leads'], ['WhatsApp', 'WhatsApp'], ['Events & webinars', 'Events'], ['Awareness', 'Awareness'], ['Traffic & engagement', 'Traffic']]));
     const cols = AX.CAMP_COLS();
     const tot = { name: 'Total', spend: d3.sum(rows, (r) => r.spend), imp: d3.sum(rows, (r) => r.imp), clicks: d3.sum(rows, (r) => r.clicks), leads: d3.sum(rows, (r) => r.leads), qualified: d3.sum(rows, (r) => r.qualified), booked: d3.sum(rows, (r) => r.booked), applied: d3.sum(rows, (r) => r.applied), admitted: d3.sum(rows, (r) => r.admitted), budget: d3.sum(rows, (r) => r.budget), crm: d3.sum(rows, (r) => r.crm) };
-    tot.cpl = AX.div(tot.spend, tot.leads); tot.ctr = AX.div(tot.clicks * 100, tot.imp); tot.cpc = AX.div(tot.spend, tot.clicks); tot.cpm = AX.div(tot.spend * 1000, tot.imp); tot.cpa = AX.div(tot.spend, tot.admitted); tot.qlRate = AX.div(tot.qualified * 100, tot.crm); tot.cpql = AX.div(tot.spend, tot.qualified);
+    tot.cpl = AX.div(d3.sum(rows.filter((r) => r.objective === 'Leads'), (r) => r.spend), tot.leads); tot.ctr = AX.div(tot.clicks * 100, tot.imp); tot.cpc = AX.div(tot.spend, tot.clicks); tot.cpm = AX.div(tot.spend * 1000, tot.imp); tot.cpa = AX.div(tot.spend, tot.admitted); tot.qlRate = AX.div(tot.qualified * 100, tot.crm); tot.cpql = AX.div(tot.spend, tot.qualified);
     const revRows = rows.filter((r) => r.revenue != null); if (revRows.length) { tot.revenue = d3.sum(revRows, (r) => r.revenue); tot.roas = AX.div(tot.revenue, tot.spend); }
     const above = rows.filter((r) => r.tCpl && r.cpl != null && r.cpl <= r.tCpl && r.leads >= AX.config.thresholds.min_leads_verdict).length;
     const below = rows.filter((r) => r.tCpl && r.cpl != null && r.cpl > r.tCpl * 1.1 && r.leads >= AX.config.thresholds.min_leads_verdict).length;
@@ -3392,7 +3398,8 @@ body.ax-noscroll { overflow: hidden; }
       const L = D.leads.filter((l) => l.date >= s && l.date <= e && l.programme === prog && !l.dup && AX.leadOk(l, Object.assign({}, P, { programme: prog }), { ignoreSource: true }));
       const spend = d3.sum(m, (x) => x.spend), leads = d3.sum(m, (x) => x.leads), q = L.filter((l) => l.qualified).length;
       const adm = D.leads.filter((l) => l.programme === prog && l.admitted && l.admitted >= s && l.admitted <= e).length;
-      return { spend, leads, cpl: AX.div(spend, leads), crm: L.length, q, cpq: AX.div(spend, q), adm };
+      const spendL = d3.sum(m.filter((x) => AX.isLeadCamp(x.c)), (x) => x.spend);
+      return { spend, leads, cpl: AX.div(spendL, leads), crm: L.length, q, cpq: AX.div(spendL, q), adm };
     };
     const rows = progs.map((p) => { const a = calc(p, w1s, A), b = calc(p, w0s, w0e); return { p, a, b, t: AX.progCfg(p) }; });
     const ch = (a, b, lowerBetter) => { const c = AX.chg(a, b).pct; if (c == null) return h('span', { class: 'muted', text: '' }); const good = lowerBetter ? c < 0 : c > 0; return h('span', { class: good ? 'ok' : 'bad', style: { fontSize: '11px', marginLeft: '4px' }, text: (c > 0 ? '▲' : '▼') + Math.abs(c).toFixed(0) + '%' }); };
@@ -3495,7 +3502,7 @@ body.ax-noscroll { overflow: hidden; }
   function calc(D, s, e) {
     const P0 = { period: 'custom', start: s, end: e };
     const meta = D.meta.filter((m) => m.date >= s && m.date <= e && AX.campOk(m.c, { unit: AX.p().unit }));
-    const spend = d3.sum(meta, (m) => m.spend), mleads = d3.sum(meta, (m) => m.leads);
+    const spend = d3.sum(meta, (m) => m.spend), mleads = d3.sum(meta, (m) => m.leads), spendL = d3.sum(meta.filter((m) => AX.isLeadCamp(m.c)), (m) => m.spend);
     const L = D.leads.filter((l) => l.date >= s && l.date <= e && !l.dup && AX.unitOk(l.programme));
     const metaL = L.filter((l) => l.source === 'Meta Ads');
     const q = L.filter((l) => l.qualified).length, mq = metaL.filter((l) => l.qualified).length;
@@ -3503,7 +3510,7 @@ body.ax-noscroll { overflow: hidden; }
     const lost = L.filter((l) => l.lost).length;
     const callable = metaL.filter((l) => l.createdTs != null && Date.now() - l.createdTs > 2 * 3600e3);
     const w1 = callable.filter((l) => l.firstCallTs != null && l.firstCallTs - l.createdTs <= 3600e3).length;
-    return { P0, meta, L, spend, mleads, cpl: AX.div(spend, mleads), crm: L.length, q, mq, cpq: AX.div(spend, mq), adm, lostPct: AX.div(lost * 100, L.length), w1: AX.div(w1 * 100, callable.length) };
+    return { P0, meta, L, spend, mleads, cpl: AX.div(spendL, mleads), crm: L.length, q, mq, cpq: AX.div(spendL, mq), adm, lostPct: AX.div(lost * 100, L.length), w1: AX.div(w1 * 100, callable.length) };
   }
 
   AX.pages.exec = function (D) {
@@ -4426,6 +4433,9 @@ body.ax-noscroll { overflow: hidden; }
     const L = AX.leadsIn(D, PP, s, e, opts), Lall = AX.leadsIn(D, PP, s, e, Object.assign({ keepDup: true }, opts));
     const meta = D.meta.filter((m) => m.date >= s && m.date <= e && AX.campOk(m.c, PP));
     const spend = d3.sum(meta, (m) => m.spend), metaLeads = d3.sum(meta, (m) => m.leads);
+    const spendL = d3.sum(meta.filter((m) => AX.isLeadCamp(m.c)), (m) => m.spend), spendWa = d3.sum(meta.filter((m) => m.c && m.c.objective === 'WhatsApp'), (m) => m.spend), spendEv = d3.sum(meta.filter((m) => m.c && m.c.objective === 'Events & webinars'), (m) => m.spend), spendOther = spend - spendL - spendWa - spendEv;
+    const waLeads = L.filter((l) => l.source === 'WhatsApp').length, waOn = !AX.srcList(PP).length || AX.srcList(PP).includes('WhatsApp');
+    const spendB = spendL + (waOn ? spendWa : 0), leadsB = metaLeads + (waOn ? waLeads : 0);
     const LM = L.filter((l) => l.source === 'Meta Ads'), now = Date.now();
     const callable = L.filter((l) => l.createdTs != null && now - l.createdTs > 2 * 3600e3);
     const waits = callable.filter((l) => l.firstCallTs != null).map((l) => (l.firstCallTs - l.createdTs) / 3600e3);
@@ -4433,8 +4443,8 @@ body.ax-noscroll { overflow: hidden; }
     const q = cnt((l) => l.qualified), booked = cnt((l) => l.booked), done = cnt((l) => l.done), applied = cnt((l) => l.applied), adm = cnt((l) => l.admitted), lost = L.filter((l) => l.lost);
     const qM = cnt((l) => l.qualified, LM), admM = cnt((l) => l.admitted, LM);
     return {
-      s, e, spend, metaLeads, crm: L.length, crmAll: Lall.length, crmMeta: LM.length, q, booked, done, applied, adm, lost: lost.length, L,
-      cpl: div(spend, metaLeads), cpql: div(spend, qM), cpa: div(spend, admM),
+      s, e, spend, spendL, spendWa, spendEv, spendOther, waLeads, cplWa: div(spendWa, waLeads), cplForm: div(spendL, metaLeads), spendB, leadsB, metaLeads, crm: L.length, crmAll: Lall.length, crmMeta: LM.length, q, booked, done, applied, adm, lost: lost.length, L,
+      cpl: div(spendB, leadsB), cpql: div(spendL, qM), cpa: div(spend, admM),
       qRate: div(q * 100, L.length), invalidPct: div(cnt((l) => l.lost && INVALID.test(l.reason || '')) * 100, L.length), dupPct: div((Lall.length - L.length) * 100, Lall.length),
       contactRate: div(cnt((l) => l.contacted || l.firstCallTs != null) * 100, L.length), connRate: div(cnt((l) => l.connected || (l.connCalls || 0) > 0) * 100, L.length),
       bookRate: div(booked * 100, L.length), attendRate: div(done * 100, booked), applyRate: div(applied * 100, L.length), admRate: div(adm * 100, L.length),
@@ -4887,6 +4897,22 @@ body.ax-noscroll { overflow: hidden; }
     const prevTxt = 'previous ' + per.len + ' day' + (per.len === 1 ? '' : 's');
     const out = [];
 
+    // course break-up of the headline: spend, form leads, WhatsApp leads, cost per lead, hot leads, admissions
+    const courseTable = () => {
+      const names = AX.config.programmes.filter((p) => P.unit === 'all' || AX.unitOf(p.name) === P.unit).map((p) => p.name);
+      const rows = names.map((n) => { const PN = Object.assign({}, P, { programme: n }), m = AX.mgmt.metrics(D, P, per.start, per.end, { programme: n });
+        return { n, m, hot: m.L.filter(isHot).length, adm: D.leads.filter((l) => l.admitted && l.admitted >= per.start && l.admitted <= per.end && AX.leadOk(l, PN, { ignoreSource: true })).length }; })
+        .filter((r) => r.m.spendB > 0 || r.m.crm > 0 || r.m.waLeads > 0).sort((a, b) => b.m.crm - a.m.crm);
+      if (!rows.length) return null;
+      const td = (t, cls) => h('td', { class: cls || '', text: t });
+      const tot = (k) => d3.sum(rows, (r) => r.m[k]);
+      const gap = cur.spendB - tot('spendB');
+      return h('div', { class: 'dk-course' }, h('div', { class: 'dk-ctitle', text: 'By course' }),
+        h('table', { class: 'dk-table' }, h('thead', null, h('tr', null, ['Course', 'Spend (lead + WhatsApp)', 'Form leads', 'WhatsApp leads', 'Cost per lead', 'New leads in CRM', 'Hot', 'Admissions'].map((t, i) => h('th', { class: i ? 'num' : '', text: t })))),
+          h('tbody', null, rows.map((r) => h('tr', null, td(r.n), td(inr(r.m.spendB), 'num'), td(F.int(r.m.metaLeads), 'num'), td(F.int(r.m.waLeads), 'num'), td(inr(r.m.cpl), 'num ' + (r.m.cpl == null ? '' : r.m.cpl <= C.target_cpl ? 'good' : 'bad')), td(F.int(r.m.crm), 'num'), td(F.int(r.hot), 'num'), td(F.int(r.adm), 'num'))),
+            gap > Math.max(500, cur.spendB * 0.02) ? h('tr', null, td('Campaigns not mapped to a course'), td(inr(gap), 'num'), td('', 'num'), td('', 'num'), td('', 'num'), td('', 'num'), td('', 'num'), td('', 'num')) : null)));
+    };
+
     // 1. Headline
     const dl = chg(cur.crm, prev.crm);
     const sentence = F.int(cur.crm) + ' new leads' + (dl == null ? '' : Math.abs(dl) < 1 ? ' (about the same as the ' + prevTxt + ')' : ' (' + (dl >= 0 ? 'up ' : 'down ') + Math.abs(dl).toFixed(0) + '% on the ' + prevTxt + ')')
@@ -4895,10 +4921,10 @@ body.ax-noscroll { overflow: hidden; }
       + (admT ? ' (' + F.int(mtdAdm) + ' of ' + F.int(admT) + ' for the month).' : '.');
     out.push({ title: 'The headline', kicker: per.label + ' · ' + per.nice, body: [
       h('p', { class: 'dk-say', text: sentence }),
-      h('div', { class: 'dk-tiles' }, tile('New leads', F.int(cur.crm), dl, 'up', 'unique leads in LeadSquared'), tile('Cost per lead', inr(cur.cpl), chg(cur.cpl, prev.cpl), 'down', 'target ' + inr(C.target_cpl)),
+      h('div', { class: 'dk-tiles' }, tile('New leads', F.int(cur.crm), dl, 'up', 'unique leads in LeadSquared'), tile('Cost per lead', inr(cur.cpl), chg(cur.cpl, prev.cpl), 'down', 'form + WhatsApp leads · target ' + inr(C.target_cpl)),
         tile('Hot leads', F.int(cur.hot), chg(cur.hot, prev.hot), 'up', pct(div(cur.hot * 100, cur.crm), 1) + ' of new leads'), tile('Admissions', F.int(cur.admIn), chg(cur.admIn, prev.admIn), 'up', admT ? F.int(mtdAdm) + ' of ' + F.int(admT) + ' this month' : 'confirmed in the period')),
-      h('div', { class: 'dk-mini' }, h('span', null, 'Spend ', h('b', { text: inr(cur.spend) })), h('span', null, 'Meta leads ', h('b', { text: F.int(cur.metaLeads) })), h('span', null, 'Contacted ', h('b', { text: pct(cur.contactRate) })), h('span', null, 'Called within 1 hour ', h('b', { text: pct(cur.w1) })), h('span', null, 'Lost ', h('b', { text: pct(cur.lostPct) })))],
-      foot: 'How we count: leads are unique LeadSquared leads created in the period (bulk lists and phone-call sources left out). Hot = Interested (L1) to Advance paid (L4), or admitted. Cost per lead = Meta spend ÷ Meta leads.' });
+      h('div', { class: 'dk-mini' }, h('span', null, 'Lead campaigns ', h('b', { text: inr(cur.spendL) + ' · ' + F.int(cur.metaLeads) + ' form leads · ' + inr(cur.cplForm) + ' each' })), cur.spendWa > 0 || cur.waLeads > 0 ? h('span', null, 'WhatsApp campaigns ', h('b', { text: inr(cur.spendWa) + ' · ' + F.int(cur.waLeads) + ' WhatsApp leads' + (cur.cplWa != null ? ' · ' + inr(cur.cplWa) + ' each' : '') })) : null, cur.spendEv > 0 ? h('span', null, 'Events & webinars ', h('b', { text: inr(cur.spendEv) })) : null, cur.spendOther > 0 ? h('span', null, 'Awareness & traffic ', h('b', { text: inr(cur.spendOther) })) : null, h('span', null, 'Contacted ', h('b', { text: pct(cur.contactRate) })), h('span', null, 'Called within 1 hour ', h('b', { text: pct(cur.w1) })), h('span', null, 'Lost ', h('b', { text: pct(cur.lostPct) }))), courseTable()],
+      foot: 'How we count: leads are unique LeadSquared leads created in the period (bulk lists and phone-call sources left out). Hot = Interested (L1) to Advance paid (L4), or admitted. Cost per lead = spend on lead and WhatsApp campaigns ÷ (Meta form leads + WhatsApp leads); webinar, awareness and traffic spend is shown separately and hiring ads are left out. WhatsApp leads with no course are counted as UGBIP.' });
 
     // 2. What went well / 3. What went wrong
     const mets = [['New leads', cur.crm, prev.crm, 'up', F.int, 'Demand'], ['Cost per lead', cur.cpl, prev.cpl, 'down', inr, 'Budget'], ['Hot leads', cur.hot, prev.hot, 'up', F.int, 'Quality'],
@@ -4947,7 +4973,7 @@ body.ax-noscroll { overflow: hidden; }
       h('div', { class: 'dk-journey' }, h('div', { class: 'dk-jt', text: 'Meta lead journey' }),
         [['Meta reported', cur.metaLeads], ['Reached LeadSquared', metaLeadsCrm.length], ['Contacted', mContacted], ['Hot', mHot], ['Admitted', mAdm]].map(([k, v], i, arr) =>
           h('div', { class: 'dk-jstep' }, h('div', { class: 'dk-jv', text: F.int(v) }), h('div', { class: 'dk-jk', text: k }), i ? h('div', { class: 'dk-jp', text: arr[i - 1][1] ? pct((v * 100) / arr[i - 1][1], 0) + ' of previous' : '' }) : h('div', { class: 'dk-jp', text: inr(cur.spend) + ' spent' }))),
-        h('div', { class: 'dk-jcost', text: 'Cost per hot lead: ' + inr(div(cur.spend, mHot)) })),
+        h('div', { class: 'dk-jcost', text: 'Cost per hot lead: ' + inr(div(cur.spendL, mHot)) })),
       h('table', { class: 'dk-table' }, h('thead', null, h('tr', null, ['Source', 'Leads', 'vs previous', 'Contacted', 'Follow-up', 'Hot', 'Lost', 'Admitted', 'Status'].map((t, i) => h('th', { class: i ? 'num' : '', text: t })))),
         h('tbody', null, rows.map((r) => h('tr', null, h('td', { text: r.k }), h('td', { class: 'num', text: F.int(r.n) }), h('td', { class: 'num ' + (r.ch == null ? '' : r.ch >= 0 ? 'good' : 'bad'), text: r.ch == null || !isFinite(r.ch) ? '—' : (r.ch >= 0 ? '▲ ' : '▼ ') + Math.abs(r.ch).toFixed(0) + '%' }),
           h('td', { class: 'num', text: pct(div(r.c * 100, r.n)) }), h('td', { class: 'num', text: F.int(r.fu) }), h('td', { class: 'num', text: F.int(r.hot) }), h('td', { class: 'num', text: F.int(r.lost) }), h('td', { class: 'num', text: F.int(r.adm) }),
@@ -5231,7 +5257,7 @@ body.ax-noscroll { overflow: hidden; }
     return out;
   }
   const s = (v) => (v == null ? '' : String(v));
-  const objective = (o, name) => { const n = s(name).toUpperCase(); if (/AWRS|AWARENESS|\bREACH\b/.test(n)) return 'Awareness'; if (/(^|[^A-Z])WEB([^A-Z]|$)|TRAFFIC|\bLPV\b/.test(n)) return 'Traffic & engagement'; const x = s(o).toUpperCase(); if (!x || x.includes('LEAD')) return 'Leads'; if (x.includes('AWARE') || x.includes('REACH')) return 'Awareness'; return 'Traffic & engagement'; };
+  const objective = (o, name) => { const n = s(name).toUpperCase(); if (/HIRING|RECRUIT|(^|[^A-Z])(BDE|BDM)([^A-Z]|$)/.test(n)) return 'Hiring'; if (/WHATSAPP|(^|[^A-Z])WA([^A-Z]|$)/.test(n)) return 'WhatsApp'; if (/WEBINAR|AMBASSADOR|SEMINAR|(^|[^A-Z])EVENT/.test(n)) return 'Events & webinars'; if (/AWRS|AWARENESS|\bREACH\b/.test(n)) return 'Awareness'; if (/(^|[^A-Z])WEB([^A-Z]|$)|TRAFFIC|\bLPV\b/.test(n)) return 'Traffic & engagement'; const x = s(o).toUpperCase(); if (!x || x.includes('LEAD')) return 'Leads'; if (x.includes('AWARE') || x.includes('REACH')) return 'Awareness'; return 'Traffic & engagement'; };
 
   // Audience breakdowns are fetched on demand for the selected period and campaigns
   AX.salesLive = async () => { const { data, error } = await sb.rpc('sales_live', { p_days: 7 }); if (error) throw error; return data; };
