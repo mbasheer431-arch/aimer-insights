@@ -555,6 +555,9 @@
       if (a || s) { if (!a || !s) return say($('dlgMsg'), 'Enter both the access key and the secret key.', 'bad'); secret = JSON.stringify({ access_key: a, secret_key: s }); }
     } else if (ai) {
       secret = $('cKey').value.trim() || null;
+      // catch the commonest mistake: pasting the name or something else into the key box
+      const KEYFMT = { gemini: [/^AIza[0-9A-Za-z_-]{30,}$/, 'Gemini keys start with “AIza” (copy it from aistudio.google.com → Get API key).'], groq: [/^gsk_[0-9A-Za-z]{20,}$/, 'Groq keys start with “gsk_”.'], openai: [/^sk-[0-9A-Za-z_-]{20,}$/, 'OpenAI keys start with “sk-”.'] };
+      if (secret && KEYFMT[p] && !KEYFMT[p][0].test(secret)) return say($('dlgMsg'), 'That doesn’t look like a valid key — ' + KEYFMT[p][1] + ' Make sure the key, not the name, is in the API key box.', 'bad');
       settings.model = $('cModel').value.trim() || AI_DEFAULT[p] || 'openai/gpt-oss-120b';
     } else {
       if (!accounts.length) return say($('dlgMsg'), 'Add at least one Meta ad account ID.', 'bad');
@@ -824,6 +827,17 @@
       });
       const isMe = u.email === me.email;
       let roleCell = sel;
+      // Team lock: Sales staff see only UGBIP/HSBIP/PGBIP, NPD staff only AI courses and Future HR
+      if (u.role && !['admin', 'creative', 'product_manager'].includes(u.role)) {
+        const team = h('select', { 'aria-label': 'Team for ' + u.email, title: 'Which courses this person sees' }, [['', 'Both teams'], ['sales', 'Sales only (UGBIP · HSBIP · PGBIP)'], ['npd', 'NPD only (AI · Future HR)']].map(([v, t]) => h('option', { value: v, text: t })));
+        team.value = u.unit || '';
+        team.addEventListener('change', async () => {
+          const { error: e3 } = await sb.rpc('admin_set_unit', { p_email: u.email, p_unit: team.value || null });
+          say($('usrMsg'), e3 ? 'Team not changed: ' + (/admin_set_unit|function/i.test(e3.message) ? 'the team setting isn’t switched on in the database yet.' : e3.message) : u.email + ' now sees ' + (team.value ? team.selectedOptions[0].text : 'both teams') + '.', e3 ? 'bad' : 'ok');
+          if (!e3) loadPeople(); else team.value = u.unit || '';
+        });
+        roleCell = h('div', { class: 'stack', style: 'gap:6px' }, sel, team);
+      }
       if (u.role === 'product_manager') {
         const names = allProgs.filter((p) => (u.programme_ids || []).includes(p.id)).map((p) => p.name);
         const edit = h('button', { class: 'btn', text: names.length ? 'Courses: ' + names.join(', ') : 'Assign courses' });
