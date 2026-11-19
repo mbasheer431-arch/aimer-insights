@@ -5444,6 +5444,7 @@ body.ax-noscroll { overflow: hidden; }
   const FILES = { lead: 'sounds/new-lead.mp3', esc: 'sounds/overdue.mp3', reply: 'sounds/reply.mp3' };
   const aud = {};
   function audio(k) { if (!aud[k]) { try { aud[k] = new Audio(FILES[k]); aud[k].preload = 'auto'; } catch (_) {} } return aud[k]; }
+  function stopSounds() { Object.keys(aud).forEach((k) => { try { aud[k].pause(); aud[k].currentTime = 0; } catch (_) {} }); }
   function synth() {
     try {
       st.ctx = st.ctx || new (window.AudioContext || window.webkitAudioContext)();
@@ -5487,6 +5488,7 @@ body.ax-noscroll { overflow: hidden; }
     AX.fill(pill, kids);
   }
   function openList() {
+    stopSounds();
     const d = st.data; if (!d) return;
     const replies = st.rep.length ? h('div', { class: 'ax-card' }, h('h3', { text: 'WhatsApp replies · last 24 hours' }), h('table', { class: 'ax-table' },
       h('thead', null, h('tr', null, ['When', 'Course', 'Owner', 'Reply', 'Lead is free', ''].map((t) => h('th', { text: t })))),
@@ -5505,7 +5507,7 @@ body.ax-noscroll { overflow: hidden; }
     unlock(); beep('lead', true); ui();
   }
   function toast(msg, title) {
-    const t = h('div', { class: 'ax-alarm-toast', role: 'alert' }, h('b', { text: title || 'New lead' }), h('span', { text: ' ' + msg }), h('button', { onclick: () => t.remove(), 'aria-label': 'Dismiss' }, '×'));
+    const t = h('div', { class: 'ax-alarm-toast', role: 'alert' }, h('b', { text: title || 'New lead' }), h('span', { text: ' ' + msg }), h('button', { onclick: () => { stopSounds(); t.remove(); }, 'aria-label': 'Dismiss' }, '×'));
     document.body.appendChild(t); setTimeout(() => t.remove(), 12000);
   }
 
@@ -5561,6 +5563,7 @@ body.ax-noscroll { overflow: hidden; }
       const w = new Worker(URL.createObjectURL(blob)); w.onmessage = poll; st.timer = w;
     } catch (_) { st.timer = setInterval(poll, 30e3); }
     document.addEventListener('visibilitychange', () => { if (!document.hidden) poll(); });
+    window.addEventListener('focus', stopSounds);
   }
   AX.alarm = { start, poll };
 })();
