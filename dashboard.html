@@ -644,6 +644,8 @@ body.ax-noscroll { overflow: hidden; }
 .ax-alarm button { border: 0; background: transparent; cursor: pointer; font: inherit; padding: 9px 14px; }
 .ax-alarm-main { display: flex; align-items: center; gap: 8px; text-align: left; }
 .ax-alarm-sw { border-left: 1px solid var(--line) !important; white-space: nowrap; font-weight: 600; }
+.ax-alarm-esc { display: flex; align-items: center; gap: 4px; padding: 0 10px; border-left: 1px solid var(--line); font-size: 12px; white-space: nowrap; color: var(--ink-2, inherit); }
+.ax-alarm-esc select { font: inherit; border: 1px solid var(--line); border-radius: 6px; padding: 2px 4px; background: transparent; color: inherit; }
 .ax-alarm-dot { width: 9px; height: 9px; border-radius: 50%; background: #9aa0a6; flex: none; }
 .ax-alarm.warn .ax-alarm-dot { background: #e8a200; }
 .ax-alarm.bad .ax-alarm-dot { background: #d93025; animation: axpulse 1.2s ease-in-out infinite; }
@@ -5411,29 +5413,53 @@ body.ax-noscroll { overflow: hidden; }
 })();
 </script><script>// New-lead alarm for sales managers and the sales head (and admin / marketing). While the dashboard is open it checks every 30 seconds
 // for course leads that nobody has called yet. A lead that appears since the last check sounds the alarm, shows a pop-up and a desktop
-// notification (after "Turn on alarm"), and the tab title flashes. A lead still uncalled after 15 minutes sounds one reminder.
+// notification (after "Turn on alarm"), and the tab title flashes. A lead still uncalled after 10 minutes (adjustable in the pill) sounds a louder escalation alarm.
 // Replies to the automatic WhatsApp (e.g. "free after 30 minutes") also sound the alarm for the owner, sales manager and sales head.
 // The list shows course, source, owner and how long each has waited, with a link to the lead in LeadSquared. No names or phone numbers are loaded.
 (function () {
   const AX = window.AX, h = AX.h;
-  const OVERDUE = 15, LS = 'https://in21.leadsquared.com/LeadManagement/LeadDetails?LeadID=';
+  const MKEY = 'aimer.alarm.mins';
+  const getMins = () => { try { const v = parseInt(localStorage.getItem(MKEY), 10); return [5, 10, 15, 20].includes(v) ? v : 10; } catch (_) { return 10; } };
+  let OVERDUE = getMins();
+  const LS = 'https://in21.leadsquared.com/LeadManagement/LeadDetails?LeadID=';
   const ROLES = ['admin', 'marketing', 'counselling_lead'];
-  const st = { on: false, seen: null, remind: {}, data: null, rep: [], seenRep: null, timer: null, ctx: null, flash: null, base: document.title, err: '' };
+  const st = { on: false, seen: null, remind: {}, data: null, rep: [], seenRep: null, timer: null, ctx: null, flash: null, base: document.title, err: '', unlocked: false };
   const KEY = 'aimer.alarm.on';
-  const getOn = () => { try { return localStorage.getItem(KEY) === '1'; } catch (_) { return false; } };
+  const getOn = () => { try { return localStorage.getItem(KEY) !== '0'; } catch (_) { return true; } };
   const setOn = (v) => { try { localStorage.setItem(KEY, v ? '1' : '0'); } catch (_) {} };
   const ago = (m) => (m < 60 ? Math.max(0, Math.round(m)) + ' min' : m < 1440 ? Math.floor(m / 60) + ' h ' + Math.round(m % 60) + ' min' : Math.floor(m / 1440) + ' d');
 
-  function beep() {
-    if (!st.on) return;
+  function unlock() {
+    try { Object.keys(FILES).forEach((k) => { const a = audio(k); if (a) { a.muted = true; const p = a.play(); const done = () => { a.pause(); a.currentTime = 0; a.muted = false; st.unlocked = true; ui(); }; if (p && p.then) p.then(done).catch(() => {}); } }); } catch (_) {}
+    try {
+      st.ctx = st.ctx || new (window.AudioContext || window.webkitAudioContext)();
+      if (st.ctx.state === 'suspended') st.ctx.resume();
+      st.unlocked = st.ctx.state === 'running' || st.ctx.state === 'suspended' && false;
+      st.ctx.resume().then(() => { st.unlocked = st.ctx.state === 'running'; ui(); }).catch(() => {});
+    } catch (_) {}
+    try { if (st.on && 'Notification' in window && Notification.permission === 'default') Notification.requestPermission(); } catch (_) {}
+  }
+  // Sound plays 9:00 am to 6:00 pm IST, Monday to Saturday. Outside that the alarm stays silent (the pill and pop-up still update).
+  function soundTime() { const t = new Date(Date.now() + 5.5 * 3600e3), hr = t.getUTCHours(); return t.getUTCDay() !== 0 && hr >= 9 && hr < 18; }
+  const FILES = { lead: 'sounds/new-lead.mp3', esc: 'sounds/overdue.mp3', reply: 'sounds/reply.mp3' };
+  const aud = {};
+  function audio(k) { if (!aud[k]) { try { aud[k] = new Audio(FILES[k]); aud[k].preload = 'auto'; } catch (_) {} } return aud[k]; }
+  function synth() {
     try {
       st.ctx = st.ctx || new (window.AudioContext || window.webkitAudioContext)();
       const c = st.ctx; if (c.state === 'suspended') c.resume();
       [0, 0.28, 0.56].forEach((t, i) => { const o = c.createOscillator(), g = c.createGain(); o.type = 'sine'; o.frequency.value = i === 2 ? 1040 : 780; g.gain.setValueAtTime(0.0001, c.currentTime + t); g.gain.exponentialRampToValueAtTime(0.35, c.currentTime + t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + t + 0.24); o.connect(g); g.connect(c.destination); o.start(c.currentTime + t); o.stop(c.currentTime + t + 0.26); });
     } catch (_) {}
   }
+  function beep(kind, force) {
+    if (!st.on || !(force || soundTime())) return;
+    const a = audio(kind || 'lead');
+    if (!a) return synth();
+    try { a.currentTime = 0; const p = a.play(); if (p && p.catch) p.catch(() => synth()); } catch (_) { synth(); }
+  }
+  function alarmLoud() { beep('esc'); }
   function notify(title, body) {
-    try { if (st.on && 'Notification' in window && Notification.permission === 'granted') new Notification(title, { body, tag: 'aimer-new-lead' }); } catch (_) {}
+    try { if (st.on && 'Notification' in window && Notification.permission === 'granted') new Notification(title, { body, tag: 'aimer-new-lead', silent: !soundTime() }); } catch (_) {}
   }
   function flashTitle(n) {
     if (st.flash) clearInterval(st.flash);
@@ -5454,8 +5480,10 @@ body.ax-noscroll { overflow: hidden; }
     const bad = n > 0 && oldest >= OVERDUE;
     pill.className = 'ax-alarm' + (st.on ? ' on' : '') + (bad ? ' bad' : n ? ' warn' : '');
     const label = (st.err ? 'Alarm paused' : d ? (n ? n + ' lead' + (n === 1 ? '' : 's') + ' waiting for a first call · oldest ' + ago(oldest) : 'No lead waiting for a first call') : 'Checking new leads…') + (st.rep.length ? ' · ' + st.rep.length + ' WhatsApp repl' + (st.rep.length === 1 ? 'y' : 'ies') : '');
-    const kids = [h('button', { class: 'ax-alarm-main', onclick: openList, 'aria-label': 'Open the waiting lead list' }, h('span', { class: 'ax-alarm-dot' }), h('span', { text: label }))];
+    const locked = st.on && !st.unlocked;
+    const kids = [h('button', { class: 'ax-alarm-main', onclick: openList, 'aria-label': 'Open the waiting lead list' }, h('span', { class: 'ax-alarm-dot' }), h('span', { text: label + (locked ? ' · click anywhere once to enable sound' : '') }))];
     kids.push(h('button', { class: 'ax-alarm-sw', onclick: toggle, title: st.on ? 'Alarm is on. Click to turn off' : 'Turn on sound and desktop alerts' }, st.on ? 'Alarm on' : 'Turn on alarm'));
+    kids.push(h('label', { class: 'ax-alarm-esc', title: 'Escalation alarm if a lead is still not called' }, h('span', { text: 'Escalate after ' }), h('select', { 'aria-label': 'Escalate after minutes', onchange: (e) => { OVERDUE = parseInt(e.target.value, 10); try { localStorage.setItem(MKEY, String(OVERDUE)); } catch (_) {} st.remind = {}; ui(); } }, [5, 10, 15, 20].map((m) => h('option', { value: String(m), selected: m === OVERDUE ? 'selected' : null, text: m + ' min' })))));
     AX.fill(pill, kids);
   }
   function openList() {
@@ -5474,7 +5502,7 @@ body.ax-noscroll { overflow: hidden; }
     if (st.on) { st.on = false; setOn(false); ui(); return; }
     st.on = true; setOn(true);
     try { if ('Notification' in window && Notification.permission === 'default') await Notification.requestPermission(); } catch (_) {}
-    beep(); ui();
+    unlock(); beep('lead', true); ui();
   }
   function toast(msg, title) {
     const t = h('div', { class: 'ax-alarm-toast', role: 'alert' }, h('b', { text: title || 'New lead' }), h('span', { text: ' ' + msg }), h('button', { onclick: () => t.remove(), 'aria-label': 'Dismiss' }, '×'));
@@ -5494,10 +5522,11 @@ body.ax-noscroll { overflow: hidden; }
         over.forEach((l) => { st.remind[l.lead_id] = 1; });
         if (fresh.length) {
           const f = fresh[0]; const msg = (fresh.length > 1 ? fresh.length + ' new leads' : (f.programme || 'Course lead') + ' · ' + f.source) + (f.owner && fresh.length === 1 ? ' · ' + f.owner : '') + '. Call now.';
-          beep(); notify('New lead', msg); toast(msg); flashTitle(fresh.length);
-        } else if (over.length) {
-          const msg = over.length + ' lead' + (over.length === 1 ? '' : 's') + ' not called after ' + OVERDUE + ' minutes.';
-          beep(); notify('Lead overdue', msg); toast(msg);
+          beep('lead'); notify('New lead', msg); toast(msg); flashTitle(fresh.length);
+        }
+        if (over.length) {
+          const msg = over.length + ' lead' + (over.length === 1 ? '' : 's') + ' still not called after ' + OVERDUE + ' minutes. Sales manager: please follow up.';
+          setTimeout(alarmLoud, fresh.length ? 2500 : 0); notify('Lead overdue', msg); toast(msg, 'Overdue'); flashTitle(over.length);
         }
         st.seen = ids;
       }
@@ -5513,7 +5542,7 @@ body.ax-noscroll { overflow: hidden; }
           if (fresh.length) {
             const f = fresh[0];
             const msg = f.intent === 'opt_out' ? 'A lead asked us to stop WhatsApp messages.' : 'Lead replied' + (f.programme ? ' (' + f.programme + ')' : '') + ': ' + (f.callback_text ? 'free ' + f.callback_text : (f.summary || f.text)) + (f.owner ? ' · ' + f.owner : '');
-            beep(); notify('WhatsApp reply', msg); toast(msg, 'WhatsApp reply'); flashTitle(fresh.length);
+            beep('reply'); notify('WhatsApp reply', msg); toast(msg, 'WhatsApp reply'); flashTitle(fresh.length);
           }
           st.seenRep = ids;
         }
@@ -5523,7 +5552,14 @@ body.ax-noscroll { overflow: hidden; }
   }
   function start() {
     if (st.timer || !ROLES.includes(AX.role)) return;
-    st.on = getOn(); ui(); poll(); st.timer = setInterval(poll, 30e3);
+    st.on = getOn(); ui(); poll();
+    const once = () => { unlock(); if (st.unlocked) ['pointerdown', 'keydown', 'touchstart'].forEach((e) => document.removeEventListener(e, once, true)); };
+    ['pointerdown', 'keydown', 'touchstart'].forEach((e) => document.addEventListener(e, once, true));
+    // a worker timer is not slowed down in background tabs, so the alarm keeps checking while the manager works in another tab
+    try {
+      const blob = new Blob(['setInterval(function(){postMessage(1)},30000)'], { type: 'text/javascript' });
+      const w = new Worker(URL.createObjectURL(blob)); w.onmessage = poll; st.timer = w;
+    } catch (_) { st.timer = setInterval(poll, 30e3); }
     document.addEventListener('visibilitychange', () => { if (!document.hidden) poll(); });
   }
   AX.alarm = { start, poll };
